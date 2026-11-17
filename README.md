@@ -20,7 +20,7 @@ The practice website (a made-up electricity board) is on the left and the real S
 4. Switch the language to नेपाली or हिन्दी. Turn on large text or read-aloud.
 5. Press **Ask my helper**, then open [/help.html](https://paperwork-decoder.web.app/help.html) on a phone, enter the group code and tap a control.
 
-No login is needed. Nothing is paid and nothing on the practice website is real.
+No login is needed. Nothing is paid and nothing on the practice website is real. It works on a phone too: the website sits above Saathi, so both are on screen at once (see below).
 
 **On-device model:** it runs only in desktop Chrome with the built-in Gemini Nano model. Without it, everything still works except the last re-finding step (a button whose label *and* internal name both changed). The panel's header shows whether the model is available.
 
@@ -147,6 +147,8 @@ The panel is built for someone who is not used to computers.
 - **Nothing appears until it has something to say.** Messages are hidden when empty, and a first visit shows one card with one clear action.
 - **Large targets and text:** controls are at least 48 px tall, with a Large text switch that enlarges the step card further, and Nepali and Hindi next to English at the top of the Follow tab.
 - **Light and dark** themes follow the system setting, motion is reduced when the system asks for it, tabs work with the arrow keys, and every control has a visible focus ring.
+
+- **The try page works on a phone.** On a narrow screen the website is on top and Saathi below it, both visible at once, the how-to guide stays closed until you ask for it, and a "Taller" button gives Saathi more room. While you follow a path on a short screen, only the step is shown, so the instruction, the progress bar and the "I did it, next" button are on screen together with the outlined control. The try-page test runs in a phone-sized, touch-enabled window (`PHONE=1 node tools/e2e-try.mjs`) and passes. The on-device model does not exist on phones, so on a phone everything works except the last re-finding step. A real phone was not used, only an emulated window.
 
 Not done: a screen-reader pass, an automated accessibility audit, or any test with an older person. The design follows common accessibility practice but has not been checked against real users or tools.
 
