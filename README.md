@@ -17,8 +17,9 @@ The practice website (a made-up electricity board) is on the left and the real S
 1. On the right, press **Start a new group**. Under *Show the way once*, name a path and press **Start**.
 2. On the left, press *Pay your bill*, click the two boxes, press *Check bill*, then *Pay now*. Press **Finish and save**.
 3. Above the website, choose **Labels renamed**. Under *Follow a path*, press **Start**. The guide finds each button even though its name changed, and tells you how it found it.
-4. Switch the language to नेपाली or हिन्दी. Turn on large text or read-aloud.
-5. Press **Ask my helper**, then open [/help.html](https://paperwork-decoder.web.app/help.html) on a phone, enter the group code and tap a control.
+4. Press **Speak** and say, in Nepali, Hindi or English, what you need, for example "I need to pay the electricity bill". Saathi understands you, picks the matching path and starts guiding. It asks for the microphone; the recording goes to the cloud only when you press Speak.
+5. Switch the language to नेपाली or हिन्दी. Turn on large text or read-aloud.
+6. Press **Ask my helper**, then open [/help.html](https://paperwork-decoder.web.app/help.html) on a phone, enter the group code and tap a control.
 
 No login is needed. Nothing is paid and nothing on the practice website is real. It works on a phone too: the website sits above Saathi, so both are on screen at once (see below).
 
@@ -31,6 +32,8 @@ No login is needed. Nothing is paid and nothing on the practice website is real.
 | Finding a recorded step again on the live page | On-device only | The page may be a bank or government page. It is read on the laptop and never sent anywhere. |
 | Explaining what a page wants | On-device first, cloud fallback | The fallback sends only the page title and up to 60 button and box names. Never anything typed. |
 | Translating a path's step sentences into Nepali and Hindi | Cloud only, once, when the path is saved | The on-device model writes only English, Spanish and Japanese. The cloud sees the path name and the step sentences, nothing else. |
+| Understanding a spoken request (Nepali, Hindi or English) | Cloud only, when the person presses Speak | The on-device model does not understand Nepali speech. The cloud hears the recording and sees the titles of the group's paths, nothing from the website. |
+| Finding a step when the on-device model is unsure, or there is none | Cloud, only if the person presses a button after seeing what would be sent | The cloud sees the old label and the names of up to 60 buttons and links near the step. A label with a personal detail is replaced first. Nothing typed. |
 | Helper taps a control on a phone | No model | The helper sees only the names of the controls, written to Firestore. |
 
 Every model call goes through one file, [src/firebase.js](src/firebase.js), using Firebase AI Logic's hybrid modes. No other AI service is used. The cloud model is named explicitly (`gemini-3.5-flash-lite`).
@@ -65,7 +68,9 @@ Toggle `cloud_enabled` to false in the Firebase console and the panel's cloud ch
 | **Saved in a path** (Firestore) | Path only, no part after `?` or `#` | Yes, in order. A name that looks like an email or number is dropped. | Never | Never |
 | **Sent to the cloud for translation** | No | The path name and the English step sentences | Never | Never |
 | **Sent to a helper's phone** | No | Names only, and the person sees exactly what will be sent before pressing Send | Never | Never |
-| **Sent anywhere when re-finding** | No | No. It stays on the laptop. | Never | Never |
+| **Sent to the cloud when you press Speak** | No | Only the titles of your group's paths, which the group wrote | Never | Never. A short voice recording is sent, once, and not stored. |
+| **Sent to the cloud when you agree to "Ask the cloud to look"** | No | The old label and up to 60 button and link names near the step, with personal ones replaced. The panel lists examples first. | Never | Never |
+| **Sent anywhere when re-finding on this computer** | No | No. It stays on the laptop. | Never | Never |
 
 The page script reads a field's label, never its value. A path step has no field that could hold a typed value ([src/path.js](src/path.js)), so one cannot be saved by mistake. A step also stores a small number, its position among the page's controls, to help find it again on a long page. Help requests are deleted when the person stops sharing.
 
@@ -108,6 +113,26 @@ Caveats: the earlier improvements were designed after looking at failures on the
 - After that change the whole replay was run again (the Wikipedia main page now reads 250 controls instead of 150, so the numbers above and these are on slightly different data, and the long-article cases were re-run separately): 22 renamed controls, 14 right, 7 declined, 1 wrong; 6 removed controls, 5 declined and 1 wrong.
 - Not measured: Devanagari pages, pages that need a login, and full multi-step paths with the model.
 
+**Asking the cloud when the on-device model is unsure.** When the guide cannot find a step, or the computer has no on-device model (a phone, or a laptop where it is not installed), the step card offers "Ask the cloud to look". It first shows what would be sent: the old label and the names of up to 60 buttons and links near the step, with a personal label replaced. Nothing is sent until the person presses the button. The same 28 real-page cases, asked of the cloud model:
+
+| Cloud setting | Renamed: right / declined / wrong | Removed: right / wrong | Median time |
+|---|---|---|---|
+| Three calls: two orderings and a yes/no check | 18 / 3 / 1 | 5 / 1 | 15 s |
+| Two calls: one ordering and the check | 19 / 3 / 0 | 5 / 1 | 15 s |
+| **One call (used)** | **22 / 0 / 0** | 4 / 2 | **8 s** |
+
+The strong cloud model needs none of the careful checks that the small on-device model does, and one call is half the time. The cost is that for a control that has been removed, it twice picked a near-synonym ("Socialize" matched to "Community") instead of saying it is not sure. Timings varied a lot between runs. For comparison, the on-device model found 14 of the same 22 renamed controls. What was not verified end to end: pressing the button in a normal Chrome and watching the cloud's answer get highlighted. In a headless browser the button appeared with the right text and sent nothing before the click, and App Check refused the cloud call for that automated browser; the cloud's finding itself was measured through the same code above.
+
+**Speaking a request.** On the Follow tab, **Speak** records up to 8 seconds, sends the recording and the titles of the group's paths to the cloud model, and starts the path it picks. It exists because the on-device model does not understand Nepali speech, so this is a task where the cloud is genuinely needed. It shows what it heard, in the language spoken and in English, and it refuses when no path matches. Tested in a normal Chrome with a fake microphone playing speech made by the Mac's text-to-speech, against a group with one path ("Pay the electricity bill", with Nepali and Hindi titles):
+
+| Spoken | Heard | Result |
+|---|---|---|
+| Hindi: "मुझे बिजली का बिल भरना है" | Exactly, with the English "I want to pay the electricity bill" | Matched, started following |
+| English: "I want to pay the electricity bill" | Exactly | Matched, started following |
+| English: "I want to renew my passport" | Exactly | Refused: "I could not match that to one of your guides" |
+
+**Not tested:** real spoken Nepali (this Mac has no Nepali voice, so I could not make any); real human voices, accents and background noise; a group with many similar paths (matching against one path is easy); and the microphone permission prompt inside the extension's side panel, where browsers do not always show it. The extension has a small page, `mic.html`, that asks for the microphone once in a normal tab as a fallback; it was not verified. The first thing to try is saying a request in Nepali on the try page.
+
 **Things we tried that did not help, and removed or did not adopt:**
 - Structured (schema-constrained) output for the model's answers: 44 right against 49 for plain text on the 55 model cases, because the constrained model said "not sure" about twice as often. Plain text is used for re-finding. Structured output is used where an answer is a longer shape, for the cloud translation.
 - Offering only same-kind controls first (buttons with buttons) on the practice sites: slightly better on renamed-and-moved steps, but 3 wrong picks against 1 when a control was removed, so it was reverted. Narrowing by section, tried later on real pages, is used (above).
@@ -136,7 +161,7 @@ The harder redesign ran in a headless Chrome that has no on-device model, so "de
 
 **Security rules.** [tools/rules-check.js](tools/rules-check.js) runs 24 checks against the live project with two separate anonymous users: all pass. Allowed actions work (a helper can set the pick, a note and the status; a creator can delete). Refusals hold: a helper cannot change the list of controls, pick outside it, write a note over 100 characters or delete someone else's request; a path cannot be edited or created with no steps, 41 steps, an extra field or someone else's name as creator; nothing can be read without signing in, with a wrong-length group code, or outside `groups`. Not covered: the rules were checked on the real project, not the Firebase emulator, and a group code that leaks still gives full access to that group.
 
-**Tests.** 72 unit tests (`npm test`). Four end-to-end scripts drive a throwaway headless Chrome with the extension loaded and run against the live site: [tools/e2e.mjs](tools/e2e.mjs) (record, save, follow), [tools/e2e-help.mjs](tools/e2e-help.mjs) (ask for help, a phone-sized helper taps, the highlight moves, the request is deleted), [tools/e2e-try.mjs](tools/e2e-try.mjs) (the same flow on the try page) and [tools/e2e-real.mjs](tools/e2e-real.mjs) (real public websites, above). In the headless browser, App Check sometimes refuses the cloud translation (reCAPTCHA scores it as a bot); the path is then saved without translations, as designed, and the test reports it. In a normal Chrome the cloud call works. The on-device model is not available in that headless Chrome, so the model path was checked separately in a normal Chrome.
+**Tests.** 83 unit tests (`npm test`). Five end-to-end scripts drive a throwaway headless Chrome with the extension loaded and run against the live site: [tools/e2e.mjs](tools/e2e.mjs) (record, save, follow), [tools/e2e-help.mjs](tools/e2e-help.mjs) (ask for help, a phone-sized helper taps, the highlight moves, the request is deleted), [tools/e2e-try.mjs](tools/e2e-try.mjs) (the same flow on the try page) and [tools/e2e-real.mjs](tools/e2e-real.mjs) (real public websites, above) and [tools/e2e-cloud.mjs](tools/e2e-cloud.mjs) (the cloud button's consent screen, in a browser with no on-device model). In the headless browser, App Check sometimes refuses the cloud translation (reCAPTCHA scores it as a bot); the path is then saved without translations, as designed, and the test reports it. In a normal Chrome the cloud call works. The on-device model is not available in that headless Chrome, so the model path was checked separately in a normal Chrome.
 
 ## Design
 
@@ -160,6 +185,8 @@ Not done: a screen-reader pass, an automated accessibility audit, or any test wi
 - **Real sites: short public paths only.** Full record and follow was tested on two-step paths on three public sites. Sites that need a login, forms with typed answers and long paths were not tested.
 - **Nepali and Hindi were not reviewed by a native speaker.** One early Nepali translation added a detail that was not in the step. The prompt now forbids that, and later samples did not repeat it, but review is still needed.
 - **Read-aloud was not tested with Nepali or Hindi voices.** It uses the browser's own voices, and many computers have no Nepali voice. The step card is always shown on screen.
+- **Speaking sends your voice to the cloud**, once, only when you press Speak, and the recording is not stored. The on-device model cannot do this task. Real Nepali speech has not been tested (see above).
+- **The cloud button was not verified end to end** in a normal browser (see above).
 - **A group code is the only key.** Anyone who learns it can read that group's paths and help requests. That suits a family, not a public community.
 - **Not an offline app.** The websites Saathi guides need the internet anyway.
 - **No real user yet.** This was built and tested by one person on practice sites and public pages. It has not been used by a parent, student or migrant worker.
@@ -201,6 +228,7 @@ The Firebase project is named `paperwork-decoder`, from an earlier idea. It is o
 | [src/backend.js](src/backend.js) | Auth, Firestore, Remote Config, live help, cloud translation |
 | [src/panel.js](src/panel.js), [panel.html](panel.html) | The side panel |
 | [src/helper.js](src/helper.js), [help.html](help.html) | The helper's phone page |
+| [src/audio.js](src/audio.js), [src/voice.js](src/voice.js) | Recording a spoken request, and asking the cloud which path it means |
 | [src/try.js](src/try.js), [try.html](try.html) | The try page that stands in for the extension |
 | [extension](extension) | The Chrome extension (page script, side panel shell) |
 | [public/demo](public/demo) | The practice website |
