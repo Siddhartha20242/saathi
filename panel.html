@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Saathi panel</title>
+    <style>
+      :root { --ink: #1d1b16; --muted: #6b665c; --line: #e2ddd2; --bg: #f6f4ef; --accent: #0f5c4a; --warn: #e0a11b; --bad: #a3271f; }
+      * { box-sizing: border-box; }
+      body { font: 14px/1.45 system-ui, sans-serif; margin: 0; color: var(--ink); background: #fff; }
+      body.big { font-size: 19px; }
+      header { padding: 10px 14px; background: var(--bg); border-bottom: 1px solid var(--line); }
+      header h1 { font-size: 17px; margin: 0; display: inline; }
+      header .tag { font-size: 12px; color: var(--muted); margin-left: 8px; }
+      .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+      .chip { font-size: 12px; padding: 2px 9px; border: 1px solid var(--line); border-radius: 999px; background: #fff; color: var(--muted); }
+      .chip.ok { color: var(--accent); border-color: var(--accent); }
+      .chip.off { color: #7a4b00; border-color: var(--warn); background: #fff4dc; }
+      main { padding: 4px 14px 24px; }
+      section { padding: 12px 0; border-bottom: 1px solid var(--line); }
+      h2 { font-size: 15px; margin: 0 0 6px; }
+      p { margin: 4px 0; }
+      .muted { color: var(--muted); font-size: 13px; }
+      body.big .muted { font-size: 16px; }
+      button { font: inherit; padding: 7px 12px; border-radius: 7px; border: 1px solid #cfc9bb; background: #fff; cursor: pointer; }
+      button.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+      button.quiet { border: 0; background: none; color: var(--muted); text-decoration: underline; padding: 2px 4px; }
+      button:disabled { opacity: 0.55; cursor: default; }
+      button:focus-visible, input:focus-visible { outline: 3px solid var(--accent); outline-offset: 1px; }
+      input[type=text], input:not([type]), select { font: inherit; padding: 7px 9px; border: 1px solid #cfc9bb; border-radius: 7px; width: 100%; }
+      .row { display: flex; gap: 8px; margin: 6px 0; flex-wrap: wrap; align-items: center; }
+      .row > input { flex: 1; min-width: 120px; }
+      .out { background: var(--bg); border-radius: 7px; padding: 8px 10px; min-height: 1.4em; white-space: pre-wrap; word-break: break-word; }
+      .ok { color: var(--accent); } .bad { color: var(--bad); }
+      ol, ul { margin: 6px 0; padding-left: 20px; }
+      ul.plain { list-style: none; padding: 0; }
+      ul.plain li { border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; margin: 6px 0; display: flex; justify-content: space-between; gap: 8px; align-items: center; }
+      .step-card { border: 2px solid var(--accent); border-radius: 12px; padding: 14px; margin: 8px 0; }
+      .step-card .count { color: var(--muted); font-size: 13px; }
+      .step-card .main { font-size: 20px; font-weight: 600; margin: 6px 0; }
+      body.big .step-card .main { font-size: 28px; }
+      .step-card .second { font-size: 18px; margin: 4px 0 8px; }
+      body.big .step-card .second { font-size: 24px; }
+      .banner { background: #fff4dc; border: 1px solid var(--warn); border-radius: 8px; padding: 8px 10px; margin: 8px 0; }
+      .seg button { border-radius: 0; margin: 0; }
+      .seg button:first-child { border-radius: 7px 0 0 7px; } .seg button:last-child { border-radius: 0 7px 7px 0; }
+      .seg button[aria-pressed=true] { background: var(--accent); color: #fff; border-color: var(--accent); }
+      details summary { cursor: pointer; color: var(--muted); }
+      [hidden] { display: none !important; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Saathi</h1><span class="tag">Saathi highlights. You do it.</span>
+      <div class="chips">
+        <span class="chip" id="chip-group">No group yet</span>
+        <span class="chip" id="chip-model">On-device model: checking…</span>
+        <span class="chip" id="chip-cloud">Cloud: checking…</span>
+      </div>
+    </header>
+
+    <main>
+      <p class="muted" id="where"></p>
+
+      <section id="sec-group">
+        <h2>1. Your group</h2>
+        <p class="muted">A group is a family or a community. Everyone with the code sees the same paths.</p>
+        <div class="row">
+          <input id="group-code" placeholder="Enter a group code" maxlength="12" autocomplete="off" aria-label="Group code" />
+          <button id="group-join">Join</button>
+          <button id="group-new">Start a new group</button>
+        </div>
+        <p class="out" id="group-msg"></p>
+      </section>
+
+      <section id="sec-follow">
+        <h2>2. Follow a path</h2>
+        <div class="row">
+          <span class="seg" role="group" aria-label="Language">
+            <button data-lang="en" aria-pressed="true">English</button><button data-lang="ne" aria-pressed="false">नेपाली</button><button data-lang="hi" aria-pressed="false">हिन्दी</button>
+          </span>
+          <button id="opt-big" aria-pressed="false">Large text</button>
+          <button id="opt-speak" aria-pressed="false">Read aloud: off</button>
+        </div>
+        <ul class="plain" id="lib-list"></ul>
+        <p class="out" id="lib-msg"></p>
+        <div class="row"><button class="quiet" id="lib-refresh">Refresh the list</button></div>
+
+        <div id="follow" hidden>
+          <div class="step-card" aria-live="polite">
+            <div class="count" id="fo-count"></div>
+            <div class="main" id="fo-text"></div>
+            <div class="second" id="fo-text2"></div>
+            <div class="muted" id="fo-how"></div>
+          </div>
+          <div class="banner" id="fo-warn" hidden></div>
+          <div class="row">
+            <button class="primary" id="fo-next">I did it, next</button>
+            <button id="fo-again">Show me again</button>
+            <button id="fo-read">Read aloud</button>
+            <button class="quiet" id="fo-stop">Stop</button>
+          </div>
+          <p class="muted">On this laptop only. The page you are on is never sent anywhere.</p>
+        </div>
+        <p class="banner" id="fo-done" hidden></p>
+      </section>
+
+      <section id="sec-record">
+        <h2>3. Show the way once</h2>
+        <p class="muted">Press Start, then use the website as you normally would. Saathi writes down which buttons and boxes you use, in order.</p>
+        <p class="muted"><b>Saved:</b> the page addresses, the names of the buttons and boxes, and their order. <b>Never saved:</b> anything you type, passwords, or pictures of the page.</p>
+        <div class="row">
+          <input id="rec-title" placeholder="Name of this path, for example Pay the electricity bill" maxlength="80" autocomplete="off" aria-label="Path name" />
+        </div>
+        <div class="row">
+          <button class="primary" id="rec-start">Start</button>
+          <button id="rec-save" hidden>Finish and save</button>
+          <button class="quiet" id="rec-cancel" hidden>Cancel</button>
+        </div>
+        <ol id="rec-steps"></ol>
+        <p class="out" id="rec-msg"></p>
+      </section>
+
+      <section>
+        <h2>4. Not sure what this page wants?</h2>
+        <p class="muted">Uses the on-device model when this laptop has one. Otherwise the cloud answers, and only the page's labels are sent.</p>
+        <button id="t-explain">Explain this page</button>
+        <p class="out" id="o-explain"></p>
+      </section>
+
+      <section id="sec-help">
+        <h2>5. Still stuck? Ask your helper</h2>
+        <p class="muted">Your helper sees the names of the buttons and boxes on this page, on their phone. They tap the right one and it lights up here. They never see the page, a picture of it, or anything you typed.</p>
+        <button id="help-ask">Ask my helper</button>
+        <div id="help-confirm" hidden>
+          <p class="banner" id="help-preview"></p>
+          <div class="row">
+            <button class="primary" id="help-send">Send the names</button>
+            <button class="quiet" id="help-cancel">Cancel</button>
+          </div>
+        </div>
+        <div id="help-live" hidden>
+          <p class="banner" id="help-status" aria-live="polite"></p>
+          <p class="muted">Your helper opens <b id="help-url"></b> on their phone and enters the group code <b id="help-code"></b>.</p>
+          <button id="help-end">I am done, stop sharing</button>
+        </div>
+        <p class="out" id="help-msg"></p>
+      </section>
+
+      <section>
+        <details>
+          <summary>Developer checks</summary>
+          <h2>On-device model</h2>
+          <button id="t-device">Run on this laptop</button>
+          <p class="out" id="o-device"></p>
+          <h2>Cloud model (with App Check)</h2>
+          <button id="t-cloud">Run in the cloud</button>
+          <p class="out" id="o-cloud"></p>
+          <h2>Find a control by its old label</h2>
+          <div class="row"><input id="f-label" placeholder="Old label, for example: Sign in" autocomplete="off" aria-label="Old label" /></div>
+          <div class="row">
+            <select id="f-kind" aria-label="Kind of control"><option value="button">Something to press</option><option value="field">Something to fill in</option></select>
+            <button id="t-find" class="primary">Find</button>
+          </div>
+          <p class="out" id="o-find"></p>
+        </details>
+      </section>
+    </main>
+
+    <script type="module" src="/src/panel.js"></script>
+  </body>
+</html>
