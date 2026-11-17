@@ -1,0 +1,25 @@
+{
+  "parameters": {
+    "cloud_enabled": {
+      "defaultValue": {
+        "value": "true"
+      },
+      "valueType": "BOOLEAN",
+      "description": "Off-switch for every cloud call. Labels and translations stay on the laptop when false."
+    },
+    "max_labels": {
+      "defaultValue": {
+        "value": "60"
+      },
+      "valueType": "NUMBER",
+      "description": "Most page labels sent to a model when explaining a page."
+    },
+    "languages": {
+      "defaultValue": {
+        "value": "ne,hi"
+      },
+      "valueType": "STRING",
+      "description": "Languages a saved path is translated into (ne = Nepali, hi = Hindi)."
+    }
+  }
+}

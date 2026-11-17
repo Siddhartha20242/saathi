@@ -1,0 +1,22 @@
+{
+  "name": "saathi",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "sync:demo": "mkdir -p public/demo-bridge && cp extension/content.js public/demo-bridge/content.js",
+    "predev": "npm run sync:demo",
+    "dev": "vite",
+    "build": "npm run sync:demo && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "build:prod": "npm run sync:demo && VITE_APPCHECK_DEBUG=false vite build"
+  },
+  "dependencies": {
+    "firebase": "^13.0.0"
+  },
+  "devDependencies": {
+    "vite": "^7.0.0",
+    "vitest": "^3.0.0"
+  }
+}

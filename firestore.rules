@@ -1,0 +1,57 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // A group is a family or a community. The 8-character group code is part of the path, so only
+    // people who know the code can ask for its paths. Anyone signed in (anonymously) may read them.
+    match /groups/{code}/paths/{id} {
+      allow get, list: if request.auth != null && code.size() == 8;
+
+      allow create: if request.auth != null
+        && code.size() == 8
+        && request.resource.data.keys().hasOnly(['title', 'host', 'steps', 'translations', 'createdBy', 'createdAt'])
+        && request.resource.data.createdBy == request.auth.uid
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.title is string
+        && request.resource.data.title.size() > 0 && request.resource.data.title.size() <= 80
+        && request.resource.data.host is string
+        && request.resource.data.host.size() > 0 && request.resource.data.host.size() <= 80
+        && request.resource.data.steps is list
+        && request.resource.data.steps.size() >= 1 && request.resource.data.steps.size() <= 40
+        && request.resource.data.translations is map;
+
+      // Paths are not edited; the person who made one can delete it.
+      allow update: if false;
+      allow delete: if request.auth != null && resource.data.createdBy == request.auth.uid;
+    }
+
+    // "I'm stuck" help. The person who asks writes the names of the controls on one page.
+    // Anyone in the group can answer, but only by setting the pick, a short note and the status.
+    match /groups/{code}/help/{id} {
+      allow get, list: if request.auth != null && code.size() == 8;
+
+      allow create: if request.auth != null
+        && code.size() == 8
+        && request.resource.data.keys().hasOnly(['title', 'host', 'controls', 'pick', 'note', 'status', 'createdBy', 'createdAt', 'expiresAt'])
+        && request.resource.data.createdBy == request.auth.uid
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.title is string && request.resource.data.title.size() <= 80
+        && request.resource.data.host is string && request.resource.data.host.size() <= 80
+        && request.resource.data.controls is list && request.resource.data.controls.size() <= 100
+        && request.resource.data.pick == null
+        && request.resource.data.note == ''
+        && request.resource.data.status == 'open'
+        && request.resource.data.expiresAt is timestamp;
+
+      allow update: if request.auth != null
+        && code.size() == 8
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['pick', 'note', 'status'])
+        && request.resource.data.pick is int
+        && request.resource.data.pick >= 0
+        && request.resource.data.pick < resource.data.controls.size()
+        && request.resource.data.note is string && request.resource.data.note.size() <= 100
+        && request.resource.data.status in ['answered', 'closed'];
+
+      allow delete: if request.auth != null && resource.data.createdBy == request.auth.uid;
+    }
+  }
+}
