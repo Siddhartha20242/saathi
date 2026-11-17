@@ -7,322 +7,384 @@
    "text": "Nepal Electricity Authority Logo",
    "section": "Menu",
    "href": "",
-   "name": ""
+   "name": "",
+   "inView": true
   },
   {
    "role": "link",
    "text": "Contact Numbers for Electrical Service Information",
    "section": "Menu",
    "href": "/contact-information-of-dcs",
-   "name": ""
+   "name": "",
+   "inView": true
   },
   {
    "role": "link",
    "text": "SmartKYC",
    "section": "Menu",
    "href": "",
-   "name": ""
+   "name": "",
+   "inView": true
   },
   {
    "role": "link",
    "text": "ABOUT",
    "section": "Menu",
    "href": "",
-   "name": "about1"
+   "name": "about1",
+   "inView": true
   },
   {
    "role": "link",
    "text": "MEDIA",
    "section": "Menu",
    "href": "",
-   "name": "media"
+   "name": "media",
+   "inView": true
   },
   {
    "role": "link",
    "text": "CONSUMER SERVICES",
    "section": "Menu",
    "href": "",
-   "name": "consumers"
+   "name": "consumers",
+   "inView": true
   },
   {
    "role": "link",
    "text": "CAREERS",
    "section": "Menu",
    "href": "",
-   "name": "recruitment"
+   "name": "recruitment",
+   "inView": true
   },
   {
    "role": "link",
    "text": "TENDERS",
    "section": "Menu",
    "href": "",
-   "name": "tenders"
+   "name": "tenders",
+   "inView": true
   },
   {
    "role": "link",
    "text": "NEA ANNIVERSARY",
    "section": "Menu",
    "href": "",
-   "name": "nea-anniversary"
+   "name": "nea-anniversary",
+   "inView": true
   },
   {
    "role": "button",
    "text": "Open accessibility settings",
    "section": "Menu",
    "href": "",
-   "name": ""
+   "name": "",
+   "inView": true
   },
   {
    "role": "button",
    "text": "Previous",
    "section": "",
    "href": "",
-   "name": ""
+   "name": "",
+   "inView": true
   },
   {
    "role": "button",
    "text": "Next",
    "section": "",
    "href": "",
-   "name": ""
+   "name": "",
+   "inView": true
   },
   {
    "role": "link",
    "text": "Mr. Dirghayu Kumar Shrestha",
    "section": "",
    "href": "",
-   "name": ""
+   "name": "",
+   "inView": true
   },
   {
    "role": "link",
    "text": "Mr. Achyut Babu Ghimire",
    "section": "Mr. Dirghayu Kumar Shrestha Managing Director",
    "href": "",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "button",
    "text": "News",
    "section": "Energy Details",
    "href": "",
-   "name": "news-tab"
+   "name": "news-tab",
+   "inView": false
   },
   {
    "role": "button",
    "text": "Notice",
    "section": "Energy Details",
    "href": "",
-   "name": "notice-tab"
+   "name": "notice-tab",
+   "inView": false
   },
   {
    "role": "button",
    "text": "Press Release",
    "section": "Energy Details",
    "href": "",
-   "name": "press-release-tab"
+   "name": "press-release-tab",
+   "inView": false
   },
   {
    "role": "button",
    "text": "Downloads",
    "section": "Energy Details",
    "href": "",
-   "name": "downloads-tab"
+   "name": "downloads-tab",
+   "inView": false
   },
   {
    "role": "link",
    "text": "View More",
    "section": "Notice",
    "href": "/category/news",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "Koshi Provincial Office, Biratnagar",
    "section": "Notice",
    "href": "",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "Madhesh Provincial Office, Janakpur",
    "section": "Notice",
    "href": "",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "Bagmati Provincial Office, Kathmandu",
    "section": "Notice",
    "href": "",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "Gandaki Provincial Office, Pokhara",
    "section": "Notice",
    "href": "",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "Lumbini Provincial Office, Butwal",
    "section": "Notice",
    "href": "",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "Karnali Provincial Office, Surkhet",
    "section": "Notice",
    "href": "",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "Sudur-Paschim Provincial Office, Attaria",
    "section": "Notice",
    "href": "",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "button",
    "text": "Previous",
    "section": "Notice",
    "href": "",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "button",
    "text": "Next",
    "section": "Notice",
    "href": "",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "View More",
    "section": "Result Publication, Level 8 (Electrical)- Internal",
    "href": "/recruitment",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "NEA App",
    "section": "Ms. Punam Joshi Nodal Officer 9851355696 gunaso@nea.org.np",
    "href": "/store/apps/details",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "Charging Station App",
    "section": "Ms. Punam Joshi Nodal Officer 9851355696 gunaso@nea.org.np",
    "href": "/store/apps/details",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "FAQs",
    "section": "Ms. Punam Joshi Nodal Officer 9851355696 gunaso@nea.org.np",
    "href": "/faq",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "Email",
    "section": "Ms. Punam Joshi Nodal Officer 9851355696 gunaso@nea.org.np",
    "href": "",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "button",
    "text": "Photo",
    "section": "Annual Reports",
    "href": "",
-   "name": "photo-tab"
+   "name": "photo-tab",
+   "inView": false
   },
   {
    "role": "button",
    "text": "Video Gallery",
    "section": "Annual Reports",
    "href": "",
-   "name": "video-tab"
+   "name": "video-tab",
+   "inView": false
   },
   {
    "role": "link",
    "text": "View More",
    "section": "Annual Reports",
    "href": "/gallery",
-   "name": ""
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "button",
+   "text": "Close All",
+   "section": "Annual Reports",
+   "href": "",
+   "name": "",
+   "inView": true
+  },
+  {
+   "role": "button",
+   "text": "X",
+   "section": "Annual Reports",
+   "href": "",
+   "name": "",
+   "inView": true
   },
   {
    "role": "link",
    "text": "information@nea.org.np",
    "section": "Footer",
    "href": "",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "977-1-4153051",
    "section": "Footer",
    "href": "",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "Ministry of Energy Water Resource and Irrigation",
    "section": "Footer",
    "href": "",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "Ministry of Finance",
    "section": "Footer",
    "href": "",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "Department of Electricity Development",
    "section": "Footer",
    "href": "",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "Electricity Regulatory Commission",
    "section": "Footer",
    "href": "",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "Department of Information and Broadcasting",
    "section": "Footer",
    "href": "",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "Alternative Energy Promotion Centre",
    "section": "Footer",
    "href": "",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "National Planning Commission",
    "section": "Footer",
    "href": "",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "Public Procurement Monitoring Office",
    "section": "Footer",
    "href": "/egp/",
-   "name": ""
+   "name": "",
+   "inView": false
   }
  ]
 }

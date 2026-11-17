@@ -7,364 +7,416 @@
    "text": "কন্টেন্টে চলে যান",
    "section": "",
    "href": "",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "এক্সেসিবিলিটি মেনুতে যান",
    "section": "",
    "href": "",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "button",
    "text": "BN",
    "section": "",
    "href": "",
-   "name": ""
+   "name": "",
+   "inView": true
   },
   {
    "role": "link",
    "text": "বাংলাদেশ জাতীয় তথ্য বাতায়ন",
    "section": "",
    "href": "",
-   "name": ""
+   "name": "",
+   "inView": true
   },
   {
    "role": "field",
    "text": "এখানে খুঁজুন...",
    "section": "",
    "href": "",
-   "name": "key"
+   "name": "key",
+   "inView": true
   },
   {
    "role": "button",
    "text": "অনুসন্ধান",
    "section": "",
    "href": "",
-   "name": ""
+   "name": "",
+   "inView": true
   },
   {
    "role": "link",
    "text": "বাংলাদেশ সম্পর্কিত",
    "section": "",
    "href": "",
-   "name": ""
+   "name": "",
+   "inView": true
   },
   {
    "role": "link",
    "text": "ই-সেবাসমূহ",
    "section": "",
    "href": "/views/all-eservices-in-bangladesh",
-   "name": ""
+   "name": "",
+   "inView": true
   },
   {
    "role": "link",
    "text": "সেবাখাত",
    "section": "",
    "href": "/views/service-sectors",
-   "name": ""
+   "name": "",
+   "inView": true
   },
   {
    "role": "link",
    "text": "ব্যবসা-বাণিজ্য",
    "section": "",
    "href": "",
-   "name": ""
+   "name": "",
+   "inView": true
   },
   {
    "role": "link",
    "text": "বৈদেশিক বিনিয়োগ",
    "section": "",
    "href": "/pages/static-pages/69a55ba386514399668e4e5b",
-   "name": ""
+   "name": "",
+   "inView": true
   },
   {
    "role": "link",
    "text": "আইন-বিধি",
    "section": "",
    "href": "",
-   "name": ""
+   "name": "",
+   "inView": true
   },
   {
    "role": "link",
    "text": "প্রয়োজনীয় অ্যাপস",
    "section": "",
    "href": "/pages/static-pages/69a55ba386514399668e4e6e",
-   "name": ""
+   "name": "",
+   "inView": true
   },
   {
    "role": "link",
    "text": "বাংলাদেশ জাতীয় তথ্য বাতায়ন",
    "section": "বাংলাদেশ জাতীয় তথ্য বাতায়ন",
    "href": "",
-   "name": ""
+   "name": "",
+   "inView": true
   },
   {
    "role": "link",
    "text": "৫৭ মন্ত্রণালয় ও বিভাগ",
    "section": "বাংলাদেশ জাতীয় তথ্য বাতায়ন",
    "href": "/views/ministry-and-directorate-list",
-   "name": ""
+   "name": "",
+   "inView": true
   },
   {
    "role": "link",
    "text": "৭২ অধিদপ্তর",
    "section": "বাংলাদেশ জাতীয় তথ্য বাতায়ন",
    "href": "/views/directorates-n-others",
-   "name": ""
+   "name": "",
+   "inView": true
   },
   {
    "role": "link",
    "text": "৫৬৫ অন্যান্য অফিস",
    "section": "বাংলাদেশ জাতীয় তথ্য বাতায়ন",
    "href": "/views/other-offices-list",
-   "name": ""
+   "name": "",
+   "inView": true
   },
   {
    "role": "link",
    "text": "৮ বিভাগ",
    "section": "বাংলাদেশ জাতীয় তথ্য বাতায়ন",
    "href": "/views/division-list",
-   "name": ""
+   "name": "",
+   "inView": true
   },
   {
    "role": "link",
    "text": "৬৪ জেলা",
    "section": "বাংলাদেশ জাতীয় তথ্য বাতায়ন",
    "href": "/views/district-list",
-   "name": ""
+   "name": "",
+   "inView": true
   },
   {
    "role": "link",
    "text": "৫০২ উপজেলা",
    "section": "বাংলাদেশ জাতীয় তথ্য বাতায়ন",
    "href": "/views/upazila-list",
-   "name": ""
+   "name": "",
+   "inView": true
   },
   {
    "role": "link",
    "text": "৪৫৬৮ ইউনিয়ন",
    "section": "বাংলাদেশ জাতীয় তথ্য বাতায়ন",
    "href": "/views/union-list",
-   "name": ""
+   "name": "",
+   "inView": true
   },
   {
    "role": "button",
    "text": "জনপ্রিয় সেবা",
    "section": "সরকারি সেবাসমূহ",
    "href": "",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "button",
    "text": "নতুন সেবা",
    "section": "সরকারি সেবাসমূহ",
    "href": "",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "button",
    "text": "মোবাইল সেবা",
    "section": "সরকারি সেবাসমূহ",
    "href": "",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "button",
    "text": "দপ্তর সেবা",
    "section": "সরকারি সেবাসমূহ",
    "href": "",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "button",
    "text": "সকল ই-সেবা",
    "section": "সরকারি সেবাসমূহ",
    "href": "",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "ডিজিটাল সেন্টার",
    "section": "সরকারি সেবাসমূহ",
    "href": "/pages/np-services",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "অর্থ ও বাণিজ্য",
    "section": "সরকারি সেবাসমূহ",
    "href": "/pages/np-services",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "অনলাইন আবেদন",
    "section": "সরকারি সেবাসমূহ",
    "href": "/pages/np-services",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "শিক্ষা-বিষয়ক",
    "section": "সরকারি সেবাসমূহ",
    "href": "/pages/np-services",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "অনলাইন নিবন্ধন",
    "section": "সরকারি সেবাসমূহ",
    "href": "/pages/np-services",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "কৃষি",
    "section": "সরকারি সেবাসমূহ",
    "href": "/pages/np-services",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "নিয়োগ সংক্রান্ত",
    "section": "সরকারি সেবাসমূহ",
    "href": "/pages/np-services",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "পাসপোর্ট, ভিসা ও ইমিগ্রেশন",
    "section": "সরকারি সেবাসমূহ",
    "href": "/pages/np-services",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "button",
    "text": "আরো দেখুন ↓",
    "section": "সরকারি সেবাসমূহ",
    "href": "",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "button",
    "text": "ছবি",
    "section": "ফটোগ্যালারি",
    "href": "",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "button",
    "text": "ভিডিও",
    "section": "ফটোগ্যালারি",
    "href": "",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "দর্শনীয় স্থান",
    "section": "ফটোগ্যালারি",
    "href": "/pages/photo-galleries/%E0%A6%A6%E0%A6%B0%E0%A7%8D%E0%A6%B6%E0%A6%A8%E0%A7%80%E0%A7%9F-%E0%A6%B8%E0%A7%8D%E0%A6%A5%E0%A6",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "কক্সবাজার",
    "section": "ফটোগ্যালারি",
    "href": "/pages/photo-galleries/bnagladesh-suoxg2-6a82a1422adbdef9eae7e3d0",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "প্রাকৃতিক সৌন্দর্য",
    "section": "ফটোগ্যালারি",
    "href": "/pages/photo-galleries/new-photo-p77zew-6a82a01bee91f75135e75822",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "নৌকা বাইচ",
    "section": "ফটোগ্যালারি",
    "href": "/pages/photo-galleries/%E0%A6%A8%E0%A7%8C%E0%A6%95%E0%A6%BE-%E0%A6%AC%E0%A6%BE%E0%A6%87%E0%A6%9A-pvhmga-6a8fb104ee91f751",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "শীতের সকাল",
    "section": "ফটোগ্যালারি",
    "href": "/pages/photo-galleries/visit-g6ymu4-6a82a09fdf1fe8071fd43bc4",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "সুন্দরবন",
    "section": "ফটোগ্যালারি",
    "href": "/pages/photo-galleries/%E0%A6%B8%E0%A7%81%E0%A6%A8%E0%A7%8D%E0%A6%A6%E0%A6%B0%E0%A6%AC%E0%A6%A8-m9vlv0-6a8fb52acb81efaf5",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "সকল ফটোগ্যালারি",
    "section": "ফটোগ্যালারি",
    "href": "/pages/photo-galleries",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "select",
    "text": "officeType",
    "section": "সকল জাতীয় বাতায়ন",
    "href": "",
-   "name": "officeType"
+   "name": "officeType",
+   "inView": true
   },
   {
    "role": "link",
    "text": "সরকারি নিয়োগ বিজ্ঞপ্তি",
    "section": "সকল জাতীয় বাতায়ন",
    "href": "/pages/job-tender-announcements",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "বাজেট",
    "section": "সকল জাতীয় বাতায়ন",
    "href": "/site/view/budget_mof/%E0%A7%A8%E0%A7%A6%E0%A7%A7%E0%A7%AF-%E0%A7%A8%E0%A7%A6/",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "স্টক এক্সচেঞ্জ",
    "section": "সকল জাতীয় বাতায়ন",
    "href": "",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "বৈদেশিক মুদ্রার হার",
    "section": "সকল জাতীয় বাতায়ন",
    "href": "/en/index.php",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "আবহাওয়া",
    "section": "সকল জাতীয় বাতায়ন",
    "href": "",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "ডিজিটাল গার্ড ফাইল",
    "section": "সকল জাতীয় বাতায়ন",
    "href": "/views/gurd-files-category",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "সেবা সহজিকরণ",
    "section": "সকল জাতীয় বাতায়ন",
    "href": "/views/sps-data",
-   "name": ""
+   "name": "",
+   "inView": false
   }
  ]
 }

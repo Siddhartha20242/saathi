@@ -9,8 +9,9 @@ import wiki from '../tools/real-model/scans/wiki.json';
 import py from '../tools/real-model/scans/py.json';
 import nea from '../tools/real-model/scans/nea.json';
 import bd from '../tools/real-model/scans/bd.json';
+import wikilong from '../tools/real-model/scans/wikilong.json';
 
-const SCANS = { wiki, py, nea, bd };
+const SCANS = { wiki, py, nea, bd, wikilong };
 const $ = (id) => document.getElementById(id);
 const params = new URLSearchParams(location.search);
 const region = params.get('region') !== '0';
@@ -29,7 +30,7 @@ function build(c) {
   const els = SCANS[c.page].elements;
   const index = els.findIndex((e) => e.text === c.label && (c.role === 'button' ? e.role === 'button' : e.role === 'link'));
   if (index < 0) return null;
-  const step = { ...els[index] };
+  const step = { ...els[index], at: index }; // a recorded step remembers its place on the page
   const after =
     c.variant === 'removed'
       ? els.filter((_, i) => i !== index)

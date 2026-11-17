@@ -11,6 +11,7 @@ export const PAGES = {
   py: 'https://www.python.org/',
   nea: 'https://www.nea.org.np/',
   bd: 'https://bangladesh.gov.bd/index.php',
+  wikilong: 'https://en.wikipedia.org/wiki/Nepal',
 };
 
 const r = (page, label, renamed, role = 'link') => ({ page, variant: 'renamed', role, label, renamed });
@@ -45,4 +46,11 @@ export const CASES = [
   r('bd', 'সেবাখাত', 'খাতভিত্তিক তথ্য'),
   r('bd', 'অনুসন্ধান', 'খুঁজুন', 'button'),
   x('bd', 'আইন-বিধি'),
+
+  // A very long page (about 4,000 controls): these footer links are near the bottom.
+  r('wikilong', 'Cookie statement', 'How we use cookies'),
+  r('wikilong', 'Developers', 'For programmers'),
+  r('wikilong', 'About Wikipedia', 'Who runs this site'),
+  r('wikilong', 'Disclaimers', 'Legal notices'),
+  x('wikilong', 'Contact Wikipedia'),
 ];

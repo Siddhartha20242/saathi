@@ -29,6 +29,13 @@ const FLOWS = [
     mutate: { 'साधारण राहदानी बनाउन के गर्ने?': 'राहदानी कसरी बनाउने' },
   },
   {
+    name: 'Wikipedia article, about 4,000 controls (English)',
+    start: 'https://en.wikipedia.org/wiki/Nepal',
+    wait: 9000,
+    steps: ['About Wikipedia'],
+    mutate: { 'About Wikipedia': 'Who runs this site' },
+  },
+  {
     name: 'Wikipedia (English)',
     start: 'https://en.wikipedia.org/wiki/Main_Page',
     wait: 7000,
@@ -37,6 +44,7 @@ const FLOWS = [
   },
 ];
 
+const only = process.env.ONLY?.split('|'); // e.g. ONLY='Wikipedia (English)' to re-run one flow
 const out = { flows: [] };
 const c = await launch();
 
@@ -80,7 +88,7 @@ try {
   await c.waitFor(frame, '/^[A-Z0-9]{8}$/.test(window.__saathi.group)');
 
   let saved = 0;
-  for (const flow of FLOWS) {
+  for (const flow of FLOWS.filter((f) => !only || only.includes(f.name))) {
     const rec = { name: flow.name, recorded: null, unchanged: [], label: [], hard: [] };
     out.flows.push(rec);
     try {
@@ -144,6 +152,7 @@ try {
             r = { timedOut: true };
           }
           if (r.by) {
+            await sleep(3000); // the page scrolls to the control smoothly; wait until it has arrived
             const under = await underHighlight(site.session);
             // Right if it is the renamed control, or another link to the same address (it does the same thing).
             const sameAddress = Boolean(under?.path) && under.path === steps[i].href;

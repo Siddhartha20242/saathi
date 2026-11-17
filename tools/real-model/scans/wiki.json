@@ -7,1050 +7,2000 @@
    "text": "Search Wikipedia",
    "section": "Menu",
    "href": "",
-   "name": "search"
+   "name": "search",
+   "inView": true
   },
   {
    "role": "button",
    "text": "Search",
    "section": "Menu",
    "href": "",
-   "name": ""
+   "name": "",
+   "inView": true
   },
   {
    "role": "link",
    "text": "Donate",
    "section": "Menu",
    "href": "",
-   "name": ""
+   "name": "",
+   "inView": true
   },
   {
    "role": "link",
    "text": "Create account",
    "section": "Menu",
    "href": "/w/index.php",
-   "name": ""
+   "name": "",
+   "inView": true
   },
   {
    "role": "link",
    "text": "Log in",
    "section": "Menu",
    "href": "/w/index.php",
-   "name": ""
+   "name": "",
+   "inView": true
   },
   {
    "role": "link",
    "text": "Main Page",
    "section": "Menu",
    "href": "",
-   "name": ""
+   "name": "",
+   "inView": true
   },
   {
    "role": "link",
    "text": "Talk",
    "section": "Menu",
    "href": "/wiki/Talk:Main_Page",
-   "name": ""
+   "name": "",
+   "inView": true
   },
   {
    "role": "link",
    "text": "Read",
    "section": "Menu",
    "href": "",
-   "name": ""
+   "name": "",
+   "inView": true
   },
   {
    "role": "link",
    "text": "View source",
    "section": "Menu",
    "href": "/w/index.php",
-   "name": ""
+   "name": "",
+   "inView": true
   },
   {
    "role": "link",
    "text": "View history",
    "section": "Menu",
    "href": "/w/index.php",
-   "name": ""
+   "name": "",
+   "inView": true
   },
   {
    "role": "link",
    "text": "Save",
    "section": "Menu",
    "href": "",
-   "name": ""
+   "name": "",
+   "inView": true
   },
   {
    "role": "button",
    "text": "Hide Appearance",
    "section": "Menu",
    "href": "",
-   "name": ""
+   "name": "",
+   "inView": true
   },
   {
    "role": "link",
    "text": "Wikipedia",
    "section": "Welcome to Wikipedia",
    "href": "/wiki/Wikipedia",
-   "name": "mwBg"
+   "name": "mwBg",
+   "inView": true
   },
   {
    "role": "link",
    "text": "free",
    "section": "Welcome to Wikipedia",
    "href": "/wiki/Free_content",
-   "name": "mwBw"
+   "name": "mwBw",
+   "inView": true
   },
   {
    "role": "link",
    "text": "anyone can edit",
    "section": "Welcome to Wikipedia",
    "href": "/wiki/Help:Introduction_to_Wikipedia",
-   "name": "mwCA"
+   "name": "mwCA",
+   "inView": true
   },
   {
    "role": "link",
    "text": "261,656",
    "section": "Welcome to Wikipedia",
    "href": "/wiki/Special:Statistics",
-   "name": "mwCw"
+   "name": "mwCw",
+   "inView": true
   },
   {
    "role": "link",
-   "text": "7,265,442",
+   "text": "7,265,534",
    "section": "Welcome to Wikipedia",
    "href": "/wiki/Special:Statistics",
-   "name": "mwDg"
+   "name": "mwDg",
+   "inView": true
   },
   {
    "role": "link",
    "text": "English",
    "section": "Welcome to Wikipedia",
    "href": "/wiki/English_language",
-   "name": "mwEA"
+   "name": "mwEA",
+   "inView": true
   },
   {
    "role": "link",
    "text": "Dividing the Light was one of the installation artworks that inspired the game.",
    "section": "From today's featured article",
    "href": "/wiki/File:Dividing_the_Light_at_dusk.jpg",
-   "name": ""
+   "name": "",
+   "inView": true
   },
   {
    "role": "link",
    "text": "Dividing the Light",
    "section": "From today's featured article",
    "href": "/wiki/Dividing_the_Light",
-   "name": ""
+   "name": "",
+   "inView": true
   },
   {
    "role": "link",
    "text": "Islands: Non-Places",
    "section": "From today's featured article",
    "href": "/wiki/Islands:_Non-Places",
-   "name": ""
+   "name": "",
+   "inView": true
   },
   {
    "role": "link",
    "text": "art game",
    "section": "From today's featured article",
    "href": "/wiki/Art_game",
-   "name": ""
+   "name": "",
+   "inView": true
   },
   {
    "role": "link",
    "text": "liminal",
    "section": "From today's featured article",
    "href": "/wiki/Liminality",
-   "name": ""
+   "name": "",
+   "inView": true
   },
   {
    "role": "link",
    "text": "Marc Augé",
    "section": "From today's featured article",
    "href": "/wiki/Marc_Aug%C3%A9",
-   "name": ""
+   "name": "",
+   "inView": true
   },
   {
    "role": "link",
    "text": "installation art",
    "section": "From today's featured article",
    "href": "/wiki/Installation_art",
-   "name": ""
+   "name": "",
+   "inView": true
   },
   {
    "role": "link",
    "text": "James Turrell",
    "section": "From today's featured article",
    "href": "/wiki/James_Turrell",
-   "name": ""
+   "name": "",
+   "inView": true
   },
   {
    "role": "link",
    "text": "field recordings",
    "section": "From today's featured article",
    "href": "/wiki/Field_recording",
-   "name": ""
+   "name": "",
+   "inView": true
   },
   {
    "role": "link",
    "text": "Chris Watson",
    "section": "From today's featured article",
    "href": "/wiki/Chris_Watson_(musician)",
-   "name": ""
+   "name": "",
+   "inView": true
   },
   {
    "role": "link",
    "text": "Nuovo Award",
    "section": "From today's featured article",
    "href": "/wiki/Nuovo_Award",
-   "name": ""
+   "name": "",
+   "inView": true
   },
   {
    "role": "link",
    "text": "Independent Games Festival",
    "section": "From today's featured article",
    "href": "/wiki/Independent_Games_Festival",
-   "name": ""
+   "name": "",
+   "inView": true
   },
   {
    "role": "link",
    "text": "Full article...",
    "section": "From today's featured article",
    "href": "/wiki/Islands:_Non-Places",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "Mark Satin",
    "section": "From today's featured article",
    "href": "/wiki/Mark_Satin",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "\"Can't Let Go\" (Mariah Carey song)",
    "section": "From today's featured article",
    "href": "/wiki/Can't_Let_Go_(Mariah_Carey_song)",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "Aucanquilcha",
    "section": "From today's featured article",
    "href": "/wiki/Aucanquilcha",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "Archive",
    "section": "From today's featured article",
    "href": "/wiki/Wikipedia:Today's_featured_article/November_2026",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "By email",
    "section": "From today's featured article",
    "href": "/postorius/lists/daily-article-l.lists.wikimedia.org/",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "More featured articles",
    "section": "From today's featured article",
    "href": "/wiki/Wikipedia:Featured_articles_(linked_from_TFAfooter)",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "About",
    "section": "From today's featured article",
    "href": "/wiki/Wikipedia:About_Today's_featured_article",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
-   "text": "Verity",
+   "text": "Harbour Tower",
    "section": "Did you know ...",
-   "href": "/wiki/File:Verity_normal.svg",
-   "name": ""
+   "href": "/wiki/File:Harbour_tower_mayo_2026.jpg",
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
-   "text": "a Generation Alpha meme",
+   "text": "Shruthi L",
    "section": "Did you know ...",
-   "href": "/wiki/Verity_(web_series)",
-   "name": ""
+   "href": "/wiki/Shruthi_L",
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
-   "text": "Julian Aguon",
+   "text": "World Women's Billiards Championship",
    "section": "Did you know ...",
-   "href": "/wiki/Julian_Aguon",
-   "name": ""
+   "href": "/wiki/World_Women's_Billiards_Championship",
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
-   "text": "a secret episode",
+   "text": "Lego Creator",
    "section": "Did you know ...",
-   "href": "/wiki/Conformity_Gate",
-   "name": ""
+   "href": "/wiki/Lego_Creator_(video_game)",
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
-   "text": "Alois Lichtsteiner",
+   "text": "Prabhu Narayan Chaudhury",
    "section": "Did you know ...",
-   "href": "/wiki/Alois_Lichtsteiner",
-   "name": ""
+   "href": "/wiki/Prabhu_Narayan_Chaudhury",
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
-   "text": "Interstate 24 in Tennessee",
+   "text": "king of Nepal",
    "section": "Did you know ...",
-   "href": "/wiki/Interstate_24_in_Tennessee",
-   "name": ""
+   "href": "/wiki/King_of_Nepal",
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
-   "text": "iCloud Private Relay",
+   "text": "Real Sound",
    "section": "Did you know ...",
-   "href": "/wiki/ICloud_Private_Relay",
-   "name": ""
+   "href": "/wiki/Real_Sound_(website)",
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
-   "text": "Dyckman House",
+   "text": "Gabrielle Bertrand",
    "section": "Did you know ...",
-   "href": "/wiki/Dyckman_House",
-   "name": ""
+   "href": "/wiki/Gabrielle_Bertrand_(painter)",
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
-   "text": "Consideration",
+   "text": "a train station in New York City",
    "section": "Did you know ...",
-   "href": "/wiki/Consideration_(song)",
-   "name": ""
+   "href": "/wiki/Goose_Creek_station",
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
-   "text": "Nannie Washburn",
+   "text": "Bill Meier",
    "section": "Did you know ...",
-   "href": "/wiki/Nannie_Washburn",
-   "name": ""
+   "href": "/wiki/Bill_Meier",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "The Shinano Mainichi Shimbun",
+   "section": "Did you know ...",
+   "href": "/wiki/The_Shinano_Mainichi_Shimbun",
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "Archive",
    "section": "Did you know ...",
    "href": "/wiki/Wikipedia:Did_you_know_archive",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "Start a new article",
    "section": "Did you know ...",
    "href": "/wiki/Help:Your_first_article",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "Nominate an article",
    "section": "Did you know ...",
    "href": "/wiki/Template_talk:Did_you_know",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "Garbage bin with trash on top",
    "section": "Help us improve this article!",
    "href": "/wiki/File:2021-05-22_Bald_geht_die_Party_richtig_los.jpg",
-   "name": ""
+   "name": "",
+   "inView": true
   },
   {
    "role": "link",
    "text": "garbage",
    "section": "Help us improve this article!",
    "href": "/wiki/Garbage",
-   "name": ""
+   "name": "",
+   "inView": true
   },
   {
    "role": "link",
    "text": "History",
    "section": "Help us improve this article!",
    "href": "/wiki/Garbage",
-   "name": ""
+   "name": "",
+   "inView": true
   },
   {
    "role": "link",
    "text": "Treatment",
    "section": "Help us improve this article!",
    "href": "/wiki/Garbage",
-   "name": ""
+   "name": "",
+   "inView": true
   },
   {
    "role": "link",
    "text": "reliable sources",
    "section": "Help us improve this article!",
    "href": "/wiki/Wikipedia:Reliable_sources",
-   "name": ""
+   "name": "",
+   "inView": true
   },
   {
    "role": "link",
    "text": "sources mentioned on the talk page",
    "section": "Help us improve this article!",
    "href": "/wiki/Talk:Garbage",
-   "name": ""
+   "name": "",
+   "inView": true
   },
   {
    "role": "link",
    "text": "be bold",
    "section": "Help us improve this article!",
    "href": "/wiki/Wikipedia:Be_bold",
-   "name": ""
+   "name": "",
+   "inView": true
   },
   {
    "role": "link",
    "text": "start editing the article",
    "section": "Help us improve this article!",
    "href": "/w/index.php",
-   "name": ""
+   "name": "",
+   "inView": true
   },
   {
    "role": "link",
    "text": "the article's talk page",
    "section": "Help us improve this article!",
    "href": "/wiki/Talk:Garbage",
-   "name": ""
+   "name": "",
+   "inView": true
   },
   {
    "role": "link",
    "text": "Teahouse",
    "section": "Help us improve this article!",
    "href": "/wiki/Wikipedia:Teahouse",
-   "name": ""
+   "name": "",
+   "inView": true
   },
   {
    "role": "link",
    "text": "For new editors",
    "section": "Help us improve this article!",
    "href": "/wiki/Help:Introduction",
-   "name": ""
+   "name": "",
+   "inView": true
   },
   {
    "role": "link",
    "text": "Archive",
    "section": "Help us improve this article!",
    "href": "/wiki/Wikipedia:Articles_for_improvement/Archives/Schedule",
-   "name": ""
+   "name": "",
+   "inView": true
   },
   {
    "role": "link",
    "text": "What is this?",
    "section": "Help us improve this article!",
    "href": "/wiki/Wikipedia:Articles_for_improvement",
-   "name": ""
+   "name": "",
+   "inView": true
   },
   {
    "role": "link",
    "text": "Jensen Huang in 2026",
    "section": "In the news",
    "href": "/wiki/File:Jensen_Huang_Stanford_2026-04-30_010_(cropped).jpg",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "Nvidia",
    "section": "In the news",
    "href": "/wiki/Nvidia",
-   "name": ""
+   "name": "",
+   "inView": true
   },
   {
    "role": "link",
    "text": "Jensen Huang",
    "section": "In the news",
    "href": "/wiki/Jensen_Huang",
-   "name": ""
+   "name": "",
+   "inView": true
   },
   {
    "role": "link",
    "text": "being targeted by a Chinese spy",
    "section": "In the news",
    "href": "/wiki/Jensen_Huang_spying_scandal",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "Salvadoran military intervention in Haiti",
    "section": "In the news",
    "href": "/wiki/Salvadoran_military_intervention_in_Haiti",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "400 Mawozo",
    "section": "In the news",
    "href": "/wiki/400_Mawozo",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "Sylvio Cator Stadium",
    "section": "In the news",
    "href": "/wiki/Stade_Sylvio_Cator",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "SS United States",
    "section": "In the news",
    "href": "/wiki/SS_United_States",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "scuttled",
    "section": "In the news",
    "href": "/wiki/Scuttling",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "artificial reef",
    "section": "In the news",
    "href": "/wiki/Artificial_reef",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "The End of Everything",
    "section": "In the news",
    "href": "/wiki/The_End_of_Everything_(Harrison_novel)",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "M. John Harrison",
    "section": "In the news",
    "href": "/wiki/M._John_Harrison",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "Booker Prize",
    "section": "In the news",
    "href": "/wiki/Booker_Prize",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "Iran war",
    "section": "In the news",
    "href": "/wiki/2026_Iran_war",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "Russo-Ukrainian war",
    "section": "In the news",
    "href": "/wiki/Russo-Ukrainian_war_(2022%E2%80%93present)",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "timeline",
    "section": "In the news",
    "href": "/wiki/Timeline_of_the_Russo-Ukrainian_war_(1_September_2026_%E2%80%93_present)",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "Yemen offensives",
    "section": "In the news",
    "href": "/wiki/2026_Yemen_offensives",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "Recent deaths",
    "section": "In the news",
    "href": "/wiki/Deaths_in_2026",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "Alexander Darchiev",
    "section": "In the news",
    "href": "/wiki/Alexander_Darchiev",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "Tom O'Brien",
    "section": "In the news",
    "href": "/wiki/Tom_O'Brien_(jockey)",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "Antonello Palombi",
    "section": "In the news",
    "href": "/wiki/Antonello_Palombi",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "Mitsuru Nagai",
    "section": "In the news",
    "href": "/wiki/Mitsuru_Nagai",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "Tommy Walsh",
    "section": "In the news",
    "href": "/wiki/Tommy_Walsh_(builder)",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "Badrul Kamal",
    "section": "In the news",
    "href": "/wiki/Badrul_Kamal",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "More current events",
    "section": "In the news",
    "href": "/wiki/Portal:Current_events",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "Nominate an article",
    "section": "In the news",
    "href": "/wiki/Wikipedia:In_the_news/Candidates",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "November 17",
    "section": "On this day",
    "href": "/wiki/November_17",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "Queen Elizabeth I of England",
    "section": "On this day",
    "href": "/wiki/File:Elizabeth_I_in_coronation_robes.jpg",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "1558",
    "section": "On this day",
    "href": "/wiki/1558",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "Elizabeth I",
    "section": "On this day",
    "href": "/wiki/Elizabeth_I",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "Queen of England",
    "section": "On this day",
    "href": "/wiki/List_of_English_monarchs",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "of Ireland",
    "section": "On this day",
    "href": "/wiki/Monarchy_of_Ireland",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "Elizabethan era",
    "section": "On this day",
    "href": "/wiki/Elizabethan_era",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "1796",
    "section": "On this day",
    "href": "/wiki/1796",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "French Revolutionary Wars",
    "section": "On this day",
    "href": "/wiki/French_Revolutionary_Wars",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "Battle of Arcole",
    "section": "On this day",
    "href": "/wiki/Battle_of_Arcole",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "1941",
    "section": "On this day",
    "href": "/wiki/1941",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "World War II",
    "section": "On this day",
    "href": "/wiki/World_War_II",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "Hjalmar Siilasvuo",
    "section": "On this day",
    "href": "/wiki/Hjalmar_Siilasvuo",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "Salla",
    "section": "On this day",
    "href": "/wiki/Salla",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "Operation Arctic Fox",
    "section": "On this day",
    "href": "/wiki/Operation_Arctic_Fox",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "1989",
    "section": "On this day",
    "href": "/wiki/1989",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "Walt Disney Pictures",
    "section": "On this day",
    "href": "/wiki/Walt_Disney_Pictures",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "The Little Mermaid",
    "section": "On this day",
    "href": "/wiki/The_Little_Mermaid_(1989_film)",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "Disney Renaissance",
    "section": "On this day",
    "href": "/wiki/Disney_Renaissance",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "2013",
    "section": "On this day",
    "href": "/wiki/2013",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "An outbreak of 77 confirmed tornadoes",
    "section": "On this day",
    "href": "/wiki/Tornado_outbreak_of_November_17,_2013",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "Illinois",
    "section": "On this day",
    "href": "/wiki/Illinois",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "Indiana",
    "section": "On this day",
    "href": "/wiki/Indiana",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "Chen Jinfeng",
    "section": "On this day",
    "href": "/wiki/Chen_Jinfeng",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "Voltairine de Cleyre",
    "section": "On this day",
    "href": "/wiki/Voltairine_de_Cleyre",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "Rosemary Edna Sinclair",
    "section": "On this day",
    "href": "/wiki/Rosemary_Edna_Sinclair",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "Petra Burka",
    "section": "On this day",
    "href": "/wiki/Petra_Burka",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "November 16",
    "section": "On this day",
    "href": "/wiki/November_16",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "November 18",
    "section": "On this day",
    "href": "/wiki/November_18",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "Archive",
    "section": "On this day",
    "href": "/wiki/Wikipedia:Selected_anniversaries/November",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "By email",
    "section": "On this day",
    "href": "/postorius/lists/daily-article-l.lists.wikimedia.org/",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "List of days of the year",
    "section": "On this day",
    "href": "/wiki/List_of_days_of_the_year",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "About",
    "section": "On this day",
    "href": "/wiki/Wikipedia:Selected_anniversaries",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "The Sorcerer",
    "section": "Today's featured picture",
    "href": "/wiki/File:H.M.Brock_-_Poster_for_Gilbert_and_Sullivan's_The_Sorcerer_(1919).jpg",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "comic opera",
    "section": "Today's featured picture",
    "href": "/wiki/Comic_opera",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "W. S. Gilbert",
    "section": "Today's featured picture",
    "href": "/wiki/W._S._Gilbert",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "Arthur Sullivan",
    "section": "Today's featured picture",
    "href": "/wiki/Arthur_Sullivan",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "collaboration",
    "section": "Today's featured picture",
    "href": "/wiki/Gilbert_and_Sullivan",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "love potion",
    "section": "Today's featured picture",
    "href": "/wiki/Love_potion",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "Opera Comique",
    "section": "Today's featured picture",
    "href": "/wiki/Opera_Comique",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "H.M.S. Pinafore",
    "section": "Today's featured picture",
    "href": "/wiki/H.M.S._Pinafore",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "H. M. Brock",
    "section": "Today's featured picture",
    "href": "/wiki/H._M._Brock",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "Adam Cuerden",
    "section": "Today's featured picture",
    "href": "/wiki/User:Adam_Cuerden",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "Space Shuttle Atlantis",
    "section": "Today's featured picture",
    "href": "/wiki/Template:POTD/2026-11-16",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "European hamster",
    "section": "Today's featured picture",
    "href": "/wiki/Template:POTD/2026-11-15",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "Harold Urey",
    "section": "Today's featured picture",
    "href": "/wiki/Template:POTD/2026-11-14",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "Archive",
    "section": "Today's featured picture",
    "href": "/wiki/Wikipedia:Picture_of_the_day/Archive",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "More featured pictures",
    "section": "Today's featured picture",
    "href": "/wiki/Wikipedia:Featured_pictures",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "Community portal",
    "section": "Other areas of Wikipedia",
    "href": "/wiki/Wikipedia:Community_portal",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "Village pump",
    "section": "Other areas of Wikipedia",
    "href": "/wiki/Wikipedia:Village_pump",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "Site news",
    "section": "Other areas of Wikipedia",
    "href": "/wiki/Wikipedia:News",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "Teahouse",
    "section": "Other areas of Wikipedia",
    "href": "/wiki/Wikipedia:Teahouse",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "Help desk",
    "section": "Other areas of Wikipedia",
    "href": "/wiki/Wikipedia:Help_desk",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "Reference desk",
    "section": "Other areas of Wikipedia",
    "href": "/wiki/Wikipedia:Reference_desk",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "Content portals",
    "section": "Other areas of Wikipedia",
    "href": "/wiki/Wikipedia:Contents/Portals",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "Wikimedia Foundation",
    "section": "Wikipedia's sister projects",
    "href": "/wiki/Wikimedia_Foundation",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "projects",
    "section": "Wikipedia's sister projects",
    "href": "/what-we-do/wikimedia-projects/",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "Wikimedia Commons logo",
    "section": "Wikipedia's sister projects",
    "href": "/wiki/File:Commons-logo.svg",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "Commons",
    "section": "Wikipedia's sister projects",
    "href": "/wiki/",
-   "name": ""
+   "name": "",
+   "inView": false
   },
   {
    "role": "link",
    "text": "MediaWiki logo",
    "section": "Wikipedia's sister projects",
    "href": "/wiki/File:MediaWiki-2020-icon.svg",
-   "name": ""
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "MediaWiki",
+   "section": "Wikipedia's sister projects",
+   "href": "/wiki/",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Meta-Wiki",
+   "section": "Wikipedia's sister projects",
+   "href": "/wiki/",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Wikibooks logo",
+   "section": "Wikipedia's sister projects",
+   "href": "/wiki/File:Wikibooks-logo.svg",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Wikibooks",
+   "section": "Wikipedia's sister projects",
+   "href": "/wiki/",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Wikidata",
+   "section": "Wikipedia's sister projects",
+   "href": "/wiki/",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Wikifunctions logo",
+   "section": "Wikipedia's sister projects",
+   "href": "/wiki/File:Wikifunctions-logo.svg",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Wikifunctions",
+   "section": "Wikipedia's sister projects",
+   "href": "/wiki/",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Wikiquote",
+   "section": "Wikipedia's sister projects",
+   "href": "/wiki/",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Wikisource logo",
+   "section": "Wikipedia's sister projects",
+   "href": "/wiki/File:Wikisource-logo.svg",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Wikisource",
+   "section": "Wikipedia's sister projects",
+   "href": "/wiki/",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Wikispecies logo",
+   "section": "Wikipedia's sister projects",
+   "href": "/wiki/File:Wikispecies-logo.svg",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Wikispecies",
+   "section": "Wikipedia's sister projects",
+   "href": "/wiki/",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Wikiversity logo",
+   "section": "Wikipedia's sister projects",
+   "href": "/wiki/File:Wikiversity_logo_2017.svg",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Wikiversity",
+   "section": "Wikipedia's sister projects",
+   "href": "/wiki/",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Wikivoyage logo",
+   "section": "Wikipedia's sister projects",
+   "href": "/wiki/File:Wikivoyage-Logo-v3-icon.svg",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Wikivoyage",
+   "section": "Wikipedia's sister projects",
+   "href": "/wiki/",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Wiktionary logo",
+   "section": "Wikipedia's sister projects",
+   "href": "/wiki/File:Wiktionary-logo-en-v2.svg",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Wiktionary",
+   "section": "Wikipedia's sister projects",
+   "href": "/wiki/",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "English",
+   "section": "Wikipedia languages",
+   "href": "/wiki/English_language",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "other Wikipedias are available",
+   "section": "Wikipedia languages",
+   "href": "/wiki/List%20of%20Wikipedias",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "العربية",
+   "section": "1,000,000+ articles",
+   "href": "/wiki/",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Deutsch",
+   "section": "1,000,000+ articles",
+   "href": "/wiki/",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Español",
+   "section": "1,000,000+ articles",
+   "href": "/wiki/",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "فارسی",
+   "section": "1,000,000+ articles",
+   "href": "/wiki/",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Français",
+   "section": "1,000,000+ articles",
+   "href": "/wiki/",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Italiano",
+   "section": "1,000,000+ articles",
+   "href": "/wiki/",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Nederlands",
+   "section": "1,000,000+ articles",
+   "href": "/wiki/",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "日本語",
+   "section": "1,000,000+ articles",
+   "href": "/wiki/",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Polski",
+   "section": "1,000,000+ articles",
+   "href": "/wiki/",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Português",
+   "section": "1,000,000+ articles",
+   "href": "/wiki/",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Русский",
+   "section": "1,000,000+ articles",
+   "href": "/wiki/",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Svenska",
+   "section": "1,000,000+ articles",
+   "href": "/wiki/",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Українська",
+   "section": "1,000,000+ articles",
+   "href": "/wiki/",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Tiếng Việt",
+   "section": "1,000,000+ articles",
+   "href": "/wiki/",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "中文",
+   "section": "1,000,000+ articles",
+   "href": "/wiki/",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Bahasa Indonesia",
+   "section": "250,000+ articles",
+   "href": "/wiki/",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Bahasa Melayu",
+   "section": "250,000+ articles",
+   "href": "/wiki/",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Bân-lâm-gú",
+   "section": "250,000+ articles",
+   "href": "/wiki/",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Български",
+   "section": "250,000+ articles",
+   "href": "/wiki/",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Català",
+   "section": "250,000+ articles",
+   "href": "/wiki/",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Čeština",
+   "section": "250,000+ articles",
+   "href": "/wiki/",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Dansk",
+   "section": "250,000+ articles",
+   "href": "/wiki/",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Eesti",
+   "section": "250,000+ articles",
+   "href": "/wiki/",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Ελληνικά",
+   "section": "250,000+ articles",
+   "href": "/wiki/",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Esperanto",
+   "section": "250,000+ articles",
+   "href": "/wiki/",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Euskara",
+   "section": "250,000+ articles",
+   "href": "/wiki/",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "עברית",
+   "section": "250,000+ articles",
+   "href": "/wiki/",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Հայերեն",
+   "section": "250,000+ articles",
+   "href": "/wiki/",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "한국어",
+   "section": "250,000+ articles",
+   "href": "/wiki/",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Magyar",
+   "section": "250,000+ articles",
+   "href": "/wiki/",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Norsk bokmål",
+   "section": "250,000+ articles",
+   "href": "/wiki/",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Română",
+   "section": "250,000+ articles",
+   "href": "/wiki/",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Simple English",
+   "section": "250,000+ articles",
+   "href": "/wiki/",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Slovenčina",
+   "section": "250,000+ articles",
+   "href": "/wiki/",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Srpski",
+   "section": "250,000+ articles",
+   "href": "/wiki/",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Srpskohrvatski",
+   "section": "250,000+ articles",
+   "href": "/wiki/",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Suomi",
+   "section": "250,000+ articles",
+   "href": "/wiki/",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Türkçe",
+   "section": "250,000+ articles",
+   "href": "/wiki/",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Oʻzbekcha",
+   "section": "250,000+ articles",
+   "href": "/wiki/",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Asturianu",
+   "section": "50,000+ articles",
+   "href": "/wiki/",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Azərbaycanca",
+   "section": "50,000+ articles",
+   "href": "/wiki/",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "বাংলা",
+   "section": "50,000+ articles",
+   "href": "/wiki/",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Bosanski",
+   "section": "50,000+ articles",
+   "href": "/wiki/",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "کوردی",
+   "section": "50,000+ articles",
+   "href": "/wiki/",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Frysk",
+   "section": "50,000+ articles",
+   "href": "/wiki/",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Gaeilge",
+   "section": "50,000+ articles",
+   "href": "/wiki/",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Galego",
+   "section": "50,000+ articles",
+   "href": "/wiki/",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Hrvatski",
+   "section": "50,000+ articles",
+   "href": "/wiki/",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "ქართული",
+   "section": "50,000+ articles",
+   "href": "/wiki/",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Kurdî",
+   "section": "50,000+ articles",
+   "href": "/wiki/",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Latviešu",
+   "section": "50,000+ articles",
+   "href": "/wiki/",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Lietuvių",
+   "section": "50,000+ articles",
+   "href": "/wiki/",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "മലയാളം",
+   "section": "50,000+ articles",
+   "href": "/wiki/",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Македонски",
+   "section": "50,000+ articles",
+   "href": "/wiki/",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "မြန်မာဘာသာ",
+   "section": "50,000+ articles",
+   "href": "/wiki/",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Norsk nynorsk",
+   "section": "50,000+ articles",
+   "href": "/wiki/",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "ਪੰਜਾਬੀ",
+   "section": "50,000+ articles",
+   "href": "/wiki/",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Shqip",
+   "section": "50,000+ articles",
+   "href": "/wiki/",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Slovenščina",
+   "section": "50,000+ articles",
+   "href": "/wiki/",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "ไทย",
+   "section": "50,000+ articles",
+   "href": "/wiki/",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "తెలుగు",
+   "section": "50,000+ articles",
+   "href": "/wiki/",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "اردو",
+   "section": "50,000+ articles",
+   "href": "/wiki/",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Parsoid",
+   "section": "Footer",
+   "href": "/wiki/Special:MyLanguage/Parsoid",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Creative Commons Attribution-ShareAlike 4.0 License",
+   "section": "Footer",
+   "href": "/wiki/Wikipedia:Text_of_the_Creative_Commons_Attribution-ShareAlike_4.0_International_License",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Terms of Use",
+   "section": "Footer",
+   "href": "/wiki/Special:MyLanguage/Policy:Terms_of_Use",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Privacy Policy",
+   "section": "Footer",
+   "href": "/wiki/Special:MyLanguage/Policy:Privacy_policy",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Wikimedia Foundation, Inc.",
+   "section": "Footer",
+   "href": "",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Privacy policy",
+   "section": "Footer",
+   "href": "/wiki/Special:MyLanguage/Policy:Privacy_policy",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "About Wikipedia",
+   "section": "Footer",
+   "href": "/wiki/Wikipedia:About",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Disclaimers",
+   "section": "Footer",
+   "href": "/wiki/Wikipedia:General_disclaimer",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Contact Wikipedia",
+   "section": "Footer",
+   "href": "/wiki/Wikipedia:Contact_us",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Legal & safety contacts",
+   "section": "Footer",
+   "href": "/wiki/Special:MyLanguage/Legal:Wikimedia_Foundation_Legal_and_Safety_Contact_Information",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Code of Conduct",
+   "section": "Footer",
+   "href": "/wiki/Special:MyLanguage/Policy:Universal_Code_of_Conduct",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Developers",
+   "section": "Footer",
+   "href": "",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Statistics",
+   "section": "Footer",
+   "href": "",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Cookie statement",
+   "section": "Footer",
+   "href": "/wiki/Special:MyLanguage/Policy:Cookie_statement",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Mobile view",
+   "section": "Footer",
+   "href": "/w/index.php",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Wikimedia Foundation",
+   "section": "Footer",
+   "href": "",
+   "name": "",
+   "inView": false
+  },
+  {
+   "role": "link",
+   "text": "Powered by MediaWiki",
+   "section": "Footer",
+   "href": "",
+   "name": "",
+   "inView": false
   }
  ]
 }
