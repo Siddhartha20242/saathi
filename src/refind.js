@@ -127,6 +127,20 @@ Could the new label be the same control as the old label, just reworded? They mu
 Answer YES or NO only.`;
 }
 
+/**
+ * A stricter yes-or-no question. "Could it be the same control?" is too easy to say yes to when a
+ * similar control exists, so this one says that a related control is not enough.
+ */
+export function strictVerifyPrompt(step, pickedText, context = {}) {
+  return `A website was redesigned. The person's task: ${context.task ?? 'unknown'}
+
+Old control: "${step.text}"
+A control on the redesigned page: "${pickedText}"
+
+Is the control on the redesigned page the very same control as the old one, only renamed? If it is merely related, nearby or similar, answer NO. Answer YES only if you are sure it is the same control.
+Answer YES or NO only.`;
+}
+
 /** Reads YES or NO. Returns null when the answer is neither. */
 export function parseYesNo(text) {
   const t = String(text ?? '').toUpperCase();
@@ -167,6 +181,20 @@ export function anchorFind(step, elements) {
   return named.length === 1 ? named[0].index : null;
 }
 
+export const MAX_REGION = 40;
+
+/**
+ * On a long page the model is shown too many controls to choose from. A redesign usually keeps a
+ * control in the same part of the page, so offer only the controls in the step's own section when
+ * there is a manageable number of them. If the section is unknown, empty or still too large, offer
+ * them all.
+ */
+export function narrowToRegion(candidates, step) {
+  if (!step.section) return candidates;
+  const here = candidates.filter((c) => norm(c.section) === norm(step.section));
+  return here.length >= 1 && here.length <= MAX_REGION ? here : candidates;
+}
+
 // Structured output: the model may only answer with one of these values.
 export const YES_NO_SCHEMA = { type: 'string', enum: ['YES', 'NO'] };
 /** "0" (none) or the number of one of n candidates. */
@@ -188,23 +216,28 @@ export async function refind(step, elements, context, ask) {
   const anchored = anchorFind(step, elements);
   if (anchored !== null) return { index: anchored, by: 'anchor' };
 
-  // All clickable controls are offered, buttons and links together. Narrowing to the same kind
-  // first was tried and measured worse: when the control is gone the model then picks a wrong one.
-  const candidates = withoutOtherSteps(first.candidates, context?.others);
-  if (!candidates.length) return { index: null, by: 'model', reason: 'no candidates' };
-  const schema = choiceSchema(candidates.length);
+  const open = withoutOtherSteps(first.candidates, context?.others);
+  if (!open.length) return { index: null, by: 'model', reason: 'no candidates' };
 
-  const pickA = parseChoice(await ask(meaningPrompt(step, candidates, context), schema), candidates);
-  if (pickA === null || pickA === 'none') return { index: null, by: 'model', reason: 'no match' };
+  // A model pick, with the guards: two orders must agree, and a strict yes/no check must say yes.
+  const verify = context?.strictVerify === false ? verifyPrompt : strictVerifyPrompt;
+  const pickAmong = async (candidates) => {
+    const schema = choiceSchema(candidates.length);
+    const pickA = parseChoice(await ask(meaningPrompt(step, candidates, context), schema), candidates);
+    if (pickA === null || pickA === 'none') return { index: null, reason: 'no match' };
+    const reversed = candidates.slice().reverse();
+    const pickB = parseChoice(await ask(meaningPrompt(step, reversed, context), schema), reversed);
+    if (pickB !== pickA) return { index: null, reason: 'answers disagreed' };
+    const yes = parseYesNo(await ask(verify(step, elements[pickA].text, context), YES_NO_SCHEMA));
+    return yes === true ? { index: pickA } : { index: null, reason: 'check failed' };
+  };
 
-  const reversed = candidates.slice().reverse();
-  const pickB = parseChoice(await ask(meaningPrompt(step, reversed, context), schema), reversed);
-  if (pickB !== pickA) return { index: null, by: 'model', reason: 'answers disagreed' };
-
-  const yes = parseYesNo(await ask(verifyPrompt(step, elements[pickA].text, context), YES_NO_SCHEMA));
-  if (yes !== true) return { index: null, by: 'model', reason: 'check failed' };
-
-  return { index: pickA, by: 'model' };
+  // Stage one: the controls in the step's own section, so the model has few to choose from.
+  // Stage two, only if stage one found nothing: every control, since a redesign may also move it.
+  const region = context?.region === false ? open : narrowToRegion(open, step);
+  let res = await pickAmong(region);
+  if (res.index === null && region.length < open.length) res = await pickAmong(open);
+  return res.index === null ? { index: null, by: 'model', reason: res.reason } : { index: res.index, by: 'model' };
 }
 
 /** Reads the model's number. Returns the element index, 'none' for 0, or null if unreadable. */

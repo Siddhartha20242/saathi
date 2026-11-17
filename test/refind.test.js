@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { textSimilarity, codeFind, candidatesFor, refindPrompt, parseChoice, parseYesNo, refind, anchorFind } from '../src/refind.js';
+import { textSimilarity, codeFind, candidatesFor, refindPrompt, parseChoice, parseYesNo, refind, anchorFind, narrowToRegion } from '../src/refind.js';
 import { buildCases, SITES } from '../src/refindCases.js';
 
 const PAGE = [
@@ -74,16 +74,16 @@ describe('refind', () => {
   });
   it('points at the pick when both orders agree and the check says yes', async () => {
     // Candidates are Home, Proceed to payment, Remind me later: 2 in order, 2 when reversed.
-    expect(await refind(payNow, renamed, {}, fake(['2', '2', 'YES']))).toEqual({ index: 1, by: 'model' });
+    expect(await refind(payNow, renamed, { region: false, strictVerify: false }, fake(['2', '2', 'YES']))).toEqual({ index: 1, by: 'model' });
   });
   it('says not sure when the two orders disagree', async () => {
-    const res = await refind(payNow, renamed, {}, fake(['2', '1', 'YES']));
+    const res = await refind(payNow, renamed, { region: false, strictVerify: false }, fake(['2', '1', 'YES']));
     expect(res).toMatchObject({ index: null, reason: 'answers disagreed' });
   });
   it('says not sure when the check says no, or the model says none', async () => {
-    expect(await refind(payNow, renamed, {}, fake(['2', '2', 'NO']))).toMatchObject({ index: null, reason: 'check failed' });
+    expect(await refind(payNow, renamed, { region: false, strictVerify: false }, fake(['2', '2', 'NO']))).toMatchObject({ index: null, reason: 'check failed' });
     const ask = fake(['0', '2', 'YES']);
-    expect(await refind(payNow, renamed, {}, ask)).toMatchObject({ index: null, reason: 'no match' });
+    expect(await refind(payNow, renamed, { region: false, strictVerify: false }, ask)).toMatchObject({ index: null, reason: 'no match' });
     expect(ask.left()).toBe(2); // stopped after the first answer
   });
   it('finds a renamed control by its link address or internal name, without the model', async () => {
@@ -126,7 +126,7 @@ describe('refind', () => {
     const seen = [];
     const answers = ['2', '2', 'YES'];
     const ask = async (_prompt, schema) => (seen.push(schema), answers.shift());
-    await refind(payNow, renamed, {}, ask);
+    await refind(payNow, renamed, { region: false, strictVerify: false }, ask);
     expect(seen[0]).toEqual({ type: 'string', enum: ['0', '1', '2', '3'] });
     expect(seen[2]).toEqual({ type: 'string', enum: ['YES', 'NO'] });
   });
@@ -134,8 +134,30 @@ describe('refind', () => {
     expect(parseYesNo('"YES"')).toBe(true);
     expect(parseChoice('"2"', [{ index: 7 }, { index: 9 }])).toBe(9);
   });
+  it('offers only the same section first, and the stricter check, by default', async () => {
+    const prompts = [];
+    // Proceed is 1 in order and 2 when the list is reversed; then the check says yes.
+    const ask = async (prompt) => (prompts.push(prompt), ['1', '2', 'YES'][prompts.length - 1]);
+    const page = [
+      { role: 'link', text: 'Home', section: 'Menu' },
+      { role: 'button', text: 'Proceed to payment', section: 'Bill details' },
+      { role: 'button', text: 'Remind me later', section: 'Bill details' },
+    ];
+    const res = await refind({ role: 'button', text: 'Pay now', section: 'Bill details' }, page, { task: 'Pay the bill' }, ask);
+    expect(prompts[0]).toContain('1. Proceed to payment');
+    expect(prompts[0]).not.toContain('Home');
+    expect(prompts[2]).toContain('the very same control');
+    expect(res.by).toBe('model');
+  });
+  it('falls back to every control when the section has none or too many', () => {
+    const few = [{ role: 'button', text: 'A', section: 'Elsewhere' }];
+    expect(narrowToRegion(few, { section: 'Missing' })).toBe(few);
+    const many = Array.from({ length: 41 }, (_, i) => ({ role: 'link', text: `L${i}`, section: 'Menu' }));
+    expect(narrowToRegion(many, { section: 'Menu' })).toBe(many);
+    expect(narrowToRegion(few, { section: '' })).toBe(few);
+  });
   it('never offers a control that belongs to another step', async () => {
-    const res = await refind(payNow, renamed, { others: ['Remind me later', 'Home'] }, fake(['1', '1', 'YES']));
+    const res = await refind(payNow, renamed, { others: ['Remind me later', 'Home'], region: false }, fake(['1', '1', 'YES']));
     expect(res).toEqual({ index: 1, by: 'model' });
   });
 });
