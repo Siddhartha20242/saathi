@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "sync:demo": "mkdir -p public/demo-bridge && cp extension/content.js public/demo-bridge/content.js",
+    "sync:demo": "node tools/build-extension.mjs",
     "predev": "npm run sync:demo",
     "dev": "vite",
     "build": "npm run sync:demo && vite build",

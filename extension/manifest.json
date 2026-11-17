@@ -4,7 +4,8 @@
   "version": "0.1.0",
   "description": "A guide that shows where to press on a website. It highlights; you do it. Test build for local development.",
   "permissions": [
-    "sidePanel"
+    "sidePanel",
+    "storage"
   ],
   "action": {
     "default_title": "Open Saathi"
@@ -22,6 +23,7 @@
         "https://*/*"
       ],
       "js": [
+        "guard-bundle.js",
         "content.js"
       ],
       "run_at": "document_idle"

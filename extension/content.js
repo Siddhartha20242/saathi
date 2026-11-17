@@ -270,6 +270,9 @@
     // the panel is closed
   }
 
+  // The scam guard (guard-bundle.js, loaded just before this script) watches the page for scams.
+  window.__saathiGuard?.start(chrome);
+
   chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
     if (msg?.saathi === 'scan') sendResponse(scan());
     else if (msg?.saathi === 'highlight') sendResponse(highlight(msg.index, msg.stepIndex));

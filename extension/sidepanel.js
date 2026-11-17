@@ -6,7 +6,7 @@
 // For local development, change this to http://localhost:5173/panel.html.
 const PANEL_URL = 'https://paperwork-decoder.web.app/panel.html';
 const PANEL_ORIGIN = new URL(PANEL_URL).origin;
-const ALLOWED = new Set(['scan', 'highlight', 'recordStart', 'recordStop']);
+const ALLOWED = new Set(['scan', 'highlight', 'recordStart', 'recordStop', 'setLang', 'alertSent', 'guardStatus']);
 
 const frame = document.getElementById('panel');
 frame.src = PANEL_URL;
@@ -40,6 +40,11 @@ addEventListener('message', async (ev) => {
   const reply = (body) => frame.contentWindow.postMessage({ id: msg.id, ...body }, PANEL_ORIGIN);
   if (msg.type === 'recordStart') recording = true;
   if (msg.type === 'recordStop') recording = false;
+  // The person's language is kept in the extension, so the warning on a page can use it even when this panel is closed.
+  if (msg.type === 'setLang') {
+    chrome.storage.local.set({ 'saathi:lang': ['en', 'ne', 'hi'].includes(msg.lang) ? msg.lang : 'en' });
+    return reply({ result: { ok: true } });
+  }
   try {
     const result = await chrome.tabs.sendMessage(await activeTabId(), {
       saathi: msg.type,
@@ -64,5 +69,20 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       { event: msg.saathi, step: msg.step, stepIndex: msg.stepIndex },
       PANEL_ORIGIN,
     );
+  } else if (msg.saathi === 'guard' || msg.saathi === 'guardAlert') {
+    // The scam guard on a page: what it found, or a request to tell the family. Only the active tab counts.
+    if (msg.saathi === 'guardAlert' && !sender.tab?.active) return;
+    frame.contentWindow?.postMessage({ event: msg.saathi, guard: msg.guard, alert: msg.alert }, PANEL_ORIGIN);
+    sendResponse({ ok: true }); // the page can tell that the panel is open
+  }
+});
+
+// When the person switches to another tab, ask that page how it looks to the guard.
+chrome.tabs.onActivated.addListener(async ({ tabId }) => {
+  try {
+    const guard = await chrome.tabs.sendMessage(tabId, { saathi: 'guardStatus' });
+    frame.contentWindow?.postMessage({ event: 'guard', guard }, PANEL_ORIGIN);
+  } catch {
+    frame.contentWindow?.postMessage({ event: 'guard', guard: { level: 'ok', reasons: [] } }, PANEL_ORIGIN);
   }
 });
