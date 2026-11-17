@@ -97,6 +97,8 @@ Caveats: the improvements were designed after looking at failures on these same 
 
 **Speed.** A model call takes about 0.4 to 0.6 seconds once the model is loaded (10 to 15 seconds the first time). A step that needs the model takes three calls, so about 1.5 seconds. Steps found by label or by link address take milliseconds.
 
+**Security rules.** [tools/rules-check.js](tools/rules-check.js) runs 24 checks against the live project with two separate anonymous users: all pass. Allowed actions work (a helper can set the pick, a note and the status; a creator can delete). Refusals hold: a helper cannot change the list of controls, pick outside it, write a note over 100 characters or delete someone else's request; a path cannot be edited or created with no steps, 41 steps, an extra field or someone else's name as creator; nothing can be read without signing in, with a wrong-length group code, or outside `groups`. Not covered: the rules were checked on the real project, not the Firebase emulator, and a group code that leaks still gives full access to that group.
+
 **Tests.** 59 unit tests (`npm test`). Three end-to-end scripts drive a throwaway headless Chrome with the extension loaded and run against the live site: [tools/e2e.mjs](tools/e2e.mjs) (record, save, follow), [tools/e2e-help.mjs](tools/e2e-help.mjs) (ask for help, a phone-sized helper taps, the highlight moves, the request is deleted) and [tools/e2e-try.mjs](tools/e2e-try.mjs) (the same flow on the try page). The on-device model is not available in that headless Chrome, so the model path was checked separately in a normal Chrome.
 
 ## Known limits
@@ -108,7 +110,6 @@ Caveats: the improvements were designed after looking at failures on these same 
 - **Nepali and Hindi were not reviewed by a native speaker.** One early Nepali translation added a detail that was not in the step. The prompt now forbids that, and later samples did not repeat it, but review is still needed.
 - **Read-aloud was not tested with Nepali or Hindi voices.** It uses the browser's own voices, and many computers have no Nepali voice. The step card is always shown on screen.
 - **A group code is the only key.** Anyone who learns it can read that group's paths and help requests. That suits a family, not a public community.
-- **Security rules:** the allowed actions are tested. The refusals (for example a helper trying to change the list of controls) are not tested against the Firebase emulator.
 - **Not an offline app.** The websites Saathi guides need the internet anyway.
 - **No real user yet.** This was built and tested by one person on practice sites and public pages. It has not been used by a parent, student or migrant worker.
 - **The helper page is heavy** (about 200 KB compressed) because it shares code with the panel.
