@@ -116,6 +116,18 @@ The harder redesign ran in a headless Chrome that has no on-device model, so "de
 
 **Tests.** 63 unit tests (`npm test`). Four end-to-end scripts drive a throwaway headless Chrome with the extension loaded and run against the live site: [tools/e2e.mjs](tools/e2e.mjs) (record, save, follow), [tools/e2e-help.mjs](tools/e2e-help.mjs) (ask for help, a phone-sized helper taps, the highlight moves, the request is deleted) and [tools/e2e-try.mjs](tools/e2e-try.mjs) (the same flow on the try page) and [tools/e2e-real.mjs](tools/e2e-real.mjs) (real public websites, above). The on-device model is not available in that headless Chrome, so the model path was checked separately in a normal Chrome.
 
+## Design
+
+The panel is built for someone who is not used to computers.
+
+- **The step comes first.** While following a path, the current step is the first and largest thing on screen, with a progress bar, one big button ("I did it, next") and the privacy line. The group form and the path list step out of the way.
+- **Three tabs, one job each:** Follow, Show the way, Get help. Once a group is joined, its code sits in a slim bar with a Copy button.
+- **Nothing appears until it has something to say.** Messages are hidden when empty, and a first visit shows one card with one clear action.
+- **Large targets and text:** controls are at least 48 px tall, with a Large text switch that enlarges the step card further, and Nepali and Hindi next to English at the top of the Follow tab.
+- **Light and dark** themes follow the system setting, motion is reduced when the system asks for it, tabs work with the arrow keys, and every control has a visible focus ring.
+
+Not done: a screen-reader pass, an automated accessibility audit, or any test with an older person. The design follows common accessibility practice but has not been checked against real users or tools.
+
 ## Known limits
 
 - **Laptop only.** The on-device model runs in desktop Chrome, not on phones. The helper page does work on a phone, because the helper needs no model.
