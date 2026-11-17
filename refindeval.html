@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Step re-finding test</title>
+    <style>
+      body { font: 14px/1.4 system-ui, sans-serif; margin: 24px; color: #1a1a1a; }
+      pre { background: #f4f4f4; padding: 12px; border-radius: 6px; overflow-x: auto; }
+      table { border-collapse: collapse; width: 100%; }
+      th, td { border-bottom: 1px solid #ddd; padding: 4px 8px; text-align: left; }
+      .ok { color: #0a6b2d; }
+      .bad { color: #b00020; font-weight: 600; }
+      button { font: inherit; padding: 8px 16px; }
+    </style>
+  </head>
+  <body>
+    <h1>Step re-finding test</h1>
+    <p>Five made-up sites, 25 saved steps, each site changed four ways. Every model call uses the on-device model only.</p>
+    <p id="status">Checking the on-device model…</p>
+    <button id="run">Run test</button>
+    <pre id="summary">Not run yet.</pre>
+    <table>
+      <thead>
+        <tr><th>Site</th><th>Change</th><th>Saved step</th><th>Right answer</th><th>Free text</th><th>Structured</th><th>Yes/no only</th></tr>
+      </thead>
+      <tbody id="rows"></tbody>
+    </table>
+    <script type="module" src="/src/refindEval.js"></script>
+  </body>
+</html>
