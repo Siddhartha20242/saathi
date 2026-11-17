@@ -10,6 +10,7 @@ import {
 import { getRemoteConfig, fetchAndActivate, getValue } from 'firebase/remote-config';
 import { getFirebaseApp, run } from './firebase.js';
 import { stepInstruction } from './path.js';
+import { cleanAlert, ALERT_HOURS } from './alerts.js';
 
 let auth = null;
 let db = null;
@@ -158,6 +159,33 @@ export async function answerHelp(code, id, { pick, note }) {
 export async function closeHelp(code, id) {
   await ensureUser();
   await deleteDoc(doc(helpOf(code), id));
+}
+
+// ---------- Family alerts (Firestore, real-time) ----------
+
+const alertsOf = (code) => collection(services().db, 'groups', code, 'alerts');
+
+/** Tells the group about a scam page. Only the address, the brand and reason codes are written. */
+export async function createAlert(code, alert) {
+  const user = await ensureUser();
+  const clean = cleanAlert(alert);
+  const id = crypto.randomUUID().replace(/-/g, '').slice(0, 12);
+  await setDoc(doc(alertsOf(code), id), {
+    ...clean,
+    createdBy: user.uid,
+    createdAt: serverTimestamp(),
+    expiresAt: Timestamp.fromMillis(Date.now() + ALERT_HOURS * 3600e3),
+  });
+  return id;
+}
+
+/** Calls back with the group's alerts each time one arrives. Returns a function that stops listening. */
+export function watchAlerts(code, onChange, onError) {
+  return onSnapshot(
+    alertsOf(code),
+    (snap) => onChange(snap.docs.map((d) => ({ id: d.id, ...d.data() }))),
+    onError,
+  );
 }
 
 // ---------- Translation (cloud, labels only) ----------

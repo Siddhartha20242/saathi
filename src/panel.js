@@ -7,6 +7,8 @@ import { refind, codeFind, cloudPreview } from './refind.js';
 import { maskText } from './masking.js';
 import { recordSpeech } from './audio.js';
 import { voicePrompt, parseVoice, VOICE_SCHEMA } from './voice.js';
+import { warning } from './guardText.js';
+import { alertsForMe, alertSentence } from './alerts.js';
 import { explainPrompt, explainPayloadSummary } from './explain.js';
 import {
   sanitizeStep, sameStep, stepInstruction, originMatches, validatePath, newGroupCode, normaliseGroup, GROUP_RE, LANGS, MAX_STEPS,
@@ -14,6 +16,7 @@ import {
 import { controlsForHelp, helpPreview } from './help.js';
 import {
   ensureUser, loadConfig, savePath, listPaths, deletePath, translatePath, createHelp, watchHelp, closeHelp,
+  createAlert, watchAlerts,
 } from './backend.js';
 
 const $ = (id) => document.getElementById(id);
@@ -94,6 +97,8 @@ function callExtension(type, payload = {}) {
 }
 
 function onPageEvent(msg) {
+  if (msg.event === 'guard') renderGuard(msg.guard);
+  if (msg.event === 'guardAlert') tellFamily(msg.alert);
   if (msg.event === 'recorded' && state.recording) addRecorded(msg.step);
   if (msg.event === 'clicked' && state.follow && msg.stepIndex === state.follow.index) {
     setTimeout(() => nextStep(), 1200); // let the next page load
@@ -149,8 +154,8 @@ async function setGroup(code) {
   state.group = code;
   store.set('saathi:group', code);
   $('group-code').value = '';
-  say('group-msg', '');
   renderChips();
+  watchFamilyAlerts();
   await refreshLibrary();
 }
 
@@ -230,6 +235,84 @@ $('lib-list').addEventListener('click', async (ev) => {
     }
   }
 });
+
+// ---------- Scam guard ----------
+// The page script decides, on this computer, whether the page in front of the person looks like a scam.
+// This panel shows what it found, and sends a family alert when the person presses the button.
+
+let guardNow = null;
+let alertsStop = null;
+let allAlerts = [];
+const SEEN_KEY = 'saathi:seenAlerts';
+const seenAlerts = () => {
+  try {
+    return JSON.parse(store.get(SEEN_KEY) || '[]');
+  } catch {
+    return [];
+  }
+};
+
+function renderGuard(g) {
+  guardNow = g && g.level && g.level !== 'ok' ? g : null;
+  const box = $('guard');
+  if (!guardNow) {
+    box.hidden = true;
+    return;
+  }
+  const w = warning(guardNow, state.lang);
+  box.className = `guard ${guardNow.level}`;
+  box.hidden = false;
+  $('guard-headline').textContent = w.headline;
+  $('guard-reasons').innerHTML = w.reasons.map((r) => `<li>${esc(r)}</li>`).join('');
+  const button = $('guard-family');
+  button.hidden = guardNow.level !== 'stop';
+  button.textContent = state.group ? w.family : `${w.family} (join a group first)`;
+  button.disabled = !state.group;
+  say('guard-msg', '');
+}
+
+async function tellFamily(data) {
+  const alert = data ?? (guardNow && { host: guardNow.host, brand: guardNow.brand ?? '', level: guardNow.level, reasons: guardNow.reasons.map((r) => r.code) });
+  if (!alert) return;
+  if (!state.group) return say('guard-msg', 'Join a group first.', 'bad');
+  try {
+    await createAlert(state.group, alert);
+    say('guard-msg', warning({ level: 'stop', reasons: [] }, state.lang).sent, 'ok');
+    await callExtension('alertSent').catch(() => {});
+  } catch (err) {
+    say('guard-msg', `Could not tell your family: ${err.message}`, 'bad');
+  }
+}
+$('guard-family').addEventListener('click', () => tellFamily());
+
+function renderFamilyAlert() {
+  const box = $('family-alert');
+  const list = alertsForMe(allAlerts, state.user?.uid, seenAlerts());
+  if (!list.length) {
+    box.hidden = true;
+    return;
+  }
+  box.hidden = false;
+  box.dataset.ids = list.map((a) => a.id).join(',');
+  $('family-alert-text').textContent = alertSentence(list[0]) + (list.length > 1 ? ` (${list.length - 1} more)` : '');
+}
+$('family-alert-ok').addEventListener('click', () => {
+  const ids = ($('family-alert').dataset.ids || '').split(',').filter(Boolean);
+  store.set(SEEN_KEY, JSON.stringify([...seenAlerts(), ...ids].slice(-50)));
+  renderFamilyAlert();
+});
+
+function watchFamilyAlerts() {
+  alertsStop?.();
+  alertsStop = null;
+  allAlerts = [];
+  renderFamilyAlert();
+  if (!state.group || !state.user) return;
+  alertsStop = watchAlerts(state.group, (list) => {
+    allAlerts = list;
+    renderFamilyAlert();
+  }, () => {});
+}
 
 // ---------- Speaking a request ----------
 // The recording and the titles of the group's paths go to the cloud model, which says which path is
@@ -597,6 +680,8 @@ document.querySelectorAll('[data-lang]').forEach((b) =>
   b.addEventListener('click', () => {
     state.lang = b.dataset.lang;
     store.set('saathi:lang', state.lang);
+    callExtension('setLang', { lang: state.lang }).catch(() => {});
+    renderGuard(guardNow);
     renderChips();
     if (state.follow) renderStepCard();
   }),
@@ -807,6 +892,9 @@ async function start() {
   }
   state.config = await loadConfig();
   renderChips();
+  callExtension('setLang', { lang: state.lang }).catch(() => {});
+  callExtension('guardStatus').then(renderGuard).catch(() => {});
+  watchFamilyAlerts();
   if (state.group) await refreshLibrary();
   else say('lib-msg', 'Join or start a group to see its paths.');
 }

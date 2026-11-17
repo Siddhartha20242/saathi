@@ -24,6 +24,27 @@ service cloud.firestore {
       allow delete: if request.auth != null && resource.data.createdBy == request.auth.uid;
     }
 
+    // Scam alerts. Anyone in the group can raise one. It names only a website's address, the brand it
+    // imitates and reason codes, and it cannot be edited.
+    match /groups/{code}/alerts/{id} {
+      allow get, list: if request.auth != null && code.size() == 8;
+
+      allow create: if request.auth != null
+        && code.size() == 8
+        && request.resource.data.keys().hasOnly(['host', 'brand', 'level', 'reasons', 'createdBy', 'createdAt', 'expiresAt'])
+        && request.resource.data.createdBy == request.auth.uid
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.host is string
+        && request.resource.data.host.size() > 0 && request.resource.data.host.size() <= 100
+        && request.resource.data.brand is string && request.resource.data.brand.size() <= 60
+        && request.resource.data.level in ['careful', 'stop']
+        && request.resource.data.reasons is list && request.resource.data.reasons.size() <= 8
+        && request.resource.data.expiresAt is timestamp;
+
+      allow update: if false;
+      allow delete: if request.auth != null && resource.data.createdBy == request.auth.uid;
+    }
+
     // "I'm stuck" help. The person who asks writes the names of the controls on one page.
     // Anyone in the group can answer, but only by setting the pick, a short note and the status.
     match /groups/{code}/help/{id} {

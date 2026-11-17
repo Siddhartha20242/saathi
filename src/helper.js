@@ -1,7 +1,8 @@
 // The helper's phone page. It shows the names of the controls on another person's page, and
 // writes back which one to point at. No extension and no on-device model are needed here.
 
-import { ensureUser, watchHelpRequests, watchHelp, answerHelp } from './backend.js';
+import { ensureUser, watchHelpRequests, watchHelp, answerHelp, watchAlerts } from './backend.js';
+import { alertsForMe, alertSentence } from './alerts.js';
 import { GROUP_RE, normaliseGroup } from './path.js';
 import { groupBySection, kindWord, cleanNote, isLive } from './help.js';
 
@@ -17,6 +18,7 @@ const state = { group: store.get('saathi-helper:group') || '', requests: [], ope
 window.__helper = state; // read by the end-to-end test
 let stopList = null;
 let stopOne = null;
+let stopAlerts = null;
 
 function say(id, text, kind = '') {
   const el = $(id);
@@ -43,6 +45,18 @@ async function join(code) {
     show('group');
     return say('group-msg', `Could not sign in: ${err.message}`, 'bad');
   }
+  stopAlerts?.();
+  stopAlerts = watchAlerts(
+    code,
+    (all) => {
+      const recent = alertsForMe(all, null, [], Date.now(), 24); // everyone's alerts: the helper is not the one who raised them
+      $('s-alerts').hidden = recent.length === 0;
+      $('alerts').innerHTML = recent
+        .map((a) => `<li>${esc(alertSentence(a))}<small>${new Date(a.createdAt?.toMillis?.() ?? Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</small></li>`)
+        .join('');
+    },
+    () => {},
+  );
   stopList?.();
   stopList = watchHelpRequests(
     code,
@@ -72,6 +86,8 @@ $('group-join').addEventListener('click', () => {
 });
 $('group-leave').addEventListener('click', () => {
   stopList?.();
+  stopAlerts?.();
+  $('s-alerts').hidden = true;
   store.del('saathi-helper:group');
   state.group = '';
   show('group');

@@ -34,6 +34,16 @@
       .brand h1 { font-size: 1.25em; letter-spacing: -0.01em; }
       .rule { font-size: 0.85em; color: var(--muted); text-align: right; }
 
+      /* The scam guard: the loudest thing in the panel */
+      .guard { padding: 14px 16px; background: #a3271f; color: #fff; }
+      .guard.careful { background: #8a5a00; }
+      .guard .headline { font-weight: 700; font-size: 1.15em; }
+      .guard ul { margin: 8px 0 12px; padding-left: 20px; }
+      .guard button.primary { background: #fff; color: #a3271f; border-color: #fff; }
+      .guard .out { margin-top: 8px; color: var(--ink); }
+      .guard.family { background: var(--warn-soft); color: var(--ink); border-bottom: 2px solid var(--warn); }
+      .guard.family button { margin-top: 8px; }
+
       /* Group */
       .groupbar { display: flex; align-items: center; gap: 8px; padding: 8px 16px; border-bottom: 1px solid var(--line); font-size: 0.92em; }
       .groupbar .label { color: var(--muted); }
@@ -142,6 +152,17 @@
       </div>
       <p class="rule">Saathi highlights.<br />You do it.</p>
     </header>
+
+    <div class="guard" id="guard" hidden role="alert">
+      <p class="headline" id="guard-headline"></p>
+      <ul id="guard-reasons"></ul>
+      <button class="primary wide" id="guard-family">Tell my family</button>
+      <p class="out" id="guard-msg"></p>
+    </div>
+    <div class="guard family" id="family-alert" hidden role="status">
+      <p id="family-alert-text"></p>
+      <button id="family-alert-ok">OK, I will call them</button>
+    </div>
 
     <div class="groupbar" id="groupbar" hidden>
       <span class="label">Group</span><code id="group-now"></code>
