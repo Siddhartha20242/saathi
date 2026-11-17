@@ -91,7 +91,22 @@ Caveats: the improvements were designed after looking at failures on these same 
 - Structured (schema-constrained) output for the model's answers: 44 right against 49 for plain text on the 55 model cases, because the constrained model said "not sure" about twice as often. Plain text is used for re-finding. Structured output is used where an answer is a longer shape, for the cloud translation.
 - Offering only same-kind controls first (buttons with buttons): slightly better on renamed-and-moved steps, but 3 wrong picks against 1 when a control was removed. Reverted.
 
-**On a real website.** The extension read the page and drew the highlight on the right control on 5 of 6 real sites tried (Wikipedia, GitHub's sign-in page, Nepal Electricity Authority, Nepal Department of Passports, the Bangladesh national portal), including labels written in Devanagari and Bengali. The sixth refused the automated browser. On the passport site a pop-up notice covers the page, and Saathi says so.
+**On real websites.** [tools/e2e-real.mjs](tools/e2e-real.mjs) records a short path on three live public sites, saves it, follows it by clicking through the real pages, and then checks it again after a script simulates a redesign. Nothing is typed or submitted; it only clicks ordinary links. The sites are the Bangladesh national portal (Bengali labels), the Nepal Department of Passports (Nepali labels, with a pop-up notice over the page) and Wikipedia (English), 5 steps in all.
+
+| | Result |
+|---|---|
+| Record, save and follow through the real pages, unchanged | 3 of 3 sites finished (5 of 5 steps), found by label |
+| Redesign: labels renamed, addresses kept | 4 of 5 steps found and highlighted correctly; 1 declined |
+| Harder redesign: labels, addresses and names all changed | 1 of 5 found (by another link to the same address); 4 declined |
+| Wrong control highlighted | 0 of 10 |
+| Pop-up notice covering the control | The passport page's notice was detected and the guide said so |
+
+The harder redesign ran in a headless Chrome that has no on-device model, so "declined" is what the guide does without the model: it says it is not sure and points at nothing. The model's part on real pages was not measured, only on the practice sites above. Earlier, the extension also read the page and drew the highlight on the right control on 5 of 6 other real sites (Wikipedia, GitHub's sign-in page, Nepal Electricity Authority, the passport office, the Bangladesh portal); the sixth refused the automated browser.
+
+**What the real sites taught us** (all fixed):
+- Many real links have an address that means nothing (`/`, `javascript:void(0)`, a link to the same page). Those are no longer recorded or used as anchors.
+- One site gives controls a new generated name on every page load (`radix-_R_…`). Such names are no longer recorded.
+- Real pages often link to the same destination twice. The same link shown twice (same label) now counts as one. Links that share an address but have different labels (Wikipedia's Log in and Create account) are not told apart, so none is chosen.
 
 **Explaining a page.** Checked on the practice site's bill page in both modes. With the on-device model it described the page correctly in plain words on the laptop (15 seconds on first use). In a browser with no model it fell back to the cloud and answered in 3 seconds, sending the page title and 8 labels and 0 typed values, as the result line states.
 
@@ -99,14 +114,14 @@ Caveats: the improvements were designed after looking at failures on these same 
 
 **Security rules.** [tools/rules-check.js](tools/rules-check.js) runs 24 checks against the live project with two separate anonymous users: all pass. Allowed actions work (a helper can set the pick, a note and the status; a creator can delete). Refusals hold: a helper cannot change the list of controls, pick outside it, write a note over 100 characters or delete someone else's request; a path cannot be edited or created with no steps, 41 steps, an extra field or someone else's name as creator; nothing can be read without signing in, with a wrong-length group code, or outside `groups`. Not covered: the rules were checked on the real project, not the Firebase emulator, and a group code that leaks still gives full access to that group.
 
-**Tests.** 59 unit tests (`npm test`). Three end-to-end scripts drive a throwaway headless Chrome with the extension loaded and run against the live site: [tools/e2e.mjs](tools/e2e.mjs) (record, save, follow), [tools/e2e-help.mjs](tools/e2e-help.mjs) (ask for help, a phone-sized helper taps, the highlight moves, the request is deleted) and [tools/e2e-try.mjs](tools/e2e-try.mjs) (the same flow on the try page). The on-device model is not available in that headless Chrome, so the model path was checked separately in a normal Chrome.
+**Tests.** 63 unit tests (`npm test`). Four end-to-end scripts drive a throwaway headless Chrome with the extension loaded and run against the live site: [tools/e2e.mjs](tools/e2e.mjs) (record, save, follow), [tools/e2e-help.mjs](tools/e2e-help.mjs) (ask for help, a phone-sized helper taps, the highlight moves, the request is deleted) and [tools/e2e-try.mjs](tools/e2e-try.mjs) (the same flow on the try page) and [tools/e2e-real.mjs](tools/e2e-real.mjs) (real public websites, above). The on-device model is not available in that headless Chrome, so the model path was checked separately in a normal Chrome.
 
 ## Known limits
 
 - **Laptop only.** The on-device model runs in desktop Chrome, not on phones. The helper page does work on a phone, because the helper needs no model.
 - **The on-device model reads only English, Spanish and Japanese.** On a website in Nepali or Bengali, a renamed button can still be found by its link address or internal name, but not by the model. Saathi then says it is not sure.
 - **The hardest case is not solved.** On the practice site's `?v=3` copy (labels and internal names both renamed), the model found one of two steps and declined the other. Declining is the safe failure.
-- **Practice website only for a full run.** Real sites with logins, pop-ups and multi-page forms were checked for reading and highlighting, but not for full record and follow.
+- **Real sites: short public paths only.** Full record and follow was tested on two-step paths on three public sites. Sites that need a login, forms with typed answers, long paths and pages with more than 150 controls were not tested. On a page with more than 150 controls, only the first 150 are read.
 - **Nepali and Hindi were not reviewed by a native speaker.** One early Nepali translation added a detail that was not in the step. The prompt now forbids that, and later samples did not repeat it, but review is still needed.
 - **Read-aloud was not tested with Nepali or Hindi voices.** It uses the browser's own voices, and many computers have no Nepali voice. The step card is always shown on screen.
 - **A group code is the only key.** Anyone who learns it can read that group's paths and help requests. That suits a family, not a public community.
