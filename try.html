@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Try Saathi</title>
+    <style>
+      :root { --ink: #1d1b16; --muted: #6b665c; --line: #e2ddd2; --bg: #f6f4ef; --accent: #0f5c4a; }
+      * { box-sizing: border-box; }
+      html, body { height: 100%; margin: 0; }
+      body { font: 15px/1.45 system-ui, sans-serif; color: var(--ink); display: flex; flex-direction: column; }
+      header { padding: 10px 16px; background: var(--bg); border-bottom: 1px solid var(--line); }
+      header h1 { font-size: 18px; margin: 0; display: inline; }
+      header span { color: var(--muted); font-size: 13px; margin-left: 8px; }
+      .guide { padding: 8px 16px; border-bottom: 1px solid var(--line); font-size: 14px; }
+      .guide ol { margin: 4px 0; padding-left: 20px; }
+      .guide li { margin: 2px 0; }
+      .guide .muted { color: var(--muted); }
+      .bar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; padding: 8px 16px; border-bottom: 1px solid var(--line); }
+      .bar b { font-size: 13px; color: var(--muted); font-weight: 600; }
+      button { font: inherit; font-size: 14px; padding: 6px 12px; border-radius: 7px; border: 1px solid #cfc9bb; background: #fff; cursor: pointer; }
+      button[aria-pressed=true] { background: var(--accent); border-color: var(--accent); color: #fff; }
+      button:focus-visible, a:focus-visible { outline: 3px solid var(--accent); outline-offset: 1px; }
+      main { flex: 1; display: grid; grid-template-columns: minmax(0, 1fr) 440px; min-height: 0; }
+      iframe { width: 100%; height: 100%; border: 0; }
+      #site { border-right: 1px solid var(--line); background: #fff; }
+      @media (max-width: 900px) { main { grid-template-columns: 1fr; grid-template-rows: 1fr 1.2fr; } #site { border-right: 0; border-bottom: 1px solid var(--line); } }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Try Saathi</h1><span>No extension needed. This page stands in for the Chrome extension, using the same code.</span>
+    </header>
+    <div class="guide">
+      <ol>
+        <li>On the right, press <b>Start a new group</b>. Then in <b>Show the way once</b>, name a path and press <b>Start</b>.</li>
+        <li>On the left, use the practice website: press <i>Pay your bill</i>, click the boxes, press <i>Check bill</i>, then <i>Pay now</i>. Press <b>Finish and save</b> on the right.</li>
+        <li>Choose <b>Labels renamed</b> below, then under <b>Follow a path</b> press <b>Start</b>. It finds the buttons even though their names changed.</li>
+        <li>Choose a language, or press <b>Ask my helper</b> and open <a href="/help.html" target="_blank" rel="noopener">the helper page</a> on a phone.</li>
+      </ol>
+      <span class="muted">The practice website is made up. Nothing here is real and nothing is paid. The on-device model needs desktop Chrome; without it, everything except the last re-finding step still works.</span>
+    </div>
+    <div class="bar" role="group" aria-label="Practice website version">
+      <b>Practice website:</b>
+      <button data-variant="" aria-pressed="true">Original</button>
+      <button data-variant="?v=2" aria-pressed="false">Labels renamed</button>
+      <button data-variant="?v=3" aria-pressed="false">Labels and internal names renamed (needs the on-device model)</button>
+    </div>
+    <main>
+      <iframe id="site" src="/demo/index.html" title="Practice website"></iframe>
+      <iframe id="panel" src="/panel.html?demo=1" allow="language-model" title="Saathi panel"></iframe>
+    </main>
+    <script type="module" src="/src/try.js"></script>
+  </body>
+</html>
