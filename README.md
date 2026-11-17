@@ -4,7 +4,7 @@
 
 Saathi is a Chrome extension for older parents, students and people far from home who get stuck on bill, bank and government websites. A son, a daughter or an experienced friend records the task once. After that, the person following it sees one step at a time, with the right button outlined on their own screen. If the website changes, the guide finds the button again. If they are still stuck, a helper on a phone can tap the right button from afar, and it lights up on the person's screen.
 
-It never clicks, types or submits for anyone.
+It never clicks, types or submits for anyone. It also watches for scam pages: when the page in front of an older person looks like a bank or wallet page that is not the real one, a red warning appears on the page, in their language, and they can tell their family with one tap.
 
 Built for the #BuildHybridAI hackathon with Firebase AI Logic. Licence: MIT.
 
@@ -20,6 +20,7 @@ The practice website (a made-up electricity board) is on the left and the real S
 4. Press **Speak** and say, in Nepali, Hindi or English, what you need, for example "I need to pay the electricity bill". Saathi understands you, picks the matching path and starts guiding. It asks for the microphone; the recording goes to the cloud only when you press Speak.
 5. Switch the language to नेपाली or हिन्दी. Turn on large text or read-aloud.
 6. Press **Ask my helper**, then open [/help.html](https://paperwork-decoder.web.app/help.html) on a phone, enter the group code and tap a control.
+7. Choose **Pretend scam page** under the title. A red warning appears on the page, in the language you chose. Press **Tell my family**, then open the helper page with the same group code to see the alert. The pretend page is made inside your browser and is never a page on the hosted site.
 
 No login is needed. Nothing is paid and nothing on the practice website is real. It works on a phone too: the website sits above Saathi, so both are on screen at once (see below).
 
@@ -34,6 +35,7 @@ No login is needed. Nothing is paid and nothing on the practice website is real.
 | Translating a path's step sentences into Nepali and Hindi | Cloud only, once, when the path is saved | The on-device model writes only English, Spanish and Japanese. The cloud sees the path name and the step sentences, nothing else. |
 | Understanding a spoken request (Nepali, Hindi or English) | Cloud only, when the person presses Speak | The on-device model does not understand Nepali speech. The cloud hears the recording and sees the titles of the group's paths, nothing from the website. |
 | Finding a step when the on-device model is unsure, or there is none | Cloud, only if the person presses a button after seeing what would be sent | The cloud sees the old label and the names of up to 60 buttons and links near the step. A label with a personal detail is replaced first. Nothing typed. |
+| Checking whether the page in front of the person is a scam | On-device, plain code, no model | The page's words and its boxes are read on the laptop and never sent. A small model is poor at this kind of judgement, so none is used. |
 | Helper taps a control on a phone | No model | The helper sees only the names of the controls, written to Firestore. |
 
 Every model call goes through one file, [src/firebase.js](src/firebase.js), using Firebase AI Logic's hybrid modes. No other AI service is used. The cloud model is named explicitly (`gemini-3.5-flash-lite`).
@@ -70,9 +72,42 @@ Toggle `cloud_enabled` to false in the Firebase console and the panel's cloud ch
 | **Sent to a helper's phone** | No | Names only, and the person sees exactly what will be sent before pressing Send | Never | Never |
 | **Sent to the cloud when you press Speak** | No | Only the titles of your group's paths, which the group wrote | Never | Never. A short voice recording is sent, once, and not stored. |
 | **Sent to the cloud when you agree to "Ask the cloud to look"** | No | The old label and up to 60 button and link names near the step, with personal ones replaced. The panel lists examples first. | Never | Never |
+| **Sent to the family when you press "Tell my family"** | The website's address only, no path | The imitated brand's name and reason codes such as "asksSecret" | Never | Never, and none of the page's words |
 | **Sent anywhere when re-finding on this computer** | No | No. It stays on the laptop. | Never | Never |
 
 The page script reads a field's label, never its value. A path step has no field that could hold a typed value ([src/path.js](src/path.js)), so one cannot be saved by mistake. A step also stores a small number, its position among the page's controls, to help find it again on a long page. Help requests are deleted when the person stops sharing.
+
+## Scam guard
+
+![A red warning in Nepali on the pretend scam page, and the same warning with its reasons in the Saathi panel](docs/test-shots/scam-guard-warning.png)
+
+When the person opens a page that looks like a scam, Saathi puts a red bar on the page itself, in the language they chose, with a "Why?" button that lists the reasons in plain words. The panel shows the same warning. The person can press **Tell my family**: that writes an alert to the group, and the family sees it on the helper page, and in their own panel if it is open.
+
+**How it decides** ([src/guard.js](src/guard.js)). Plain code on the computer, no model. It adds up facts a person cannot easily see, and says "stop" only when several agree (a score of 5 or more; 3 or 4 is a gentler "be careful"):
+
+- The address looks like a bank's but is not (a typo, or the bank's name hidden inside a longer address): 3 points.
+- The page's title or heading names a listed bank, wallet or government site, but the address is not one of that site's real addresses: 2 points.
+- The page asks for a password, PIN or one-time code: 1 point, and 3 more when the page is also pretending to be a listed site. This is judged from what each box is, never from what is typed.
+- It pushes you to hurry or threatens you, in English, Nepali or Hindi: 1 or 2 points.
+- It asks you to install a remote-control app, or to pay by gift card or crypto: 3 or 2 points.
+- The connection is not secure and it asks for a secret, or what you type would be sent to a different website: 2 or 3 points.
+
+It knows 22 real banks, wallets, utility and government sites in Nepal, India and Bangladesh ([the list](src/guard.js)), and one made-up bank for the practice page. Global brands such as Google and Amazon are left out on purpose: their real addresses are too many to list completely, and a wrong guess would block a real site. The warning sentences are written by hand in three languages ([src/guardText.js](src/guardText.js)), so a warning never waits for a model or the network. They have not been reviewed by a native speaker.
+
+**What it is not.** It is not a replacement for the browser's own protection: Chrome has built-in on-device scam detection. Saathi adds three things: the family loop, the South Asian institutions that scammers copy, and warnings in Nepali and Hindi. It warns and does not block. It catches only scams that imitate a listed site or use the signals above.
+
+**What was measured.**
+
+| Test | Result |
+|---|---|
+| 12 made-up scam pages ([test/guard.fixtures.js](test/guard.fixtures.js)) | All 11 marked "stop" are stopped; the 12th (a prize page asking for a fee, with no box to type in) gets "be careful", as intended |
+| 14 made-up ordinary pages, including a real bank login on its real address, a Wikipedia article about a bank, the remote-support tool's own site and a shop checkout with card boxes | None stopped; 2 get a gentle "be careful": a news story about phishing, and an old school portal still on plain http |
+| 13 real, legitimate pages, visited live with the real extension (Wikipedia, python.org, the Nepal Electricity Authority, the passport office, the Bangladesh portal, the real Nabil Bank, eSewa, Khalti and tax-department sites, and GitHub, Google and PayPal sign-in pages) | No warning on any of the 13 |
+| The family loop on the try page ([tools/e2e-guard.mjs](tools/e2e-guard.mjs)): the pretend scam page, the warning on the page in Nepali, the panel, "Tell my family", the helper page | 9 of 9 checks pass. The alert holds no page content. |
+
+The made-up pages were written by me, so they show that the rules do what I intended, not how many real scams they would catch. No real scam page was visited, on purpose. A false-alarm rate on a large sample of real pages is not known: 13 real pages is a small sample.
+
+**Limits.** A clever scam can score below "stop". The on-page family button only works while the side panel is open (the page tells the person how to open it). The extension's own relay of the family alert was not exercised in a real scam situation, only through the try page's stand-in. The Firestore rules for alerts follow the same pattern as the ones checked by `tools/rules-check.js`, but that script does not cover them yet. The pretend scam page claims a made-up address, as a real scam would, which is how the try page can show it without hosting a fake bank page.
 
 ## What we measured
 
@@ -161,7 +196,7 @@ The harder redesign ran in a headless Chrome that has no on-device model, so "de
 
 **Security rules.** [tools/rules-check.js](tools/rules-check.js) runs 24 checks against the live project with two separate anonymous users: all pass. Allowed actions work (a helper can set the pick, a note and the status; a creator can delete). Refusals hold: a helper cannot change the list of controls, pick outside it, write a note over 100 characters or delete someone else's request; a path cannot be edited or created with no steps, 41 steps, an extra field or someone else's name as creator; nothing can be read without signing in, with a wrong-length group code, or outside `groups`. Not covered: the rules were checked on the real project, not the Firebase emulator, and a group code that leaks still gives full access to that group.
 
-**Tests.** 83 unit tests (`npm test`). Five end-to-end scripts drive a throwaway headless Chrome with the extension loaded and run against the live site: [tools/e2e.mjs](tools/e2e.mjs) (record, save, follow), [tools/e2e-help.mjs](tools/e2e-help.mjs) (ask for help, a phone-sized helper taps, the highlight moves, the request is deleted), [tools/e2e-try.mjs](tools/e2e-try.mjs) (the same flow on the try page) and [tools/e2e-real.mjs](tools/e2e-real.mjs) (real public websites, above) and [tools/e2e-cloud.mjs](tools/e2e-cloud.mjs) (the cloud button's consent screen, in a browser with no on-device model). In the headless browser, App Check sometimes refuses the cloud translation (reCAPTCHA scores it as a bot); the path is then saved without translations, as designed, and the test reports it. In a normal Chrome the cloud call works. The on-device model is not available in that headless Chrome, so the model path was checked separately in a normal Chrome.
+**Tests.** 129 unit tests (`npm test`). Six end-to-end scripts drive a throwaway headless Chrome with the extension loaded and run against the live site: [tools/e2e.mjs](tools/e2e.mjs) (record, save, follow), [tools/e2e-help.mjs](tools/e2e-help.mjs) (ask for help, a phone-sized helper taps, the highlight moves, the request is deleted), [tools/e2e-try.mjs](tools/e2e-try.mjs) (the same flow on the try page) and [tools/e2e-real.mjs](tools/e2e-real.mjs) (real public websites, above) [tools/e2e-cloud.mjs](tools/e2e-cloud.mjs) (the cloud button's consent screen, in a browser with no on-device model) and [tools/e2e-guard.mjs](tools/e2e-guard.mjs) (the scam guard and family alert, and a pass over real legitimate pages). In the headless browser, App Check sometimes refuses the cloud translation (reCAPTCHA scores it as a bot); the path is then saved without translations, as designed, and the test reports it. In a normal Chrome the cloud call works. The on-device model is not available in that headless Chrome, so the model path was checked separately in a normal Chrome.
 
 ## Design
 
@@ -185,6 +220,7 @@ Not done: a screen-reader pass, an automated accessibility audit, or any test wi
 - **Real sites: short public paths only.** Full record and follow was tested on two-step paths on three public sites. Sites that need a login, forms with typed answers and long paths were not tested.
 - **Nepali and Hindi were not reviewed by a native speaker.** One early Nepali translation added a detail that was not in the step. The prompt now forbids that, and later samples did not repeat it, but review is still needed.
 - **Read-aloud was not tested with Nepali or Hindi voices.** It uses the browser's own voices, and many computers have no Nepali voice. The step card is always shown on screen.
+- **The scam guard is not a complete defence.** It knows 22 listed sites and some scam signals, warns and does not block, and has not been tried on a large sample of real pages or on any real scam page.
 - **Speaking sends your voice to the cloud**, once, only when you press Speak, and the recording is not stored. The on-device model cannot do this task. Real Nepali speech has not been tested (see above).
 - **The cloud button was not verified end to end** in a normal browser (see above).
 - **A group code is the only key.** Anyone who learns it can read that group's paths and help requests. That suits a family, not a public community.
@@ -228,6 +264,7 @@ The Firebase project is named `paperwork-decoder`, from an earlier idea. It is o
 | [src/backend.js](src/backend.js) | Auth, Firestore, Remote Config, live help, cloud translation |
 | [src/panel.js](src/panel.js), [panel.html](panel.html) | The side panel |
 | [src/helper.js](src/helper.js), [help.html](help.html) | The helper's phone page |
+| [src/guard.js](src/guard.js), [src/guardText.js](src/guardText.js), [src/guardPage.js](src/guardPage.js), [src/alerts.js](src/alerts.js) | The scam guard: the rules, the warning words, the page code, and family alerts |
 | [src/audio.js](src/audio.js), [src/voice.js](src/voice.js) | Recording a spoken request, and asking the cloud which path it means |
 | [src/try.js](src/try.js), [try.html](try.html) | The try page that stands in for the extension |
 | [extension](extension) | The Chrome extension (page script, side panel shell) |
