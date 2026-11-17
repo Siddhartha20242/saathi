@@ -1,6 +1,6 @@
 // End to end on the hosted try page, with no extension involved: record a path on the practice
 // website, save it, then follow it on the renamed copy. Runs in a throwaway headless Chrome.
-// The page is the same one a judge opens.
+// The page is the same public try page anyone can open.
 
 import { launch, sleep } from './chrome.mjs';
 

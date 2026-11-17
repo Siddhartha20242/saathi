@@ -97,7 +97,7 @@ Caveats: the improvements were designed after looking at failures on these same 
 
 **Speed.** A model call takes about 0.4 to 0.6 seconds once the model is loaded (10 to 15 seconds the first time). A step that needs the model takes three calls, so about 1.5 seconds. Steps found by label or by link address take milliseconds.
 
-**Tests.** 59 unit tests (`npm test`). Three end-to-end scripts drive a throwaway headless Chrome with the extension loaded and run against the live site: [tools/e2e.mjs](tools/e2e.mjs) (record, save, follow), [tools/e2e-help.mjs](tools/e2e-help.mjs) (ask for help, a phone-sized helper taps, the highlight moves, the request is deleted) and [tools/e2e-try.mjs](tools/e2e-try.mjs) (the same flow on the judge demo page). The on-device model is not available in that headless Chrome, so the model path was checked separately in a normal Chrome.
+**Tests.** 59 unit tests (`npm test`). Three end-to-end scripts drive a throwaway headless Chrome with the extension loaded and run against the live site: [tools/e2e.mjs](tools/e2e.mjs) (record, save, follow), [tools/e2e-help.mjs](tools/e2e-help.mjs) (ask for help, a phone-sized helper taps, the highlight moves, the request is deleted) and [tools/e2e-try.mjs](tools/e2e-try.mjs) (the same flow on the try page). The on-device model is not available in that headless Chrome, so the model path was checked separately in a normal Chrome.
 
 ## Known limits
 
@@ -148,7 +148,7 @@ The Firebase project is named `paperwork-decoder`, from an earlier idea. It is o
 | [src/backend.js](src/backend.js) | Auth, Firestore, Remote Config, live help, cloud translation |
 | [src/panel.js](src/panel.js), [panel.html](panel.html) | The side panel |
 | [src/helper.js](src/helper.js), [help.html](help.html) | The helper's phone page |
-| [src/try.js](src/try.js), [try.html](try.html) | The judge demo that stands in for the extension |
+| [src/try.js](src/try.js), [try.html](try.html) | The try page that stands in for the extension |
 | [extension](extension) | The Chrome extension (page script, side panel shell) |
 | [public/demo](public/demo) | The practice website |
 | [docs/test-shots](docs/test-shots) | Screenshots from the test runs |
