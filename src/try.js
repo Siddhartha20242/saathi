@@ -98,4 +98,24 @@ document.querySelectorAll('[data-variant]').forEach((button) =>
   }),
 );
 
+// ---------- The guide, and the panel height on a phone ----------
+
+const guide = $('guide');
+const toggle = $('guide-toggle');
+const setGuide = (open) => {
+  guide.hidden = !open;
+  toggle.setAttribute('aria-expanded', String(open));
+};
+// Open on a computer, where there is room. Closed on a phone, so the website and Saathi fill the screen.
+setGuide(!matchMedia('(max-width: 900px)').matches);
+toggle.addEventListener('click', () => setGuide(guide.hidden));
+$('guide-close').addEventListener('click', () => setGuide(false));
+
+$('expand').addEventListener('click', (ev) => {
+  const tall = document.body.classList.toggle('tall');
+  ev.currentTarget.setAttribute('aria-pressed', String(tall));
+  ev.currentTarget.textContent = tall ? 'Shorter' : 'Taller';
+  ev.currentTarget.setAttribute('aria-label', tall ? 'Make Saathi shorter' : 'Make Saathi taller');
+});
+
 window.__try = { get recording() { return recording; } }; // read by the end-to-end test

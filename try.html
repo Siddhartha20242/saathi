@@ -2,54 +2,87 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#0f5c4a" />
     <title>Try Saathi</title>
     <style>
-      :root { color-scheme: light dark; --ink: #1d1b16; --muted: #5f5a50; --line: #ddd7ca; --bg: #ffffff; --surface: #f6f4ef; --accent: #0f5c4a; --accent-ink: #ffffff; }
+      :root { color-scheme: light dark; --ink: #1d1b16; --muted: #5f5a50; --line: #ddd7ca; --bg: #ffffff; --surface: #f6f4ef; --accent: #0f5c4a; --accent-ink: #ffffff; --tap: 44px; }
       @media (prefers-color-scheme: dark) { :root { --ink: #f1eee6; --muted: #b9b2a3; --line: #3b372d; --bg: #17150f; --surface: #221f18; --accent: #52bf9f; --accent-ink: #0b1f19; } }
       * { box-sizing: border-box; }
       html, body { height: 100%; margin: 0; }
-      body { font: 15px/1.5 system-ui, -apple-system, 'Segoe UI', sans-serif; color: var(--ink); background: var(--bg); display: flex; flex-direction: column; }
-      header { padding: 10px 16px; background: var(--surface); border-bottom: 1px solid var(--line); display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
-      header h1 { font-size: 1.2em; margin: 0; }
-      header span { color: var(--muted); font-size: 0.9em; }
-      details.guide { border-bottom: 1px solid var(--line); padding: 8px 16px; }
-      details.guide summary { cursor: pointer; font-weight: 600; min-height: 32px; display: flex; align-items: center; }
-      details.guide ol { margin: 6px 0 4px; padding-left: 22px; }
-      details.guide li { margin: 3px 0; }
-      details.guide .muted { color: var(--muted); font-size: 0.9em; }
-      .bar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; padding: 8px 16px; border-bottom: 1px solid var(--line); }
-      .bar b { font-size: 0.9em; color: var(--muted); font-weight: 600; }
-      button { font: inherit; font-size: 0.93em; min-height: 40px; padding: 6px 14px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); cursor: pointer; }
+      body { height: 100dvh; font: 15px/1.5 system-ui, -apple-system, 'Segoe UI', sans-serif; color: var(--ink); background: var(--bg); display: flex; flex-direction: column; overflow: hidden; }
+      [hidden] { display: none !important; }
+
+      header { display: flex; align-items: center; gap: 12px; padding: 8px 16px; padding-top: max(8px, env(safe-area-inset-top)); background: var(--surface); border-bottom: 1px solid var(--line); }
+      header h1 { font-size: 1.15em; margin: 0; }
+      header .tag { flex: 1; color: var(--muted); font-size: 0.88em; }
+      button { font: inherit; font-size: 0.93em; min-height: var(--tap); padding: 6px 14px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); cursor: pointer; }
       button[aria-pressed=true] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 600; }
       :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
       a { color: var(--accent); }
+
+      .guide { border-bottom: 1px solid var(--line); padding: 10px 16px; max-height: 45dvh; overflow: auto; }
+      .guide ol { margin: 0 0 6px; padding-left: 22px; }
+      .guide li { margin: 4px 0; }
+      .guide .muted { color: var(--muted); font-size: 0.9em; margin: 0; }
+      .guide .close { margin-top: 8px; }
+
+      .bar { display: flex; gap: 8px; align-items: center; padding: 6px 16px; border-bottom: 1px solid var(--line); }
+      .bar .short { display: none; }
+      .bar b { font-size: 0.85em; color: var(--muted); font-weight: 600; flex: none; }
+      .bar button { flex: none; }
+      .bar .spacer { flex: 1; }
+
       main { flex: 1; display: grid; grid-template-columns: minmax(0, 1fr) 440px; min-height: 0; }
-      iframe { width: 100%; height: 100%; border: 0; }
+      iframe { width: 100%; height: 100%; border: 0; display: block; }
       #site { border-right: 1px solid var(--line); background: #fff; }
-      @media (max-width: 900px) { main { grid-template-columns: 1fr; grid-template-rows: 1fr 1.4fr; } #site { border-right: 0; border-bottom: 1px solid var(--line); } }
+      #expand { display: none; }
+
+      /* Phones and narrow windows: the website on top and Saathi below, both visible at once. */
+      @media (max-width: 900px) {
+        header .tag { display: none; }
+        .bar { padding: 6px 12px; gap: 6px; }
+        .bar button { padding: 6px 10px; }
+        .bar b { display: none; }
+        .bar .long { display: none; }
+        .bar .short { display: inline; }
+        main { display: flex; flex-direction: column; }
+        #site { flex: 1 1 0; min-height: 120px; border-right: 0; border-bottom: 2px solid var(--accent); }
+        #panel { flex: 0 0 var(--panel-h, 46dvh); padding-bottom: env(safe-area-inset-bottom); }
+        body.tall { --panel-h: 74dvh; }
+        #expand { display: inline-flex; align-items: center; }
+      }
+      @media (max-width: 900px) and (max-height: 600px) { body { --panel-h: 55dvh; } }
     </style>
   </head>
   <body>
     <header>
-      <h1>Try Saathi</h1><span>No extension needed. This page stands in for the Chrome extension, using the same code.</span>
+      <h1>Try Saathi</h1>
+      <span class="tag">No extension needed. This page stands in for the Chrome extension, using the same code.</span>
+      <button id="guide-toggle" aria-expanded="true" aria-controls="guide">How to try</button>
     </header>
-    <details class="guide" open>
-      <summary>How to try this (about two minutes)</summary>
+
+    <div class="guide" id="guide">
       <ol>
-        <li>On the right, press <b>Start a new group</b>. Open <b>Show the way</b>, name a path and press <b>Start</b>.</li>
-        <li>On the left, use the practice website: press <i>Pay your bill</i>, click the boxes, press <i>Check bill</i>, then <i>Pay now</i>. Press <b>Finish and save</b>.</li>
-        <li>Choose <b>Labels renamed</b> below. On the <b>Follow</b> tab, press <b>Start</b>. It finds the buttons even though their names changed.</li>
+        <li>In Saathi (right of the website on a computer, below it on a phone), press <b>Start a new group</b>. Open <b>Show the way</b>, name a path and press <b>Start</b>.</li>
+        <li>On the practice website press <i>Pay your bill</i>, click the boxes, press <i>Check bill</i>, then <i>Pay now</i>. In Saathi press <b>Finish and save</b>.</li>
+        <li>Choose <b>Labels renamed</b> under the title. In Saathi, on the <b>Follow</b> tab, press <b>Start</b>. It finds the buttons even though their names changed.</li>
         <li>Switch the language, or open <b>Get help</b>, press <b>Ask my helper</b> and open <a href="/help.html" target="_blank" rel="noopener">the helper page</a> on a phone.</li>
       </ol>
-      <p class="muted">The practice website is made up. Nothing here is real and nothing is paid. The on-device model needs desktop Chrome; without it, everything except the last re-finding step still works.</p>
-    </details>
-    <div class="bar" role="group" aria-label="Practice website version">
-      <b>Practice website:</b>
-      <button data-variant="" aria-pressed="true">Original</button>
-      <button data-variant="?v=2" aria-pressed="false">Labels renamed</button>
-      <button data-variant="?v=3" aria-pressed="false">Labels and internal names renamed (needs the on-device model)</button>
+      <p class="muted">No extension and no login are needed. The practice website is made up; nothing here is real and nothing is paid. The on-device model needs desktop Chrome; without it, everything except the last re-finding step still works.</p>
+      <button class="close" id="guide-close">Hide this</button>
     </div>
+
+    <div class="bar" role="group" aria-label="Practice website version">
+      <b>Website:</b>
+      <button data-variant="" aria-pressed="true">Original</button>
+      <button data-variant="?v=2" aria-pressed="false" aria-label="Labels renamed"><span class="long">Labels renamed</span><span class="short">Renamed</span></button>
+      <button data-variant="?v=3" aria-pressed="false" title="Needs the on-device model" aria-label="Labels and names renamed (needs the on-device model)"><span class="long">Names renamed too</span><span class="short">Harder</span></button>
+      <span class="spacer"></span>
+      <button id="expand" aria-pressed="false" aria-label="Make Saathi taller">Taller</button>
+    </div>
+
     <main>
       <iframe id="site" src="/demo/index.html" title="Practice website"></iframe>
       <iframe id="panel" src="/panel.html?demo=1" allow="language-model" title="Saathi panel"></iframe>

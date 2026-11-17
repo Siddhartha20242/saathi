@@ -17,6 +17,14 @@ try {
   const t = await c.open(URL_TRY);
   await sleep(4000);
   const s = t.session;
+  // PHONE=1 runs the same flow in a phone-sized, touch-enabled window.
+  const phone = process.env.PHONE === '1';
+  if (phone) {
+    await c.send('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 2, mobile: true }, s);
+    await c.send('Emulation.setTouchEmulationEnabled', { enabled: true }, s);
+    await c.send('Page.reload', {}, s);
+    await sleep(5000);
+  }
   await c.waitFor(s, P('return !!w.__saathi?.user'), 40000);
   check('panel runs in demo mode', await c.evalIn(s, P(`return d.getElementById('where').textContent`)).then((x) => /Demo mode/.test(x)));
 
@@ -53,7 +61,7 @@ try {
     const found = await c.waitFor(s, P(`const f = w.__saathi.follow; return f && f.index === ${i} && f.found ? JSON.stringify({ text: f.found.text, by: f.found.by, role: f.path.steps[${i}].role }) : false;`), 25000);
     const info = JSON.parse(found);
     how.push(`${info.by}:${info.text}`);
-    if (i === 3) await c.shot(s, 'try-follow-renamed.png');
+    if (i === 3) await c.shot(s, phone ? 'try-follow-phone.png' : 'try-follow-renamed.png');
     if (info.role === 'field' || info.role === 'select') await c.evalIn(s, P(`d.getElementById('fo-next').click()`));
     else await press(info.text);
     await sleep(3200);

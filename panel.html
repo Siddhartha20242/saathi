@@ -107,6 +107,16 @@
       .rec-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--bad); margin-right: 6px; }
       @media (prefers-reduced-motion: no-preference) { .rec-dot { animation: pulse 1.4s ease-in-out infinite; } @keyframes pulse { 50% { opacity: 0.35; } } }
 
+      /* A short window (a phone showing the website above Saathi): while following, show only the step. */
+      @media (max-height: 620px) {
+        body[data-following=true] .groupbar, body[data-following=true] .settings, body[data-following=true] footer { display: none; }
+        body[data-following=true] .top { padding: 6px 16px; }
+        body[data-following=true] .panel-body { padding: 10px 16px; gap: 10px; }
+        body[data-following=true] .step-card { padding: 12px; }
+        body[data-following=true] .progress { margin: 6px 0 8px; }
+        body[data-following=true] .tabs button { min-height: 40px; }
+      }
+
       /* Footer */
       footer { padding: 12px 16px 24px; border-top: 1px solid var(--line); color: var(--muted); font-size: 0.82em; display: flex; flex-direction: column; gap: 8px; }
       .status { display: flex; flex-wrap: wrap; gap: 6px 14px; }
