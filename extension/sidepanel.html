@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Saathi</title>
+    <style>
+      html, body { margin: 0; height: 100%; font: 12px/1.4 system-ui, sans-serif; color: #1d1b16; }
+      body { display: flex; flex-direction: column; }
+      #bar { padding: 6px 10px; background: #f6f4ef; border-bottom: 1px solid #e2ddd2; color: #6b665c; }
+      #panel { flex: 1; width: 100%; border: 0; }
+    </style>
+  </head>
+  <body>
+    <div id="bar">Saathi highlights. You do it. <span id="direct"></span></div>
+    <!-- The panel is a hosted page so Firebase App Check works. "language-model" lets it use the on-device model. -->
+    <iframe id="panel" allow="language-model" title="Saathi panel"></iframe>
+    <script src="sidepanel.js"></script>
+  </body>
+</html>
