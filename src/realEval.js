@@ -21,6 +21,8 @@ const only = params.get('pages')?.split(',');
 // ?engine=cloud asks the cloud model instead of the on-device one, the way the panel does after the
 // person agrees. The cloud sees one list of the 60 controls nearest the step, so there is no second stage.
 const cloud = params.get('engine') === 'cloud';
+const single = params.get('single') === '1'; // one call per find, no second ordering or yes/no check
+const oneOrder = params.get('oneorder') === '1'; // no second ordering, but the yes/no check stays
 let lastError = '';
 const ask = async (prompt) => {
   try {
@@ -78,7 +80,7 @@ async function start() {
       continue;
     }
     const started = performance.now();
-    const res = await refind(built.step, built.after, { task: SCANS[c.page].title, region: cloud ? false : region, strictVerify }, ask);
+    const res = await refind(built.step, built.after, { task: SCANS[c.page].title, region: cloud ? false : region, strictVerify, single, oneOrder }, ask);
     row.ms = Math.round(performance.now() - started);
     row.pool = region ? narrowToRegion(built.after.filter((e) => (e.role === 'button' || e.role === 'link')), built.step).length : built.after.filter((e) => e.role === 'button' || e.role === 'link').length;
     row.reason = res.reason ?? null;

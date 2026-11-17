@@ -188,6 +188,22 @@ describe('refind', () => {
     expect(cloudPreview({ role: 'field', text: 'Old' }, page, {}).count).toBe(0); // no boxes to fill in on the page
     expect(cloudPreview({ role: 'link', text: 'Old' }, page.slice(0, 5), { others: ['Link 1'] }).count).toBe(4);
   });
+  it('takes the first pick as it is in single mode, and skips only the second ordering in oneOrder mode', async () => {
+    const page = [
+      { role: 'button', text: 'Proceed to payment', section: 'Pay' },
+      { role: 'button', text: 'Remind me later', section: 'Pay' },
+    ];
+    const step = { role: 'button', text: 'Pay now', section: 'Pay' };
+    const calls = [];
+    const ask = (answers) => async (prompt) => (calls.push(prompt), answers[calls.length - 1]);
+    expect(await refind(step, page, { single: true }, ask(['1']))).toEqual({ index: 0, by: 'model' });
+    expect(calls).toHaveLength(1);
+    calls.length = 0;
+    expect(await refind(step, page, { oneOrder: true }, ask(['1', 'YES']))).toEqual({ index: 0, by: 'model' });
+    expect(calls).toHaveLength(2);
+    calls.length = 0;
+    expect(await refind(step, page, { oneOrder: true }, ask(['1', 'NO']))).toMatchObject({ index: null, reason: 'check failed' });
+  });
   it('never offers a control that belongs to another step', async () => {
     const res = await refind(payNow, renamed, { others: ['Remind me later', 'Home'], region: false }, fake(['1', '1', 'YES']));
     expect(res).toEqual({ index: 1, by: 'model' });

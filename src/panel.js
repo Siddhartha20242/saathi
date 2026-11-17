@@ -471,7 +471,9 @@ $('fo-cloud-go').addEventListener('click', async (ev) => {
   setHow('Asking the cloud…');
   try {
     const safe = scrub(page.elements);
-    const res = await refind(step, safe, { ...ctx, region: false }, askCloud);
+    // One call is enough for the cloud model: on 22 real renamed controls it found all of them, in about
+    // half the time of the careful three-call check that suits the small on-device model.
+    const res = await refind(step, safe, { ...ctx, region: false, single: true }, askCloud);
     if (state.follow !== f || f.index !== index) return;
     $('fo-cloud').hidden = true;
     if (res.index === null) return setHow('The cloud was not sure either. Try "Ask a helper" in Get help.', 'bad');

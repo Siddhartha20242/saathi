@@ -252,9 +252,14 @@ export async function refind(step, elements, context, ask) {
     const schema = choiceSchema(candidates.length);
     const pickA = parseChoice(await ask(meaningPrompt(step, candidates, context), schema), candidates);
     if (pickA === null || pickA === 'none') return { index: null, reason: 'no match' };
-    const reversed = candidates.slice().reverse();
-    const pickB = parseChoice(await ask(meaningPrompt(step, reversed, context), schema), reversed);
-    if (pickB !== pickA) return { index: null, reason: 'answers disagreed' };
+    // For a model that is already strong: `single` takes the first pick as it is, `oneOrder` skips the
+    // second ordering but still runs the yes/no check.
+    if (context?.single) return { index: pickA };
+    if (!context?.oneOrder) {
+      const reversed = candidates.slice().reverse();
+      const pickB = parseChoice(await ask(meaningPrompt(step, reversed, context), schema), reversed);
+      if (pickB !== pickA) return { index: null, reason: 'answers disagreed' };
+    }
     const yes = parseYesNo(await ask(verify(step, elements[pickA].text, context), YES_NO_SCHEMA));
     return yes === true ? { index: pickA } : { index: null, reason: 'check failed' };
   };
