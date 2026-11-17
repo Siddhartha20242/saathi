@@ -212,6 +212,15 @@ export function narrowToRegion(candidates, step) {
   return here.length >= 1 && here.length <= MAX_REGION ? here : candidates;
 }
 
+/**
+ * What the cloud would be shown if the person agrees to ask it: at most MAX_MODEL controls nearest the
+ * step, labels only. Used to tell the person exactly what would leave the computer.
+ */
+export function cloudPreview(step, elements, context) {
+  const near = nearestTo(withoutOtherSteps(candidatesFor(step, elements), context?.others), step);
+  return { count: near.length, examples: near.slice(0, 4).map((c) => c.text) };
+}
+
 // Structured output: the model may only answer with one of these values.
 export const YES_NO_SCHEMA = { type: 'string', enum: ['YES', 'NO'] };
 /** "0" (none) or the number of one of n candidates. */

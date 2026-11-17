@@ -18,10 +18,15 @@ const region = params.get('region') !== '0';
 const strictVerify = params.get('verify') !== 'loose';
 const only = params.get('pages')?.split(',');
 
+// ?engine=cloud asks the cloud model instead of the on-device one, the way the panel does after the
+// person agrees. The cloud sees one list of the 60 controls nearest the step, so there is no second stage.
+const cloud = params.get('engine') === 'cloud';
+let lastError = '';
 const ask = async (prompt) => {
   try {
-    return (await run({ mode: 'ONLY_ON_DEVICE', prompt })).text;
-  } catch {
+    return (await run({ mode: cloud ? 'ONLY_IN_CLOUD' : 'ONLY_ON_DEVICE', prompt })).text;
+  } catch (err) {
+    lastError = String(err.message || err).slice(0, 120);
     return '';
   }
 };
@@ -47,7 +52,7 @@ function render(rows, done) {
   }
   const sum = (v) => ['right', 'not sure', 'WRONG'].map((k) => `${k} ${Object.entries(tally).filter(([key]) => key.endsWith(`/${v}`)).reduce((n, [, t]) => n + t[k], 0)}`).join(', ');
   $('summary').textContent = [
-    `Options: region=${region}, verify=${params.get('verify') ?? 'default'}`,
+    `Engine: ${cloud ? 'cloud' : 'on-device'}, region=${cloud ? false : region}, verify=${params.get('verify') ?? 'default'}${lastError ? ` | last error: ${lastError}` : ''}`,
     `Renamed controls: ${sum('renamed')}`,
     `Removed controls (right answer is "not sure"): right ${rows.filter((r) => r.variant === 'removed' && r.result.startsWith('right')).length} of ${rows.filter((r) => r.variant === 'removed').length}, WRONG ${rows.filter((r) => r.variant === 'removed' && r.result === 'WRONG').length}`,
     ...Object.entries(tally).map(([k, t]) => `  ${k}: right ${t.right}, not sure ${t['not sure']}, WRONG ${t.WRONG}`),
@@ -73,7 +78,7 @@ async function start() {
       continue;
     }
     const started = performance.now();
-    const res = await refind(built.step, built.after, { task: SCANS[c.page].title, region, strictVerify }, ask);
+    const res = await refind(built.step, built.after, { task: SCANS[c.page].title, region: cloud ? false : region, strictVerify }, ask);
     row.ms = Math.round(performance.now() - started);
     row.pool = region ? narrowToRegion(built.after.filter((e) => (e.role === 'button' || e.role === 'link')), built.step).length : built.after.filter((e) => e.role === 'button' || e.role === 'link').length;
     row.reason = res.reason ?? null;

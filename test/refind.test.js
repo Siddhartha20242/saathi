@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { textSimilarity, codeFind, candidatesFor, refindPrompt, parseChoice, parseYesNo, refind, anchorFind, narrowToRegion, nearestTo, MAX_MODEL } from '../src/refind.js';
+import { textSimilarity, codeFind, candidatesFor, refindPrompt, parseChoice, parseYesNo, refind, anchorFind, narrowToRegion, nearestTo, cloudPreview, MAX_MODEL } from '../src/refind.js';
 import { buildCases, SITES } from '../src/refindCases.js';
 
 const PAGE = [
@@ -179,6 +179,14 @@ describe('refind', () => {
     expect(res).toEqual({ index: 3000, by: 'model' });
     expect(seen[0]).toContain('1. Data policy');
     expect(seen[0]).not.toContain('Article link');
+  });
+  it('previews what the cloud would see: labels near the step, not the whole page', () => {
+    const page = Array.from({ length: 500 }, (_, i) => ({ role: 'link', text: `Link ${i}`, section: 'Body' }));
+    const p = cloudPreview({ role: 'link', text: 'Old', at: 250 }, page, {});
+    expect(p.count).toBe(MAX_MODEL);
+    expect(p.examples).toEqual(['Link 220', 'Link 221', 'Link 222', 'Link 223']);
+    expect(cloudPreview({ role: 'field', text: 'Old' }, page, {}).count).toBe(0); // no boxes to fill in on the page
+    expect(cloudPreview({ role: 'link', text: 'Old' }, page.slice(0, 5), { others: ['Link 1'] }).count).toBe(4);
   });
   it('never offers a control that belongs to another step', async () => {
     const res = await refind(payNow, renamed, { others: ['Remind me later', 'Home'], region: false }, fake(['1', '1', 'YES']));
