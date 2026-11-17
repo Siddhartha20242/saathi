@@ -73,23 +73,42 @@ The page script reads a field's label, never its value. A path step has no field
 
 All numbers are from the real on-device model in desktop Chrome. Reproduce them with the test pages and scripts below.
 
-**Finding a step again** ([refindeval.html](refindeval.html)): five made-up sites, 25 recorded steps, each site changed four ways, 80 cases.
+**Finding a step again on the practice sites** ([refindeval.html](refindeval.html)): five made-up sites, 25 recorded steps, each site changed four ways, 80 cases. Two configurations, measured on the same cases:
 
-| Change | Result |
-|---|---|
-| Button moved, same label | 25 of 25, by plain code |
-| Label renamed | 23 of 25 |
-| Label renamed and button moved | 22 of 25 |
-| Control removed (the right answer is "it's gone") | 4 of 5 |
-| **Overall** | **74 or 75 of 80 across runs, with one wrong pick** |
+| Change | Earlier setting: every control offered, looser check | Current setting: same section first, then every control, stricter check |
+|---|---|---|
+| Button moved, same label | 25 of 25 (plain code) | 25 of 25 (plain code) |
+| Label renamed | 23 of 25 | 17 of 25 |
+| Label renamed and button moved | 22 of 25 | 15 of 25 |
+| Control removed (the right answer is "it's gone") | 4 of 5 | 5 of 5 |
+| **Overall** | **74 or 75 of 80, one wrong pick** | **62 of 80, no wrong pick** |
 
-Over the project the number went from 63 of 80 (first prompt) to 74 of 80 after three changes: remove controls that belong to other steps, ask in two different orders and require agreement, then check the pick with a yes/no question. Those changes trade a few "not sure" answers for far fewer wrong picks (17 down to 1). A wrong pick is the harmful failure, because it sends a person to the wrong button.
+The first prompt scored 63 of 80 with 17 wrong picks on the model cases. Asking in two orders, taking out controls that belong to other steps, and checking the pick with a yes/no question brought it to 74 or 75. Real pages then showed that the earlier setting was too eager (next section), so the current setting declines more often: it finds fewer steps on these easy sites and never points at a wrong control. A wrong pick is the harmful failure, because it sends a person to the wrong button, so the current setting is the default.
 
-Caveats: the improvements were designed after looking at failures on these same five sites, so the real-world figure is likely a little lower. Each run takes a different path through the model, so results move by a case or two.
+Caveats: the earlier improvements were designed after looking at failures on these same five sites. Each run takes a different path through the model, so results move by a case or two.
+
+**The on-device model on real pages.** The practice sites have about 25 controls. Real pages have far more (Wikipedia 150, python.org 147), and the model did much worse on them. [src/realEval.js](src/realEval.js) replays what the extension actually read on four real public pages (saved by [tools/capture-scans.mjs](tools/capture-scans.mjs): Wikipedia, python.org, the Nepal Electricity Authority, the Bangladesh national portal). For each test case a control is renamed, with its link address and name removed so only the model can find it, or hidden. The model runs in Chrome through Firebase AI Logic's on-device mode, as in the product. 23 cases: 18 renamed controls and 5 removed ones.
+
+| Setting | Renamed: right / declined / wrong | Removed: right / wrong |
+|---|---|---|
+| Every control offered, looser check (the earlier setting) | 5 / 10 / 3 | 5 / 0 |
+| Same section first, looser check | 15 / 2 / 1 | 3 / 2 |
+| Same section first, stricter check | 11 / 7 / 0 | 4 / 1 |
+| Every control offered, stricter check | 5 / 13 / 0 | 5 / 0 |
+| **Current: same section first, then every control, stricter check** | **9 / 8 / 1** | **4 / 1** |
+
+- The big gain is from offering the model only the controls in the step's own part of the page (11 to 20 instead of up to 150).
+- The stricter yes/no check ("the very same control, only renamed; related is not enough") is what removes wrong picks.
+- The fallback to every control is there for controls that moved as well as being renamed, which the practice sites showed matter.
+- Each setting was run once, and a repeat of the same setting moved by about two cases, so treat the differences as rough. The current setting was chosen after seeing these cases, so its figures are likely a little optimistic.
+- The wrong picks that remain are near-synonyms: a removed "Socialize" matched to "Community", and, on the Bengali page, "all services" matched to an existing "all e-services" card.
+- Bengali: the model does not read Bengali, yet it matched some Bengali labels. 3 renamed Bengali controls: 1 right, 1 declined, 1 wrong, so no claim is made for Bengali.
+- A model step on a real page takes about 4 seconds, from 2 to 6 model calls.
+- Not measured: Devanagari pages, pages that need a login, and full multi-step paths with the model.
 
 **Things we tried that did not help, and removed or did not adopt:**
 - Structured (schema-constrained) output for the model's answers: 44 right against 49 for plain text on the 55 model cases, because the constrained model said "not sure" about twice as often. Plain text is used for re-finding. Structured output is used where an answer is a longer shape, for the cloud translation.
-- Offering only same-kind controls first (buttons with buttons): slightly better on renamed-and-moved steps, but 3 wrong picks against 1 when a control was removed. Reverted.
+- Offering only same-kind controls first (buttons with buttons) on the practice sites: slightly better on renamed-and-moved steps, but 3 wrong picks against 1 when a control was removed, so it was reverted. Narrowing by section, tried later on real pages, is used (above).
 
 **On real websites.** [tools/e2e-real.mjs](tools/e2e-real.mjs) records a short path on three live public sites, saves it, follows it by clicking through the real pages, and then checks it again after a script simulates a redesign. Nothing is typed or submitted; it only clicks ordinary links. The sites are the Bangladesh national portal (Bengali labels), the Nepal Department of Passports (Nepali labels, with a pop-up notice over the page) and Wikipedia (English), 5 steps in all.
 
@@ -114,7 +133,7 @@ The harder redesign ran in a headless Chrome that has no on-device model, so "de
 
 **Security rules.** [tools/rules-check.js](tools/rules-check.js) runs 24 checks against the live project with two separate anonymous users: all pass. Allowed actions work (a helper can set the pick, a note and the status; a creator can delete). Refusals hold: a helper cannot change the list of controls, pick outside it, write a note over 100 characters or delete someone else's request; a path cannot be edited or created with no steps, 41 steps, an extra field or someone else's name as creator; nothing can be read without signing in, with a wrong-length group code, or outside `groups`. Not covered: the rules were checked on the real project, not the Firebase emulator, and a group code that leaks still gives full access to that group.
 
-**Tests.** 63 unit tests (`npm test`). Four end-to-end scripts drive a throwaway headless Chrome with the extension loaded and run against the live site: [tools/e2e.mjs](tools/e2e.mjs) (record, save, follow), [tools/e2e-help.mjs](tools/e2e-help.mjs) (ask for help, a phone-sized helper taps, the highlight moves, the request is deleted) and [tools/e2e-try.mjs](tools/e2e-try.mjs) (the same flow on the try page) and [tools/e2e-real.mjs](tools/e2e-real.mjs) (real public websites, above). The on-device model is not available in that headless Chrome, so the model path was checked separately in a normal Chrome.
+**Tests.** 65 unit tests (`npm test`). Four end-to-end scripts drive a throwaway headless Chrome with the extension loaded and run against the live site: [tools/e2e.mjs](tools/e2e.mjs) (record, save, follow), [tools/e2e-help.mjs](tools/e2e-help.mjs) (ask for help, a phone-sized helper taps, the highlight moves, the request is deleted), [tools/e2e-try.mjs](tools/e2e-try.mjs) (the same flow on the try page) and [tools/e2e-real.mjs](tools/e2e-real.mjs) (real public websites, above). In the headless browser, App Check sometimes refuses the cloud translation (reCAPTCHA scores it as a bot); the path is then saved without translations, as designed, and the test reports it. In a normal Chrome the cloud call works. The on-device model is not available in that headless Chrome, so the model path was checked separately in a normal Chrome.
 
 ## Design
 
@@ -132,7 +151,7 @@ Not done: a screen-reader pass, an automated accessibility audit, or any test wi
 
 - **Laptop only.** The on-device model runs in desktop Chrome, not on phones. The helper page does work on a phone, because the helper needs no model.
 - **The on-device model reads only English, Spanish and Japanese.** On a website in Nepali or Bengali, a renamed button can still be found by its link address or internal name, but not by the model. Saathi then says it is not sure.
-- **The hardest case is not solved.** On the practice site's `?v=3` copy (labels and internal names both renamed), the model found one of two steps and declined the other. Declining is the safe failure.
+- **The model is weak on long real pages.** When a control's label, address and name all change, the on-device model finds the right one in roughly half the cases on real pages (9 of 18 in the latest replay), declines in most of the rest, and occasionally points at a near-synonym. Declining is the safe failure and is the usual one.
 - **Real sites: short public paths only.** Full record and follow was tested on two-step paths on three public sites. Sites that need a login, forms with typed answers, long paths and pages with more than 150 controls were not tested. On a page with more than 150 controls, only the first 150 are read.
 - **Nepali and Hindi were not reviewed by a native speaker.** One early Nepali translation added a detail that was not in the step. The prompt now forbids that, and later samples did not repeat it, but review is still needed.
 - **Read-aloud was not tested with Nepali or Hindi voices.** It uses the browser's own voices, and many computers have no Nepali voice. The step card is always shown on screen.
