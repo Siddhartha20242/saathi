@@ -100,31 +100,74 @@ function onPageEvent(msg) {
 // ---------- Header ----------
 
 function renderChips() {
-  const g = $('chip-group');
-  g.textContent = state.group ? `Group ${state.group}` : 'No group yet';
-  g.className = `chip ${state.group ? 'ok' : ''}`;
-  const m = $('chip-model');
-  m.textContent = `On-device model: ${state.device}`;
-  m.className = `chip ${state.device === 'available' ? 'ok' : 'off'}`;
-  const c = $('chip-cloud');
-  c.textContent = state.config.cloudEnabled ? 'Cloud: on, labels only' : 'Cloud: switched off';
-  c.className = `chip ${state.config.cloudEnabled ? 'ok' : 'off'}`;
+  const joined = Boolean(state.group) && !state.switching;
+  document.body.dataset.joined = String(joined);
+  $('groupbar').hidden = !state.group || state.switching;
+  $('group-now').textContent = state.group;
+  $('sec-group').hidden = joined;
+  $('group-cancel').hidden = !(state.switching && state.group);
+  const model = $('chip-model');
+  model.textContent = `On-device model: ${state.device}`;
+  $('dot-model').className = `dot ${state.device === 'available' ? 'ok' : 'off'}`;
+  $('chip-cloud').textContent = state.config.cloudEnabled ? 'Cloud: on, labels only' : 'Cloud: switched off';
+  $('dot-cloud').className = `dot ${state.config.cloudEnabled ? 'ok' : 'off'}`;
   document.body.classList.toggle('big', state.big);
   $('opt-big').setAttribute('aria-pressed', String(state.big));
+  $('opt-speak').setAttribute('aria-pressed', String(state.speak));
   document.querySelectorAll('[data-lang]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.lang === state.lang)));
 }
+
+// ---------- Tabs ----------
+
+const TABS = ['follow', 'record', 'help'];
+function showTab(name) {
+  state.tab = name;
+  for (const t of TABS) {
+    $(`tab-${t}`).setAttribute('aria-selected', String(t === name));
+    $(`panel-${t}`).hidden = t !== name;
+  }
+}
+TABS.forEach((t) => $(`tab-${t}`).addEventListener('click', () => showTab(t)));
+$('tab-follow').closest('.tabs').addEventListener('keydown', (ev) => {
+  const at = TABS.indexOf(state.tab ?? 'follow');
+  const next = ev.key === 'ArrowRight' ? at + 1 : ev.key === 'ArrowLeft' ? at - 1 : null;
+  if (next === null) return;
+  const name = TABS[(next + TABS.length) % TABS.length];
+  showTab(name);
+  $(`tab-${name}`).focus();
+});
 
 // ---------- Group ----------
 
 async function setGroup(code) {
+  state.switching = false;
   state.group = code;
   store.set('saathi:group', code);
   $('group-code').value = '';
-  say('group-msg', code ? `You are in group ${code}. Share this code with the people who should see your paths.` : '', 'ok');
+  say('group-msg', '');
   renderChips();
   await refreshLibrary();
 }
 
+$('group-switch').addEventListener('click', () => {
+  state.switching = true;
+  renderChips();
+  $('group-code').focus();
+});
+$('group-cancel').addEventListener('click', () => {
+  state.switching = false;
+  renderChips();
+});
+$('group-copy').addEventListener('click', async (ev) => {
+  const button = ev.currentTarget;
+  try {
+    await navigator.clipboard.writeText(state.group);
+    button.textContent = 'Copied';
+  } catch {
+    button.textContent = state.group; // no clipboard here: show the code to read out
+  }
+  setTimeout(() => (button.textContent = 'Copy'), 2000);
+});
 $('group-new').addEventListener('click', () => setGroup(newGroupCode()));
 $('group-join').addEventListener('click', () => {
   const code = normaliseGroup($('group-code').value);
@@ -145,15 +188,15 @@ async function refreshLibrary() {
     state.paths = await listPaths(state.group);
     const fromCache = state.paths.some((p) => p.fromCache);
     list.innerHTML = state.paths
-      .map(
-        (p) => `<li>
-          <span><b>${esc(p.title)}</b><br><span class="muted">${esc(p.host)} · ${p.steps.length} steps${
-            Object.keys(p.translations ?? {}).length ? ` · ${Object.keys(p.translations).map((l) => LANGS[l]).join(', ')}` : ''
-          }</span></span>
-          <span><button class="primary" data-start="${esc(p.id)}">Start</button>${
-            p.mine ? ` <button class="quiet" data-delete="${esc(p.id)}">Delete</button>` : ''
-          }</span></li>`,
-      )
+      .map((p) => {
+        const langs = Object.keys(p.translations ?? {}).map((l) => LANGS[l]);
+        return `<li class="path">
+          <div class="info"><div class="title">${esc(p.title)}</div>
+            <div class="meta">${esc(p.host)} · ${p.steps.length} steps${langs.length ? ` · ${esc(langs.join(', '))}` : ''}</div></div>
+          <div class="go"><button class="primary" data-start="${esc(p.id)}">Start</button>${
+            p.mine ? `<button class="quiet small" data-delete="${esc(p.id)}">Delete</button>` : ''
+          }</div></li>`;
+      })
       .join('');
     say(
       'lib-msg',
@@ -161,7 +204,7 @@ async function refreshLibrary() {
         ? fromCache
           ? 'Showing the copy saved on this laptop. It updates when you are online.'
           : ''
-        : 'No paths in this group yet. Show the way once below.',
+        : 'No paths in this group yet. Open "Show the way" to record the first one.',
     );
   } catch (err) {
     say('lib-msg', `Could not load paths: ${err.message}`, 'bad');
@@ -227,6 +270,7 @@ $('rec-start').addEventListener('click', async () => {
     state.host = page.host;
     await callExtension('recordStart');
     recordingUi(true);
+    showTab('record');
     say('rec-msg', 'Recording. Use the website now. Press "Finish and save" when you are done.', 'ok');
   } catch (err) {
     say('rec-msg', err.message, 'bad');
@@ -311,6 +355,7 @@ function renderStepCard() {
   const english = stepInstruction(step);
   const other = state.lang !== 'en' ? instructionIn(f.path, f.index, state.lang) : null;
   $('fo-count').textContent = `${f.path.title} · ${(WORDS[state.lang] ?? WORDS.en).step(f.index + 1, f.path.steps.length)}`;
+  $('fo-bar').style.width = `${((f.index + 1) / f.path.steps.length) * 100}%`;
   $('fo-text').textContent = other ?? english;
   $('fo-text2').textContent = other ? english : state.lang !== 'en' ? '(This path has no translation yet, so it is shown in English.)' : '';
   $('fo-next').textContent = f.index === f.path.steps.length - 1 ? 'I did it, finish' : 'I did it, next';
@@ -324,9 +369,9 @@ function setHow(text, kind = '') {
 }
 
 const HOW = {
-  code: 'Found by its label. On this laptop; the page never left it.',
-  anchor: 'The label changed, but the link or box underneath is the same. Found by plain code on this laptop.',
-  model: 'The label changed. Found by the on-device model on this laptop.',
+  code: 'Found by its label.',
+  anchor: 'The label changed, but the link or box underneath is the same.',
+  model: 'The label changed. Found by the on-device model.',
 };
 
 const askLocal = async (prompt) => {
@@ -391,6 +436,8 @@ async function startFollow(path) {
   if (!path) return;
   state.follow = { path, index: 0, found: null };
   state.done = false;
+  document.body.dataset.following = 'true';
+  showTab('follow');
   $('fo-done').hidden = true;
   $('follow').hidden = false;
   await showStep();
@@ -403,6 +450,7 @@ async function nextStep() {
   if (f.index >= f.path.steps.length) {
     state.follow = null;
     state.done = true;
+    document.body.dataset.following = 'false';
     $('follow').hidden = true;
     $('fo-done').hidden = false;
     $('fo-done').textContent = (WORDS[state.lang] ?? WORDS.en).done;
@@ -422,6 +470,7 @@ $('fo-read').addEventListener('click', () => {
 });
 $('fo-stop').addEventListener('click', () => {
   state.follow = null;
+  document.body.dataset.following = 'false';
   $('follow').hidden = true;
   speechSynthesis?.cancel?.();
 });
@@ -439,10 +488,9 @@ $('opt-big').addEventListener('click', () => {
   store.set('saathi:big', state.big ? '1' : '0');
   renderChips();
 });
-$('opt-speak').addEventListener('click', (ev) => {
+$('opt-speak').addEventListener('click', () => {
   state.speak = !state.speak;
-  ev.currentTarget.setAttribute('aria-pressed', String(state.speak));
-  ev.currentTarget.textContent = `Read aloud: ${state.speak ? 'on' : 'off'}`;
+  renderChips();
   if (!state.speak) speechSynthesis?.cancel?.();
 });
 

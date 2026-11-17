@@ -3,169 +3,265 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light dark" />
     <title>Saathi panel</title>
     <style>
-      :root { --ink: #1d1b16; --muted: #6b665c; --line: #e2ddd2; --bg: #f6f4ef; --accent: #0f5c4a; --warn: #e0a11b; --bad: #a3271f; }
+      :root {
+        --bg: #ffffff; --surface: #f6f4ef; --ink: #1d1b16; --muted: #5f5a50; --line: #ddd7ca;
+        --accent: #0f5c4a; --accent-ink: #ffffff; --accent-soft: #e4f1ec;
+        --warn: #b97a00; --warn-soft: #fff4dc; --bad: #a3271f; --radius: 12px; --tap: 48px;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #17150f; --surface: #221f18; --ink: #f1eee6; --muted: #b9b2a3; --line: #3b372d;
+          --accent: #52bf9f; --accent-ink: #0b1f19; --accent-soft: #17332b;
+          --warn: #e6b04a; --warn-soft: #3a2d0c; --bad: #ff8f84;
+        }
+      }
       * { box-sizing: border-box; }
-      body { font: 14px/1.45 system-ui, sans-serif; margin: 0; color: var(--ink); background: #fff; }
+      html { -webkit-text-size-adjust: 100%; }
+      body { margin: 0; font: 15px/1.5 system-ui, -apple-system, 'Segoe UI', sans-serif; color: var(--ink); background: var(--bg); }
       body.big { font-size: 19px; }
-      header { padding: 10px 14px; background: var(--bg); border-bottom: 1px solid var(--line); }
-      header h1 { font-size: 17px; margin: 0; display: inline; }
-      header .tag { font-size: 12px; color: var(--muted); margin-left: 8px; }
-      .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
-      .chip { font-size: 12px; padding: 2px 9px; border: 1px solid var(--line); border-radius: 999px; background: #fff; color: var(--muted); }
-      .chip.ok { color: var(--accent); border-color: var(--accent); }
-      .chip.off { color: #7a4b00; border-color: var(--warn); background: #fff4dc; }
-      main { padding: 4px 14px 24px; }
-      section { padding: 12px 0; border-bottom: 1px solid var(--line); }
-      h2 { font-size: 15px; margin: 0 0 6px; }
-      p { margin: 4px 0; }
-      .muted { color: var(--muted); font-size: 13px; }
-      body.big .muted { font-size: 16px; }
-      button { font: inherit; padding: 7px 12px; border-radius: 7px; border: 1px solid #cfc9bb; background: #fff; cursor: pointer; }
-      button.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
-      button.quiet { border: 0; background: none; color: var(--muted); text-decoration: underline; padding: 2px 4px; }
-      button:disabled { opacity: 0.55; cursor: default; }
-      button:focus-visible, input:focus-visible { outline: 3px solid var(--accent); outline-offset: 1px; }
-      input[type=text], input:not([type]), select { font: inherit; padding: 7px 9px; border: 1px solid #cfc9bb; border-radius: 7px; width: 100%; }
-      .row { display: flex; gap: 8px; margin: 6px 0; flex-wrap: wrap; align-items: center; }
-      .row > input { flex: 1; min-width: 120px; }
-      .out { background: var(--bg); border-radius: 7px; padding: 8px 10px; min-height: 1.4em; white-space: pre-wrap; word-break: break-word; }
-      .ok { color: var(--accent); } .bad { color: var(--bad); }
-      ol, ul { margin: 6px 0; padding-left: 20px; }
-      ul.plain { list-style: none; padding: 0; }
-      ul.plain li { border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; margin: 6px 0; display: flex; justify-content: space-between; gap: 8px; align-items: center; }
-      .step-card { border: 2px solid var(--accent); border-radius: 12px; padding: 14px; margin: 8px 0; }
-      .step-card .count { color: var(--muted); font-size: 13px; }
-      .step-card .main { font-size: 20px; font-weight: 600; margin: 6px 0; }
-      body.big .step-card .main { font-size: 28px; }
-      .step-card .second { font-size: 18px; margin: 4px 0 8px; }
-      body.big .step-card .second { font-size: 24px; }
-      .banner { background: #fff4dc; border: 1px solid var(--warn); border-radius: 8px; padding: 8px 10px; margin: 8px 0; }
-      .seg button { border-radius: 0; margin: 0; }
-      .seg button:first-child { border-radius: 7px 0 0 7px; } .seg button:last-child { border-radius: 0 7px 7px 0; }
-      .seg button[aria-pressed=true] { background: var(--accent); color: #fff; border-color: var(--accent); }
-      details summary { cursor: pointer; color: var(--muted); }
+      h1, h2, h3, p { margin: 0; }
+      p + p { margin-top: 6px; }
+      .muted { color: var(--muted); font-size: 0.92em; }
       [hidden] { display: none !important; }
+
+      /* Header */
+      .top { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 16px; background: var(--surface); border-bottom: 1px solid var(--line); }
+      .brand { display: flex; align-items: center; gap: 8px; }
+      .brand svg { width: 26px; height: 26px; color: var(--accent); flex: none; }
+      .brand h1 { font-size: 1.25em; letter-spacing: -0.01em; }
+      .rule { font-size: 0.85em; color: var(--muted); text-align: right; }
+
+      /* Group */
+      .groupbar { display: flex; align-items: center; gap: 8px; padding: 8px 16px; border-bottom: 1px solid var(--line); font-size: 0.92em; }
+      .groupbar .label { color: var(--muted); }
+      .groupbar code { font: 600 1em ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: 0.08em; background: var(--accent-soft); color: var(--accent); padding: 2px 8px; border-radius: 6px; }
+      .groupbar .spacer { flex: 1; }
+      .card { margin: 16px; padding: 16px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+      .card h2 { font-size: 1.1em; margin-bottom: 4px; }
+
+      /* Tabs */
+      .tabs { display: flex; border-bottom: 1px solid var(--line); background: var(--bg); position: sticky; top: 0; z-index: 2; }
+      .tabs button { flex: 1; min-height: var(--tap); border: 0; border-bottom: 3px solid transparent; background: none; color: var(--muted); font: inherit; font-weight: 600; cursor: pointer; padding: 8px 6px; border-radius: 0; }
+      .tabs button[aria-selected=true] { color: var(--accent); border-bottom-color: var(--accent); }
+      body[data-joined=false] .tabs, body[data-joined=false] .panels { display: none; }
+      .panel-body { padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+
+      /* Controls */
+      button, input, select { font: inherit; color: var(--ink); }
+      button { min-height: var(--tap); padding: 8px 16px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); cursor: pointer; }
+      button:hover:not(:disabled) { border-color: var(--muted); }
+      button.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 600; }
+      button.wide { width: 100%; }
+      button.small { min-height: 36px; padding: 4px 12px; font-size: 0.9em; }
+      button.quiet { border-color: transparent; background: none; color: var(--muted); text-decoration: underline; min-height: 36px; padding: 4px 8px; }
+      button:disabled { opacity: 0.55; cursor: default; }
+      :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+      input, select { width: 100%; min-height: var(--tap); padding: 8px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); }
+      input::placeholder { color: var(--muted); }
+      .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+      .row > input { flex: 1; min-width: 140px; }
+      .stack { display: flex; flex-direction: column; gap: 8px; }
+      .seg { display: inline-flex; }
+      .seg button { border-radius: 0; margin-left: -1px; }
+      .seg button:first-child { border-radius: 10px 0 0 10px; margin-left: 0; }
+      .seg button:last-child { border-radius: 0 10px 10px 0; }
+      .seg button[aria-pressed=true], .toggle[aria-pressed=true] { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); font-weight: 600; }
+      .settings { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+
+      /* Messages: nothing shows until there is something to say */
+      .out { padding: 10px 12px; border-radius: 10px; background: var(--surface); white-space: pre-wrap; word-break: break-word; }
+      .out:empty { display: none; }
+      .out.ok { color: var(--accent); background: var(--accent-soft); }
+      .out.bad { color: var(--bad); }
+      .banner { padding: 10px 12px; border-radius: 10px; background: var(--warn-soft); border: 1px solid var(--warn); }
+
+      /* Paths */
+      .paths { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+      .path { display: flex; align-items: center; gap: 10px; padding: 12px; border: 1px solid var(--line); border-radius: var(--radius); }
+      .path .info { flex: 1; min-width: 0; }
+      .path .title { font-weight: 600; }
+      .path .meta { color: var(--muted); font-size: 0.85em; }
+      .path .go { display: flex; flex-direction: column; align-items: stretch; gap: 2px; }
+      body[data-following=true] #lib-wrap { display: none; }
+
+      /* The step card: the one thing a person needs, so it is the largest thing */
+      .step-card { border: 2px solid var(--accent); border-radius: 16px; padding: 16px; background: var(--bg); }
+      .step-card .count { color: var(--muted); font-size: 0.88em; }
+      .progress { height: 6px; border-radius: 3px; background: var(--line); margin: 8px 0 12px; overflow: hidden; }
+      .progress span { display: block; height: 100%; width: 0; background: var(--accent); }
+      .step-card .main { font-size: 1.45em; font-weight: 700; line-height: 1.3; }
+      .step-card .second { font-size: 1.2em; margin-top: 8px; }
+      .step-card .how { margin-top: 10px; color: var(--muted); font-size: 0.88em; }
+      .step-card .how.bad { color: var(--bad); }
+      .privacy { display: flex; align-items: center; gap: 6px; margin-top: 10px; color: var(--muted); font-size: 0.85em; }
+      .privacy svg { width: 14px; height: 14px; flex: none; }
+      body.big .step-card .main { font-size: 1.7em; }
+      .done { padding: 16px; border-radius: var(--radius); background: var(--accent-soft); color: var(--accent); font-weight: 600; font-size: 1.1em; }
+
+      /* Recording */
+      .steps-list { margin: 0; padding-left: 22px; display: flex; flex-direction: column; gap: 4px; }
+      .steps-list:empty { display: none; }
+      .rec-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--bad); margin-right: 6px; }
+      @media (prefers-reduced-motion: no-preference) { .rec-dot { animation: pulse 1.4s ease-in-out infinite; } @keyframes pulse { 50% { opacity: 0.35; } } }
+
+      /* Footer */
+      footer { padding: 12px 16px 24px; border-top: 1px solid var(--line); color: var(--muted); font-size: 0.82em; display: flex; flex-direction: column; gap: 8px; }
+      .status { display: flex; flex-wrap: wrap; gap: 6px 14px; }
+      .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--muted); margin-right: 5px; }
+      .dot.ok { background: var(--accent); } .dot.off { background: var(--warn); }
+      details summary { cursor: pointer; }
+      details h3 { font-size: 1em; margin: 12px 0 4px; color: var(--ink); }
     </style>
   </head>
-  <body>
-    <header>
-      <h1>Saathi</h1><span class="tag">Saathi highlights. You do it.</span>
-      <div class="chips">
-        <span class="chip" id="chip-group">No group yet</span>
-        <span class="chip" id="chip-model">On-device model: checking…</span>
-        <span class="chip" id="chip-cloud">Cloud: checking…</span>
+  <body data-joined="false" data-following="false">
+    <header class="top">
+      <div class="brand">
+        <svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><circle cx="16" cy="16" r="14" stroke="currentColor" stroke-width="2.5"/><circle cx="16" cy="16" r="6" fill="currentColor"/></svg>
+        <h1>Saathi</h1>
       </div>
+      <p class="rule">Saathi highlights.<br />You do it.</p>
     </header>
 
-    <main>
-      <p class="muted" id="where"></p>
+    <div class="groupbar" id="groupbar" hidden>
+      <span class="label">Group</span><code id="group-now"></code>
+      <button class="small" id="group-copy" aria-label="Copy the group code">Copy</button>
+      <span class="spacer"></span>
+      <button class="quiet small" id="group-switch">Change group</button>
+    </div>
 
-      <section id="sec-group">
-        <h2>1. Your group</h2>
-        <p class="muted">A group is a family or a community. Everyone with the code sees the same paths.</p>
+    <section class="card" id="sec-group">
+      <h2>Start with a group</h2>
+      <p class="muted">A group is a family or a community. Everyone with the code sees the same paths.</p>
+      <div class="stack" style="margin-top: 12px">
         <div class="row">
           <input id="group-code" placeholder="Enter a group code" maxlength="12" autocomplete="off" aria-label="Group code" />
           <button id="group-join">Join</button>
-          <button id="group-new">Start a new group</button>
         </div>
+        <button class="primary wide" id="group-new">Start a new group</button>
+        <button class="quiet" id="group-cancel" hidden>Cancel</button>
         <p class="out" id="group-msg"></p>
-      </section>
+      </div>
+    </section>
 
-      <section id="sec-follow">
-        <h2>2. Follow a path</h2>
-        <div class="row">
+    <nav class="tabs" role="tablist" aria-label="Saathi">
+      <button role="tab" id="tab-follow" aria-controls="panel-follow" aria-selected="true">Follow</button>
+      <button role="tab" id="tab-record" aria-controls="panel-record" aria-selected="false">Show the way</button>
+      <button role="tab" id="tab-help" aria-controls="panel-help" aria-selected="false">Get help</button>
+    </nav>
+
+    <div class="panels">
+      <!-- Follow -->
+      <div class="panel-body" role="tabpanel" id="panel-follow" aria-labelledby="tab-follow">
+        <div class="settings" role="group" aria-label="Reading settings">
           <span class="seg" role="group" aria-label="Language">
             <button data-lang="en" aria-pressed="true">English</button><button data-lang="ne" aria-pressed="false">नेपाली</button><button data-lang="hi" aria-pressed="false">हिन्दी</button>
           </span>
-          <button id="opt-big" aria-pressed="false">Large text</button>
-          <button id="opt-speak" aria-pressed="false">Read aloud: off</button>
+          <button class="toggle small" id="opt-big" aria-pressed="false">Large text</button>
+          <button class="toggle small" id="opt-speak" aria-pressed="false">Read aloud</button>
         </div>
-        <ul class="plain" id="lib-list"></ul>
-        <p class="out" id="lib-msg"></p>
-        <div class="row"><button class="quiet" id="lib-refresh">Refresh the list</button></div>
 
         <div id="follow" hidden>
           <div class="step-card" aria-live="polite">
             <div class="count" id="fo-count"></div>
+            <div class="progress" aria-hidden="true"><span id="fo-bar"></span></div>
             <div class="main" id="fo-text"></div>
             <div class="second" id="fo-text2"></div>
-            <div class="muted" id="fo-how"></div>
+            <div class="how" id="fo-how"></div>
+            <div class="privacy">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="3" y="7" width="10" height="7" rx="1.5"/><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2"/></svg>
+              On this laptop only. The page you are on is never sent anywhere.
+            </div>
           </div>
-          <div class="banner" id="fo-warn" hidden></div>
-          <div class="row">
-            <button class="primary" id="fo-next">I did it, next</button>
-            <button id="fo-again">Show me again</button>
-            <button id="fo-read">Read aloud</button>
-            <button class="quiet" id="fo-stop">Stop</button>
+          <div class="banner" id="fo-warn" hidden style="margin-top: 12px"></div>
+          <div class="stack" style="margin-top: 12px">
+            <button class="primary wide" id="fo-next">I did it, next</button>
+            <div class="row">
+              <button id="fo-again">Show me again</button>
+              <button id="fo-read">Read aloud</button>
+              <button class="quiet" id="fo-stop">Stop</button>
+            </div>
           </div>
-          <p class="muted">On this laptop only. The page you are on is never sent anywhere.</p>
         </div>
-        <p class="banner" id="fo-done" hidden></p>
-      </section>
+        <p class="done" id="fo-done" hidden></p>
 
-      <section id="sec-record">
-        <h2>3. Show the way once</h2>
-        <p class="muted">Press Start, then use the website as you normally would. Saathi writes down which buttons and boxes you use, in order.</p>
-        <p class="muted"><b>Saved:</b> the page addresses, the names of the buttons and boxes, and their order. <b>Never saved:</b> anything you type, passwords, or pictures of the page.</p>
-        <div class="row">
-          <input id="rec-title" placeholder="Name of this path, for example Pay the electricity bill" maxlength="80" autocomplete="off" aria-label="Path name" />
+        <div id="lib-wrap" class="stack">
+          <h2>Paths in your group</h2>
+          <ul class="paths" id="lib-list"></ul>
+          <p class="out" id="lib-msg"></p>
+          <div class="row"><button class="quiet" id="lib-refresh">Refresh the list</button></div>
         </div>
-        <div class="row">
-          <button class="primary" id="rec-start">Start</button>
-          <button id="rec-save" hidden>Finish and save</button>
+      </div>
+
+      <!-- Show the way -->
+      <div class="panel-body" role="tabpanel" id="panel-record" aria-labelledby="tab-record" hidden>
+        <div>
+          <h2>Show the way once</h2>
+          <p class="muted">Press Start, then use the website as you normally would. Saathi writes down which buttons and boxes you use, in order.</p>
+        </div>
+        <p class="banner"><b>Saved:</b> page addresses, the names of buttons and boxes, and their order.<br /><b>Never saved:</b> anything you type, passwords, or pictures of the page.</p>
+        <input id="rec-title" placeholder="Name of this path, for example Pay the electricity bill" maxlength="80" autocomplete="off" aria-label="Path name" />
+        <div class="stack">
+          <button class="primary wide" id="rec-start">Start</button>
+          <button class="primary wide" id="rec-save" hidden><span class="rec-dot"></span>Finish and save</button>
           <button class="quiet" id="rec-cancel" hidden>Cancel</button>
         </div>
-        <ol id="rec-steps"></ol>
+        <ol class="steps-list" id="rec-steps"></ol>
         <p class="out" id="rec-msg"></p>
-      </section>
+      </div>
 
-      <section>
-        <h2>4. Not sure what this page wants?</h2>
-        <p class="muted">Uses the on-device model when this laptop has one. Otherwise the cloud answers, and only the page's labels are sent.</p>
-        <button id="t-explain">Explain this page</button>
-        <p class="out" id="o-explain"></p>
-      </section>
-
-      <section id="sec-help">
-        <h2>5. Still stuck? Ask your helper</h2>
-        <p class="muted">Your helper sees the names of the buttons and boxes on this page, on their phone. They tap the right one and it lights up here. They never see the page, a picture of it, or anything you typed.</p>
-        <button id="help-ask">Ask my helper</button>
-        <div id="help-confirm" hidden>
-          <p class="banner" id="help-preview"></p>
-          <div class="row">
-            <button class="primary" id="help-send">Send the names</button>
+      <!-- Get help -->
+      <div class="panel-body" role="tabpanel" id="panel-help" aria-labelledby="tab-help" hidden>
+        <div class="stack" id="sec-help">
+          <h2>Ask a helper</h2>
+          <p class="muted">Your helper sees the names of the buttons and boxes on this page, on their phone. They tap the right one and it lights up here. They never see the page, a picture of it, or anything you typed.</p>
+          <button class="primary wide" id="help-ask">Ask my helper</button>
+          <div id="help-confirm" hidden class="stack">
+            <p class="banner" id="help-preview"></p>
+            <button class="primary wide" id="help-send">Send the names</button>
             <button class="quiet" id="help-cancel">Cancel</button>
           </div>
-        </div>
-        <div id="help-live" hidden>
-          <p class="banner" id="help-status" aria-live="polite"></p>
-          <p class="muted">Your helper opens <b id="help-url"></b> on their phone and enters the group code <b id="help-code"></b>.</p>
-          <button id="help-end">I am done, stop sharing</button>
-        </div>
-        <p class="out" id="help-msg"></p>
-      </section>
-
-      <section>
-        <details>
-          <summary>Developer checks</summary>
-          <h2>On-device model</h2>
-          <button id="t-device">Run on this laptop</button>
-          <p class="out" id="o-device"></p>
-          <h2>Cloud model (with App Check)</h2>
-          <button id="t-cloud">Run in the cloud</button>
-          <p class="out" id="o-cloud"></p>
-          <h2>Find a control by its old label</h2>
-          <div class="row"><input id="f-label" placeholder="Old label, for example: Sign in" autocomplete="off" aria-label="Old label" /></div>
-          <div class="row">
-            <select id="f-kind" aria-label="Kind of control"><option value="button">Something to press</option><option value="field">Something to fill in</option></select>
-            <button id="t-find" class="primary">Find</button>
+          <div id="help-live" hidden class="stack">
+            <p class="banner" id="help-status" aria-live="polite"></p>
+            <p class="muted">Your helper opens <b id="help-url"></b> on their phone and enters the group code <b id="help-code"></b>.</p>
+            <button id="help-end">I am done, stop sharing</button>
           </div>
-          <p class="out" id="o-find"></p>
-        </details>
-      </section>
-    </main>
+          <p class="out" id="help-msg"></p>
+        </div>
+        <div class="stack">
+          <h2>Not sure what this page wants?</h2>
+          <p class="muted">Uses the on-device model when this laptop has one. Otherwise the cloud answers, and only the page's labels are sent.</p>
+          <button class="wide" id="t-explain">Explain this page</button>
+          <p class="out" id="o-explain"></p>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <div class="status">
+        <span><span class="dot" id="dot-model"></span><span id="chip-model">On-device model: checking…</span></span>
+        <span><span class="dot" id="dot-cloud"></span><span id="chip-cloud">Cloud: checking…</span></span>
+      </div>
+      <p id="where"></p>
+      <details>
+        <summary>Developer checks</summary>
+        <h3>On-device model</h3>
+        <button id="t-device">Run on this laptop</button>
+        <p class="out" id="o-device"></p>
+        <h3>Cloud model (with App Check)</h3>
+        <button id="t-cloud">Run in the cloud</button>
+        <p class="out" id="o-cloud"></p>
+        <h3>Find a control by its old label</h3>
+        <div class="row"><input id="f-label" placeholder="Old label, for example: Sign in" autocomplete="off" aria-label="Old label" /></div>
+        <div class="row">
+          <select id="f-kind" aria-label="Kind of control"><option value="button">Something to press</option><option value="field">Something to fill in</option></select>
+          <button id="t-find" class="primary">Find</button>
+        </div>
+        <p class="out" id="o-find"></p>
+      </details>
+    </footer>
 
     <script type="module" src="/src/panel.js"></script>
   </body>
