@@ -1,0 +1,1056 @@
+{
+ "url": "https://en.wikipedia.org/wiki/Main_Page",
+ "title": "Wikipedia, the free encyclopedia",
+ "elements": [
+  {
+   "role": "field",
+   "text": "Search Wikipedia",
+   "section": "Menu",
+   "href": "",
+   "name": "search"
+  },
+  {
+   "role": "button",
+   "text": "Search",
+   "section": "Menu",
+   "href": "",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Donate",
+   "section": "Menu",
+   "href": "",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Create account",
+   "section": "Menu",
+   "href": "/w/index.php",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Log in",
+   "section": "Menu",
+   "href": "/w/index.php",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Main Page",
+   "section": "Menu",
+   "href": "",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Talk",
+   "section": "Menu",
+   "href": "/wiki/Talk:Main_Page",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Read",
+   "section": "Menu",
+   "href": "",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "View source",
+   "section": "Menu",
+   "href": "/w/index.php",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "View history",
+   "section": "Menu",
+   "href": "/w/index.php",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Save",
+   "section": "Menu",
+   "href": "",
+   "name": ""
+  },
+  {
+   "role": "button",
+   "text": "Hide Appearance",
+   "section": "Menu",
+   "href": "",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Wikipedia",
+   "section": "Welcome to Wikipedia",
+   "href": "/wiki/Wikipedia",
+   "name": "mwBg"
+  },
+  {
+   "role": "link",
+   "text": "free",
+   "section": "Welcome to Wikipedia",
+   "href": "/wiki/Free_content",
+   "name": "mwBw"
+  },
+  {
+   "role": "link",
+   "text": "anyone can edit",
+   "section": "Welcome to Wikipedia",
+   "href": "/wiki/Help:Introduction_to_Wikipedia",
+   "name": "mwCA"
+  },
+  {
+   "role": "link",
+   "text": "261,656",
+   "section": "Welcome to Wikipedia",
+   "href": "/wiki/Special:Statistics",
+   "name": "mwCw"
+  },
+  {
+   "role": "link",
+   "text": "7,265,442",
+   "section": "Welcome to Wikipedia",
+   "href": "/wiki/Special:Statistics",
+   "name": "mwDg"
+  },
+  {
+   "role": "link",
+   "text": "English",
+   "section": "Welcome to Wikipedia",
+   "href": "/wiki/English_language",
+   "name": "mwEA"
+  },
+  {
+   "role": "link",
+   "text": "Dividing the Light was one of the installation artworks that inspired the game.",
+   "section": "From today's featured article",
+   "href": "/wiki/File:Dividing_the_Light_at_dusk.jpg",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Dividing the Light",
+   "section": "From today's featured article",
+   "href": "/wiki/Dividing_the_Light",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Islands: Non-Places",
+   "section": "From today's featured article",
+   "href": "/wiki/Islands:_Non-Places",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "art game",
+   "section": "From today's featured article",
+   "href": "/wiki/Art_game",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "liminal",
+   "section": "From today's featured article",
+   "href": "/wiki/Liminality",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Marc Augé",
+   "section": "From today's featured article",
+   "href": "/wiki/Marc_Aug%C3%A9",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "installation art",
+   "section": "From today's featured article",
+   "href": "/wiki/Installation_art",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "James Turrell",
+   "section": "From today's featured article",
+   "href": "/wiki/James_Turrell",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "field recordings",
+   "section": "From today's featured article",
+   "href": "/wiki/Field_recording",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Chris Watson",
+   "section": "From today's featured article",
+   "href": "/wiki/Chris_Watson_(musician)",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Nuovo Award",
+   "section": "From today's featured article",
+   "href": "/wiki/Nuovo_Award",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Independent Games Festival",
+   "section": "From today's featured article",
+   "href": "/wiki/Independent_Games_Festival",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Full article...",
+   "section": "From today's featured article",
+   "href": "/wiki/Islands:_Non-Places",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Mark Satin",
+   "section": "From today's featured article",
+   "href": "/wiki/Mark_Satin",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "\"Can't Let Go\" (Mariah Carey song)",
+   "section": "From today's featured article",
+   "href": "/wiki/Can't_Let_Go_(Mariah_Carey_song)",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Aucanquilcha",
+   "section": "From today's featured article",
+   "href": "/wiki/Aucanquilcha",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Archive",
+   "section": "From today's featured article",
+   "href": "/wiki/Wikipedia:Today's_featured_article/November_2026",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "By email",
+   "section": "From today's featured article",
+   "href": "/postorius/lists/daily-article-l.lists.wikimedia.org/",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "More featured articles",
+   "section": "From today's featured article",
+   "href": "/wiki/Wikipedia:Featured_articles_(linked_from_TFAfooter)",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "About",
+   "section": "From today's featured article",
+   "href": "/wiki/Wikipedia:About_Today's_featured_article",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Verity",
+   "section": "Did you know ...",
+   "href": "/wiki/File:Verity_normal.svg",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "a Generation Alpha meme",
+   "section": "Did you know ...",
+   "href": "/wiki/Verity_(web_series)",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Julian Aguon",
+   "section": "Did you know ...",
+   "href": "/wiki/Julian_Aguon",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "a secret episode",
+   "section": "Did you know ...",
+   "href": "/wiki/Conformity_Gate",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Alois Lichtsteiner",
+   "section": "Did you know ...",
+   "href": "/wiki/Alois_Lichtsteiner",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Interstate 24 in Tennessee",
+   "section": "Did you know ...",
+   "href": "/wiki/Interstate_24_in_Tennessee",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "iCloud Private Relay",
+   "section": "Did you know ...",
+   "href": "/wiki/ICloud_Private_Relay",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Dyckman House",
+   "section": "Did you know ...",
+   "href": "/wiki/Dyckman_House",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Consideration",
+   "section": "Did you know ...",
+   "href": "/wiki/Consideration_(song)",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Nannie Washburn",
+   "section": "Did you know ...",
+   "href": "/wiki/Nannie_Washburn",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Archive",
+   "section": "Did you know ...",
+   "href": "/wiki/Wikipedia:Did_you_know_archive",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Start a new article",
+   "section": "Did you know ...",
+   "href": "/wiki/Help:Your_first_article",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Nominate an article",
+   "section": "Did you know ...",
+   "href": "/wiki/Template_talk:Did_you_know",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Garbage bin with trash on top",
+   "section": "Help us improve this article!",
+   "href": "/wiki/File:2021-05-22_Bald_geht_die_Party_richtig_los.jpg",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "garbage",
+   "section": "Help us improve this article!",
+   "href": "/wiki/Garbage",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "History",
+   "section": "Help us improve this article!",
+   "href": "/wiki/Garbage",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Treatment",
+   "section": "Help us improve this article!",
+   "href": "/wiki/Garbage",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "reliable sources",
+   "section": "Help us improve this article!",
+   "href": "/wiki/Wikipedia:Reliable_sources",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "sources mentioned on the talk page",
+   "section": "Help us improve this article!",
+   "href": "/wiki/Talk:Garbage",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "be bold",
+   "section": "Help us improve this article!",
+   "href": "/wiki/Wikipedia:Be_bold",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "start editing the article",
+   "section": "Help us improve this article!",
+   "href": "/w/index.php",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "the article's talk page",
+   "section": "Help us improve this article!",
+   "href": "/wiki/Talk:Garbage",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Teahouse",
+   "section": "Help us improve this article!",
+   "href": "/wiki/Wikipedia:Teahouse",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "For new editors",
+   "section": "Help us improve this article!",
+   "href": "/wiki/Help:Introduction",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Archive",
+   "section": "Help us improve this article!",
+   "href": "/wiki/Wikipedia:Articles_for_improvement/Archives/Schedule",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "What is this?",
+   "section": "Help us improve this article!",
+   "href": "/wiki/Wikipedia:Articles_for_improvement",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Jensen Huang in 2026",
+   "section": "In the news",
+   "href": "/wiki/File:Jensen_Huang_Stanford_2026-04-30_010_(cropped).jpg",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Nvidia",
+   "section": "In the news",
+   "href": "/wiki/Nvidia",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Jensen Huang",
+   "section": "In the news",
+   "href": "/wiki/Jensen_Huang",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "being targeted by a Chinese spy",
+   "section": "In the news",
+   "href": "/wiki/Jensen_Huang_spying_scandal",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Salvadoran military intervention in Haiti",
+   "section": "In the news",
+   "href": "/wiki/Salvadoran_military_intervention_in_Haiti",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "400 Mawozo",
+   "section": "In the news",
+   "href": "/wiki/400_Mawozo",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Sylvio Cator Stadium",
+   "section": "In the news",
+   "href": "/wiki/Stade_Sylvio_Cator",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "SS United States",
+   "section": "In the news",
+   "href": "/wiki/SS_United_States",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "scuttled",
+   "section": "In the news",
+   "href": "/wiki/Scuttling",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "artificial reef",
+   "section": "In the news",
+   "href": "/wiki/Artificial_reef",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "The End of Everything",
+   "section": "In the news",
+   "href": "/wiki/The_End_of_Everything_(Harrison_novel)",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "M. John Harrison",
+   "section": "In the news",
+   "href": "/wiki/M._John_Harrison",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Booker Prize",
+   "section": "In the news",
+   "href": "/wiki/Booker_Prize",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Iran war",
+   "section": "In the news",
+   "href": "/wiki/2026_Iran_war",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Russo-Ukrainian war",
+   "section": "In the news",
+   "href": "/wiki/Russo-Ukrainian_war_(2022%E2%80%93present)",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "timeline",
+   "section": "In the news",
+   "href": "/wiki/Timeline_of_the_Russo-Ukrainian_war_(1_September_2026_%E2%80%93_present)",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Yemen offensives",
+   "section": "In the news",
+   "href": "/wiki/2026_Yemen_offensives",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Recent deaths",
+   "section": "In the news",
+   "href": "/wiki/Deaths_in_2026",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Alexander Darchiev",
+   "section": "In the news",
+   "href": "/wiki/Alexander_Darchiev",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Tom O'Brien",
+   "section": "In the news",
+   "href": "/wiki/Tom_O'Brien_(jockey)",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Antonello Palombi",
+   "section": "In the news",
+   "href": "/wiki/Antonello_Palombi",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Mitsuru Nagai",
+   "section": "In the news",
+   "href": "/wiki/Mitsuru_Nagai",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Tommy Walsh",
+   "section": "In the news",
+   "href": "/wiki/Tommy_Walsh_(builder)",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Badrul Kamal",
+   "section": "In the news",
+   "href": "/wiki/Badrul_Kamal",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "More current events",
+   "section": "In the news",
+   "href": "/wiki/Portal:Current_events",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Nominate an article",
+   "section": "In the news",
+   "href": "/wiki/Wikipedia:In_the_news/Candidates",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "November 17",
+   "section": "On this day",
+   "href": "/wiki/November_17",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Queen Elizabeth I of England",
+   "section": "On this day",
+   "href": "/wiki/File:Elizabeth_I_in_coronation_robes.jpg",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "1558",
+   "section": "On this day",
+   "href": "/wiki/1558",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Elizabeth I",
+   "section": "On this day",
+   "href": "/wiki/Elizabeth_I",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Queen of England",
+   "section": "On this day",
+   "href": "/wiki/List_of_English_monarchs",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "of Ireland",
+   "section": "On this day",
+   "href": "/wiki/Monarchy_of_Ireland",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Elizabethan era",
+   "section": "On this day",
+   "href": "/wiki/Elizabethan_era",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "1796",
+   "section": "On this day",
+   "href": "/wiki/1796",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "French Revolutionary Wars",
+   "section": "On this day",
+   "href": "/wiki/French_Revolutionary_Wars",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Battle of Arcole",
+   "section": "On this day",
+   "href": "/wiki/Battle_of_Arcole",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "1941",
+   "section": "On this day",
+   "href": "/wiki/1941",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "World War II",
+   "section": "On this day",
+   "href": "/wiki/World_War_II",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Hjalmar Siilasvuo",
+   "section": "On this day",
+   "href": "/wiki/Hjalmar_Siilasvuo",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Salla",
+   "section": "On this day",
+   "href": "/wiki/Salla",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Operation Arctic Fox",
+   "section": "On this day",
+   "href": "/wiki/Operation_Arctic_Fox",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "1989",
+   "section": "On this day",
+   "href": "/wiki/1989",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Walt Disney Pictures",
+   "section": "On this day",
+   "href": "/wiki/Walt_Disney_Pictures",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "The Little Mermaid",
+   "section": "On this day",
+   "href": "/wiki/The_Little_Mermaid_(1989_film)",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Disney Renaissance",
+   "section": "On this day",
+   "href": "/wiki/Disney_Renaissance",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "2013",
+   "section": "On this day",
+   "href": "/wiki/2013",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "An outbreak of 77 confirmed tornadoes",
+   "section": "On this day",
+   "href": "/wiki/Tornado_outbreak_of_November_17,_2013",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Illinois",
+   "section": "On this day",
+   "href": "/wiki/Illinois",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Indiana",
+   "section": "On this day",
+   "href": "/wiki/Indiana",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Chen Jinfeng",
+   "section": "On this day",
+   "href": "/wiki/Chen_Jinfeng",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Voltairine de Cleyre",
+   "section": "On this day",
+   "href": "/wiki/Voltairine_de_Cleyre",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Rosemary Edna Sinclair",
+   "section": "On this day",
+   "href": "/wiki/Rosemary_Edna_Sinclair",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Petra Burka",
+   "section": "On this day",
+   "href": "/wiki/Petra_Burka",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "November 16",
+   "section": "On this day",
+   "href": "/wiki/November_16",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "November 18",
+   "section": "On this day",
+   "href": "/wiki/November_18",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Archive",
+   "section": "On this day",
+   "href": "/wiki/Wikipedia:Selected_anniversaries/November",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "By email",
+   "section": "On this day",
+   "href": "/postorius/lists/daily-article-l.lists.wikimedia.org/",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "List of days of the year",
+   "section": "On this day",
+   "href": "/wiki/List_of_days_of_the_year",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "About",
+   "section": "On this day",
+   "href": "/wiki/Wikipedia:Selected_anniversaries",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "The Sorcerer",
+   "section": "Today's featured picture",
+   "href": "/wiki/File:H.M.Brock_-_Poster_for_Gilbert_and_Sullivan's_The_Sorcerer_(1919).jpg",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "comic opera",
+   "section": "Today's featured picture",
+   "href": "/wiki/Comic_opera",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "W. S. Gilbert",
+   "section": "Today's featured picture",
+   "href": "/wiki/W._S._Gilbert",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Arthur Sullivan",
+   "section": "Today's featured picture",
+   "href": "/wiki/Arthur_Sullivan",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "collaboration",
+   "section": "Today's featured picture",
+   "href": "/wiki/Gilbert_and_Sullivan",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "love potion",
+   "section": "Today's featured picture",
+   "href": "/wiki/Love_potion",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Opera Comique",
+   "section": "Today's featured picture",
+   "href": "/wiki/Opera_Comique",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "H.M.S. Pinafore",
+   "section": "Today's featured picture",
+   "href": "/wiki/H.M.S._Pinafore",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "H. M. Brock",
+   "section": "Today's featured picture",
+   "href": "/wiki/H._M._Brock",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Adam Cuerden",
+   "section": "Today's featured picture",
+   "href": "/wiki/User:Adam_Cuerden",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Space Shuttle Atlantis",
+   "section": "Today's featured picture",
+   "href": "/wiki/Template:POTD/2026-11-16",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "European hamster",
+   "section": "Today's featured picture",
+   "href": "/wiki/Template:POTD/2026-11-15",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Harold Urey",
+   "section": "Today's featured picture",
+   "href": "/wiki/Template:POTD/2026-11-14",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Archive",
+   "section": "Today's featured picture",
+   "href": "/wiki/Wikipedia:Picture_of_the_day/Archive",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "More featured pictures",
+   "section": "Today's featured picture",
+   "href": "/wiki/Wikipedia:Featured_pictures",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Community portal",
+   "section": "Other areas of Wikipedia",
+   "href": "/wiki/Wikipedia:Community_portal",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Village pump",
+   "section": "Other areas of Wikipedia",
+   "href": "/wiki/Wikipedia:Village_pump",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Site news",
+   "section": "Other areas of Wikipedia",
+   "href": "/wiki/Wikipedia:News",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Teahouse",
+   "section": "Other areas of Wikipedia",
+   "href": "/wiki/Wikipedia:Teahouse",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Help desk",
+   "section": "Other areas of Wikipedia",
+   "href": "/wiki/Wikipedia:Help_desk",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Reference desk",
+   "section": "Other areas of Wikipedia",
+   "href": "/wiki/Wikipedia:Reference_desk",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Content portals",
+   "section": "Other areas of Wikipedia",
+   "href": "/wiki/Wikipedia:Contents/Portals",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Wikimedia Foundation",
+   "section": "Wikipedia's sister projects",
+   "href": "/wiki/Wikimedia_Foundation",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "projects",
+   "section": "Wikipedia's sister projects",
+   "href": "/what-we-do/wikimedia-projects/",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Wikimedia Commons logo",
+   "section": "Wikipedia's sister projects",
+   "href": "/wiki/File:Commons-logo.svg",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "Commons",
+   "section": "Wikipedia's sister projects",
+   "href": "/wiki/",
+   "name": ""
+  },
+  {
+   "role": "link",
+   "text": "MediaWiki logo",
+   "section": "Wikipedia's sister projects",
+   "href": "/wiki/File:MediaWiki-2020-icon.svg",
+   "name": ""
+  }
+ ]
+}

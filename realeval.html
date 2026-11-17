@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Real page replay test</title>
+    <style>
+      body { font: 14px/1.4 system-ui, sans-serif; margin: 24px; }
+      pre { background: #f4f4f4; padding: 12px; border-radius: 6px; overflow-x: auto; }
+      table { border-collapse: collapse; width: 100%; }
+      th, td { border-bottom: 1px solid #ddd; padding: 4px 8px; text-align: left; }
+      .ok { color: #0a6b2d; } .bad { color: #b00020; font-weight: 600; }
+      button { font: inherit; padding: 8px 16px; }
+    </style>
+  </head>
+  <body>
+    <h1>Real page replay test</h1>
+    <p>Replays what the extension read on real public pages. A control is renamed (with its link address and name removed) or removed, then the guide, using the on-device model through Firebase AI Logic, must find it. Development page: not part of the built site.</p>
+    <p id="status">Checking the on-device model…</p>
+    <p>Options in the address: the guide's defaults are on (same section first, stricter yes/no check); <code>?region=0</code> offers every control, <code>?verify=loose</code> uses the looser yes/no check.</p>
+    <button id="run">Run</button>
+    <pre id="summary">Not run yet.</pre>
+    <table><thead><tr><th>Page</th><th>Change</th><th>Control</th><th>Renamed to</th><th>Result</th><th>Picked</th><th>Candidates</th><th>ms</th></tr></thead><tbody id="rows"></tbody></table>
+    <script type="module" src="/src/realEval.js"></script>
+  </body>
+</html>
