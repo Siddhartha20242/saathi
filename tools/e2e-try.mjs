@@ -20,6 +20,7 @@ try {
   await c.waitFor(s, P('return !!w.__saathi?.user'), 40000);
   check('panel runs in demo mode', await c.evalIn(s, P(`return d.getElementById('where').textContent`)).then((x) => /Demo mode/.test(x)));
 
+  await c.waitFor(s, `!!document.getElementById('site').contentWindow.__saathiLoaded`, 20000); // the practice site's page script is ready
   await c.evalIn(s, P(`d.getElementById('group-new').click()`));
   await c.waitFor(s, P('return /^[A-Z0-9]{8}$/.test(w.__saathi.group)'));
   await c.evalIn(s, P(`d.getElementById('rec-title').value = 'Pay the electricity bill'; d.getElementById('rec-start').click()`));

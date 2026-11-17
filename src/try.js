@@ -47,17 +47,25 @@ function fromPage(message, callback) {
   }
 }
 
-// From the panel to the page script.
+// From the panel to the page script. If the practice website has only just loaded, wait a moment
+// for its page script instead of failing straight away.
 function toPage(msg) {
   return new Promise((resolve, reject) => {
-    const listener = listeners[0];
-    if (!listener) return reject(new Error('not ready'));
-    let answered = false;
-    listener({ saathi: msg.type, index: msg.index, stepIndex: msg.stepIndex }, {}, (response) => {
-      answered = true;
-      resolve(response);
-    });
-    if (!answered) setTimeout(() => !answered && reject(new Error('no answer')), 500);
+    const started = Date.now();
+    const attempt = () => {
+      const listener = listeners[0];
+      if (!listener) {
+        if (Date.now() - started > 3000) return reject(new Error('not ready'));
+        return setTimeout(attempt, 150);
+      }
+      let answered = false;
+      listener({ saathi: msg.type, index: msg.index, stepIndex: msg.stepIndex }, {}, (response) => {
+        answered = true;
+        resolve(response);
+      });
+      if (!answered) setTimeout(() => !answered && reject(new Error('no answer')), 500);
+    };
+    attempt();
   });
 }
 
