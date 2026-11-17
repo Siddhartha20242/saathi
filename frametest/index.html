@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Side panel stand-in</title>
+    <style>
+      html, body { margin: 0; height: 100%; font: 12px/1.4 system-ui, sans-serif; }
+      body { display: flex; flex-direction: column; }
+      #bar { padding: 6px 10px; background: #f6f4ef; border-bottom: 1px solid #e2ddd2; }
+      iframe { flex: 1; border: 0; width: 100%; }
+    </style>
+  </head>
+  <body>
+    <!-- Stands in for the extension's side panel: a page on a different site that frames the panel
+         the same way sidepanel.html does. Used to test the frame without loading the extension. -->
+    <div id="bar">Stand-in for the side panel (a different site framing the panel page)</div>
+    <iframe src="http://localhost:5173/panel.html" allow="language-model" title="Saathi panel"></iframe>
+  </body>
+</html>

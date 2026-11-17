@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Side panel stand-in (live panel)</title>
+    <style>
+      html, body { margin: 0; height: 100%; font: 12px/1.4 system-ui, sans-serif; }
+      body { display: flex; flex-direction: column; }
+      #bar { padding: 6px 10px; background: #f6f4ef; border-bottom: 1px solid #e2ddd2; }
+      iframe { flex: 1; border: 0; width: 100%; }
+    </style>
+  </head>
+  <body>
+    <div id="bar">Stand-in for the side panel, framing the live panel page</div>
+    <iframe src="https://paperwork-decoder.web.app/panel.html" allow="language-model" title="Saathi panel"></iframe>
+  </body>
+</html>
