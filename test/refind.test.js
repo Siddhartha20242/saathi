@@ -96,6 +96,25 @@ describe('refind', () => {
     expect(await refind({ role: 'link', text: 'Pay your bill', href: '/bill.html' }, page, {}, ask)).toEqual({ index: 0, by: 'anchor' });
     expect(await refind({ role: 'button', text: 'Check bill', name: 'show' }, page, {}, ask)).toEqual({ index: 1, by: 'anchor' });
   });
+  it('ignores a front-page link address as an anchor', () => {
+    const page = [{ role: 'link', text: 'Start', href: '/' }];
+    expect(anchorFind({ role: 'link', text: 'Old', href: '/' }, page)).toBeNull();
+  });
+  it('treats the same link shown twice as one, preferring the recorded section', () => {
+    const page = [
+      { role: 'link', text: 'Main Page', section: 'Menu', href: '/wiki/Main_Page' },
+      { role: 'link', text: 'Main Page', section: 'Talk', href: '/wiki/Main_Page' },
+    ];
+    expect(anchorFind({ role: 'link', text: 'Old', section: 'Talk', href: '/wiki/Main_Page' }, page)).toBe(1);
+    expect(anchorFind({ role: 'link', text: 'Old', section: 'Elsewhere', href: '/wiki/Main_Page' }, page)).toBe(0);
+  });
+  it('does not mix up links that share an address but have different labels', () => {
+    const page = [
+      { role: 'link', text: 'Log in', section: 'Menu', href: '/w/index.php' },
+      { role: 'link', text: 'Create account', section: 'Menu', href: '/w/index.php' },
+    ];
+    expect(anchorFind({ role: 'link', text: 'Sign in', section: 'Menu', href: '/w/index.php' }, page)).toBeNull();
+  });
   it('does not trust an anchor that two controls share', async () => {
     const twins = [
       { role: 'button', text: 'A', name: 'go' },

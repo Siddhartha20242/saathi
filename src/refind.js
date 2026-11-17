@@ -138,20 +138,33 @@ export function parseYesNo(text) {
   return yes < no;
 }
 
+// A link address of "/" or nothing points at too many controls to tell them apart.
+const usable = (href) => Boolean(href) && href !== '/';
+
 /**
  * Layer two, also plain code: the label is gone, but the control may still have the same link
- * address or internal name. Used only when exactly one control on the page matches.
+ * address or internal name.
+ *
+ * A link address is trusted when exactly one control has it, or when every control that has it
+ * carries the same label (the same link shown twice, such as a menu and a page body). Links that
+ * share an address but have different labels are not told apart, so none is chosen. A control's
+ * internal name is trusted only when exactly one control has it.
  * @returns {number|null} the element's index
  */
 export function anchorFind(step, elements) {
-  const hits = elements
-    .map((el, index) => ({ el, index }))
-    .filter(
-      ({ el }) =>
-        sameKind(el.role, step.role) &&
-        ((step.href && el.href === step.href) || (step.name && el.name && el.name === step.name)),
-    );
-  return hits.length === 1 ? hits[0].index : null;
+  const same = (el) => sameKind(el.role, step.role);
+  const indexed = elements.map((el, index) => ({ el, index })).filter(({ el }) => same(el));
+
+  if (usable(step.href)) {
+    const links = indexed.filter(({ el }) => el.href === step.href);
+    const labels = new Set(links.map(({ el }) => norm(el.text)));
+    if (links.length === 1 || (links.length > 1 && labels.size === 1 && !labels.has(''))) {
+      const here = links.find(({ el }) => norm(el.section) === norm(step.section));
+      return (here ?? links[0]).index;
+    }
+  }
+  const named = indexed.filter(({ el }) => step.name && el.name && el.name === step.name);
+  return named.length === 1 ? named[0].index : null;
 }
 
 // Structured output: the model may only answer with one of these values.

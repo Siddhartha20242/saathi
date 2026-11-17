@@ -42,6 +42,10 @@ describe('sanitizeStep', () => {
     expect(sanitizeStep({ role: 'weird', text: 'x'.repeat(200) }).text).toHaveLength(80);
     expect(sanitizeStep({ role: 'weird' }).role).toBe('button');
   });
+  it('drops a link address that says nothing', () => {
+    expect(sanitizeStep({ role: 'link', text: 'Home', href: '/' }).href).toBe('');
+    expect(sanitizeStep({ role: 'link', text: 'Pay', href: '/pay?x=1' }).href).toBe('/pay');
+  });
   it('recognises the same step twice', () => {
     const a = sanitizeStep({ role: 'link', text: 'Pay', href: '/pay', page: '/' });
     expect(sameStep(a, { ...a })).toBe(true);

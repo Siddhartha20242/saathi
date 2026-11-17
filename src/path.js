@@ -53,7 +53,7 @@ export function sanitizeStep(d = {}) {
     text: clip(d.text, 80),
     section: clip(d.section, 80),
     page: pathOnly(d.page),
-    href: d.href ? pathOnly(d.href) : '',
+    href: d.href && pathOnly(d.href) !== '/' ? pathOnly(d.href) : '',
     name: clip(d.name, 60),
   };
   // A label can hold a person's name or number, for example an account menu. It is not saved;
