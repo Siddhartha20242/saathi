@@ -3,7 +3,10 @@
 // The extension around it only reads the open tab's controls and draws the highlight.
 
 import { run, deviceStatus } from './firebase.js';
-import { refind, codeFind } from './refind.js';
+import { refind, codeFind, cloudPreview } from './refind.js';
+import { maskText } from './masking.js';
+import { recordSpeech } from './audio.js';
+import { voicePrompt, parseVoice, VOICE_SCHEMA } from './voice.js';
 import { explainPrompt, explainPayloadSummary } from './explain.js';
 import {
   sanitizeStep, sameStep, stepInstruction, originMatches, validatePath, newGroupCode, normaliseGroup, GROUP_RE, LANGS, MAX_STEPS,
@@ -114,6 +117,8 @@ function renderChips() {
   document.body.classList.toggle('big', state.big);
   $('opt-big').setAttribute('aria-pressed', String(state.big));
   $('opt-speak').setAttribute('aria-pressed', String(state.speak));
+  // Speaking needs a microphone and the cloud, because the on-device model does not understand Nepali speech.
+  $('voice').hidden = !(joined && navigator.mediaDevices?.getUserMedia && state.config.cloudEnabled);
   document.querySelectorAll('[data-lang]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.lang === state.lang)));
 }
 
@@ -223,6 +228,61 @@ $('lib-list').addEventListener('click', async (ev) => {
     } catch (err) {
       say('lib-msg', `Could not delete: ${err.message}`, 'bad');
     }
+  }
+});
+
+// ---------- Speaking a request ----------
+// The recording and the titles of the group's paths go to the cloud model, which says which path is
+// wanted. It starts only when the person presses the button, and nothing from the website is sent.
+
+const voice = { busy: false, stop: null };
+const VOICE_LABEL = { idle: 'Speak · बोल्नुहोस्', listening: 'Listening… tap when you are done', thinking: 'Understanding…' };
+const voiceUi = (name) => {
+  $('voice-go').dataset.state = name;
+  $('voice-label').textContent = VOICE_LABEL[name];
+};
+
+function voiceError(err) {
+  if (err?.name === 'NotAllowedError') {
+    if (inExtension) {
+      $('voice-perm').href = `${parentOrigin}/mic.html`;
+      $('voice-perm').hidden = false;
+    }
+    return 'The microphone is blocked. Allow it for this page, then tap Speak again.';
+  }
+  if (err?.name === 'NotFoundError') return 'No microphone was found on this computer.';
+  return `I could not understand that: ${err?.message ?? err}`;
+}
+
+$('voice-go').addEventListener('click', async () => {
+  if (voice.busy) return voice.stop?.(); // tapping again ends the recording
+  if (!state.paths.length) return say('voice-out', 'There are no paths in this group yet. Open "Show the way" to record the first one.', 'bad');
+  voice.busy = true;
+  voiceUi('listening');
+  $('voice-perm').hidden = true;
+  say('voice-out', '');
+  try {
+    const wav = await recordSpeech({ maxMs: 8000, stop: new Promise((resolve) => (voice.stop = resolve)) });
+    if (!wav) return say('voice-out', 'I did not hear anything. Tap and try again.', 'bad');
+    voiceUi('thinking');
+    const { text } = await run({ mode: 'ONLY_IN_CLOUD', prompt: voicePrompt(state.paths), audio: wav, schema: VOICE_SCHEMA });
+    const answer = parseVoice(text, state.paths.length);
+    const heard = answer.heard
+      ? `I heard: \u201c${answer.heard}\u201d${answer.english && answer.english !== answer.heard ? ` (${answer.english})` : ''}`
+      : '';
+    if (answer.index === null) {
+      return say('voice-out', `${heard ? `${heard}\n` : ''}I could not match that to one of your guides. Tap and try again, or choose from the list.`, 'bad');
+    }
+    const path = state.paths[answer.index];
+    say('voice-out', `${heard}\nStarting \u201c${path.title}\u201d.`, 'ok');
+    voice.busy = false; // show the button as ready now, not after the first step has been found
+    voiceUi('idle');
+    await startFollow(path);
+  } catch (err) {
+    say('voice-out', voiceError(err), 'bad');
+  } finally {
+    voice.busy = false;
+    voiceUi('idle');
   }
 });
 
@@ -372,15 +432,62 @@ const HOW = {
   code: 'Found by its label.',
   anchor: 'The label changed, but the link or box underneath is the same.',
   model: 'The label changed. Found by the on-device model.',
+  cloud: 'The label changed. The cloud found it, with your OK. It saw only button and link names.',
 };
 
 const askLocal = async (prompt) => {
+  // Only when the model is already on this computer. Otherwise asking would start a large download.
+  if (state.device !== 'available') return '';
   try {
     return (await run({ mode: 'ONLY_ON_DEVICE', prompt })).text;
   } catch {
-    return ''; // no on-device model: the guide will say it is not sure
+    return ''; // the guide will say it is not sure
   }
 };
+
+// The cloud model is asked only when the person presses the button, and it sees only labels.
+const askCloud = async (prompt) => (await run({ mode: 'ONLY_IN_CLOUD', prompt })).text;
+
+// A label that holds a personal detail is not sent, even to the cloud.
+const scrub = (elements) =>
+  elements.map((e) => (maskText(e.text).items.length ? { ...e, text: '(personal label)' } : e));
+
+function offerCloud(f, step, page, ctx) {
+  if (!state.config.cloudEnabled) return;
+  const preview = cloudPreview(step, page.elements, ctx);
+  if (!preview.count) return;
+  f.cloud = { step, page, ctx };
+  const why = state.device === 'available' ? 'The on-device model could not tell.' : 'This computer has no on-device model.';
+  $('fo-cloud-text').textContent = `${why} Ask the cloud to look? It would see the old label "${step.text || 'this step'}" and the names of ${preview.count} buttons and links near this step (for example: ${preview.examples.map((t) => `"${t}"`).join(', ')}). Nothing you typed, and no picture of the page.`;
+  $('fo-cloud').hidden = false;
+}
+
+$('fo-cloud-go').addEventListener('click', async (ev) => {
+  const f = state.follow;
+  if (!f?.cloud) return;
+  const { step, page, ctx } = f.cloud;
+  const index = f.index;
+  ev.currentTarget.disabled = true;
+  setHow('Asking the cloud…');
+  try {
+    const safe = scrub(page.elements);
+    const res = await refind(step, safe, { ...ctx, region: false }, askCloud);
+    if (state.follow !== f || f.index !== index) return;
+    $('fo-cloud').hidden = true;
+    if (res.index === null) return setHow('The cloud was not sure either. Try "Ask a helper" in Get help.', 'bad');
+    const drawn = await callExtension('highlight', { index: res.index, stepIndex: index });
+    f.found = { text: page.elements[res.index].text, by: 'cloud' };
+    if (drawn?.covered) {
+      $('fo-warn').hidden = false;
+      $('fo-warn').textContent = 'Something is in front of it, such as a pop-up notice. Close that first.';
+    }
+    setHow(HOW.cloud);
+  } catch (err) {
+    setHow(`The cloud could not help: ${err.message}`, 'bad');
+  } finally {
+    ev.currentTarget.disabled = false;
+  }
+});
 
 async function scanWithRetry() {
   let last;
@@ -402,7 +509,9 @@ async function showStep() {
   if (!f) return;
   renderStepCard();
   $('fo-warn').hidden = true;
+  $('fo-cloud').hidden = true;
   f.found = null;
+  f.cloud = null;
   setHow('Looking for it on the page…');
   const index = f.index;
   try {
@@ -415,10 +524,17 @@ async function showStep() {
     }
     const step = f.path.steps[index];
     const others = f.path.steps.filter((_, i) => i !== index).map((s) => s.text).filter(Boolean);
-    const res = await refind(step, page.elements, { task: f.path.title, others, previous: f.path.steps[index - 1]?.text }, askLocal);
+    const ctx = { task: f.path.title, others, previous: f.path.steps[index - 1]?.text };
+    const res = await refind(step, page.elements, ctx, askLocal);
     if (state.follow !== f || f.index !== index) return;
     if (res.index === null) {
-      return setHow(`I am not sure which one it is (${res.reason}). The page may have changed. Try "Explain this page" below.`, 'bad');
+      offerCloud(f, step, page, ctx);
+      return setHow(
+        state.device === 'available'
+          ? `I am not sure which one it is (${res.reason}). The page may have changed.`
+          : 'I could not find it by its label or address, and this computer has no on-device model.',
+        'bad',
+      );
     }
     const drawn = await callExtension('highlight', { index: res.index, stepIndex: index });
     f.found = { text: page.elements[res.index].text, by: res.by };
@@ -505,7 +621,10 @@ $('t-explain').addEventListener('click', async (ev) => {
     const page = await callExtension('scan');
     say('o-explain', `Read ${page.elements.length} controls. Explaining…`);
     const started = performance.now();
-    const mode = state.config.cloudEnabled ? 'PREFER_ON_DEVICE' : 'ONLY_ON_DEVICE';
+    const onDevice = state.device === 'available';
+    if (!onDevice && !state.config.cloudEnabled) throw new Error('This computer has no on-device model, and the cloud is switched off.');
+    // Without the model already on this computer, go straight to the cloud (labels only) instead of starting a download.
+    const mode = !onDevice ? 'ONLY_IN_CLOUD' : state.config.cloudEnabled ? 'PREFER_ON_DEVICE' : 'ONLY_ON_DEVICE';
     const { text, source } = await run({ mode, prompt: explainPrompt(page, state.config.maxLabels) });
     const ms = Math.round(performance.now() - started);
     const sent = explainPayloadSummary(page, state.config.maxLabels);

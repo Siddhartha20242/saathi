@@ -115,9 +115,10 @@ async function toPart(image) {
 }
 
 /** The runner the pipeline uses. Returns the text and where it actually ran. */
-export async function run({ mode, prompt, image, schema = null }) {
+export async function run({ mode, prompt, image, audio, schema = null }) {
   const model = getModel(mode, Boolean(image), schema);
-  const input = image ? [prompt, await toPart(image)] : prompt;
+  const media = image ?? audio; // a picture or a short spoken recording
+  const input = media ? [prompt, await toPart(media)] : prompt;
   const result = await model.generateContent(input);
   const text = result.response.text();
   return { text, source: normaliseSource(result.response.inferenceSource, mode) };

@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Saathi microphone</title>
+    <style>
+      body { font: 18px/1.5 system-ui, sans-serif; max-width: 460px; margin: 60px auto; padding: 0 20px; color: #1d1b16; }
+      button { font: inherit; padding: 14px 20px; border-radius: 10px; border: 0; background: #0f5c4a; color: #fff; font-weight: 600; cursor: pointer; }
+      p { color: #5f5a50; }
+      #out { color: #1d1b16; font-weight: 600; }
+    </style>
+  </head>
+  <body>
+    <h1>Allow the microphone for Saathi</h1>
+    <p>Saathi listens only when you press Speak, and only to understand which guide you want. Your voice goes to the cloud for that and is not stored.</p>
+    <button id="go">Allow the microphone</button>
+    <p id="out" role="status"></p>
+    <script src="mic.js"></script>
+  </body>
+</html>

@@ -3,15 +3,39 @@
   "name": "Saathi (test build)",
   "version": "0.1.0",
   "description": "A guide that shows where to press on a website. It highlights; you do it. Test build for local development.",
-  "permissions": ["sidePanel"],
-  "action": { "default_title": "Open Saathi" },
-  "background": { "service_worker": "background.js" },
-  "side_panel": { "default_path": "sidepanel.html" },
+  "permissions": [
+    "sidePanel"
+  ],
+  "action": {
+    "default_title": "Open Saathi"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "side_panel": {
+    "default_path": "sidepanel.html"
+  },
   "content_scripts": [
     {
-      "matches": ["http://*/*", "https://*/*"],
-      "js": ["content.js"],
+      "matches": [
+        "http://*/*",
+        "https://*/*"
+      ],
+      "js": [
+        "content.js"
+      ],
       "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "mic.html",
+        "mic.js"
+      ],
+      "matches": [
+        "https://paperwork-decoder.web.app/*"
+      ]
     }
   ]
 }

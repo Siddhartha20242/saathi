@@ -101,6 +101,14 @@
       body.big .step-card .main { font-size: 1.7em; }
       .done { padding: 16px; border-radius: var(--radius); background: var(--accent-soft); color: var(--accent); font-weight: 600; font-size: 1.1em; }
 
+      /* Speaking a request */
+      .voice { display: flex; flex-direction: column; gap: 8px; padding-bottom: 6px; }
+      .mic { display: flex; align-items: center; justify-content: center; gap: 10px; min-height: 56px; font-size: 1.1em; }
+      .mic svg { width: 24px; height: 24px; flex: none; }
+      .mic[data-state=listening] { background: var(--bad); border-color: var(--bad); color: #fff; }
+      .mic[data-state=thinking] { opacity: 0.8; }
+      @media (prefers-reduced-motion: no-preference) { .mic[data-state=listening] svg { animation: pulse 1.2s ease-in-out infinite; } }
+
       /* Recording */
       .steps-list { margin: 0; padding-left: 22px; display: flex; flex-direction: column; gap: 4px; }
       .steps-list:empty { display: none; }
@@ -186,6 +194,10 @@
             </div>
           </div>
           <div class="banner" id="fo-warn" hidden style="margin-top: 12px"></div>
+          <div class="banner" id="fo-cloud" hidden style="margin-top: 12px">
+            <p id="fo-cloud-text"></p>
+            <button class="wide" id="fo-cloud-go" style="margin-top: 8px">Ask the cloud to look</button>
+          </div>
           <div class="stack" style="margin-top: 12px">
             <button class="primary wide" id="fo-next">I did it, next</button>
             <div class="row">
@@ -198,6 +210,15 @@
         <p class="done" id="fo-done" hidden></p>
 
         <div id="lib-wrap" class="stack">
+          <div class="voice" id="voice" hidden>
+            <button class="primary wide mic" id="voice-go" data-state="idle">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
+              <span id="voice-label">Speak · बोल्नुहोस्</span>
+            </button>
+            <p class="muted" id="voice-note">Say what you need, in Nepali, Hindi or English. Your voice goes to the cloud to be understood. The website you are on does not.</p>
+            <p class="out" id="voice-out"></p>
+            <a id="voice-perm" hidden target="_blank" rel="noopener">Open the microphone permission page</a>
+          </div>
           <h2>Paths in your group</h2>
           <ul class="paths" id="lib-list"></ul>
           <p class="out" id="lib-msg"></p>
