@@ -586,11 +586,12 @@ async function onHelpAnswer(data) {
   const note = data.note ? ` Your helper says: ${data.note}` : '';
   if (data.pick === null || data.pick === undefined) return;
   const label = h.controls[data.pick]?.text || 'a control';
+  const scanIndex = h.controls[data.pick]?.at ?? data.pick; // the control's place in the page scan
   $('help-status').textContent = `Your helper pointed at "${label}". Look for the yellow box.${note}`;
   if (data.pick === lastPick && !data.note) return;
   lastPick = data.pick;
   try {
-    await callExtension('highlight', { index: data.pick });
+    await callExtension('highlight', { index: scanIndex });
   } catch {
     // The page may have been rescanned since. Find the control again by its name.
     try {

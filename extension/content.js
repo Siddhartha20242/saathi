@@ -11,7 +11,9 @@
 
   const SELECTOR =
     'a[href], button, input, select, textarea, summary, [role="button"], [role="link"], [role="tab"], [role="menuitem"]';
-  const MAX_CONTROLS = 150;
+  // Long pages (an encyclopedia article has about 4,000 links) are read in full: checking them takes
+  // milliseconds, and a control at the very bottom, such as a footer link, must still be findable.
+  const MAX_CONTROLS = 6000;
   let lastScan = [];
   let recording = false;
 
@@ -115,8 +117,12 @@
     const seen = new Set();
     lastScan = [];
     const elements = [];
+    let truncated = false;
     for (const el of document.querySelectorAll(SELECTOR)) {
-      if (elements.length >= MAX_CONTROLS) break;
+      if (elements.length >= MAX_CONTROLS) {
+        truncated = true;
+        break;
+      }
       if (el.closest('[data-saathi]') || !isVisible(el) || el.disabled) continue;
       const role = roleOf(el);
       if (!role) continue;
@@ -127,9 +133,11 @@
       if (seen.has(key)) continue; // the same link repeated in a menu is listed once
       seen.add(key);
       lastScan.push(el);
-      elements.push({ role, text, section, href: hrefOf(el, role), name: nameOf(el) });
+      const r = el.getBoundingClientRect();
+      const inView = r.bottom > 0 && r.top < innerHeight && r.right > 0 && r.left < innerWidth;
+      elements.push({ role, text, section, href: hrefOf(el, role), name: nameOf(el), inView });
     }
-    return { title: clean(document.title), host: location.hostname, path: location.pathname, elements };
+    return { title: clean(document.title), host: location.hostname, path: location.pathname, truncated, elements };
   }
 
   // ---------- Highlight ----------
@@ -208,7 +216,9 @@
   // ---------- Recording ----------
 
   function report(el, role) {
+    scan(); // refreshes the list so the control's position on the page can be noted
     const step = {
+      at: Math.max(0, lastScan.indexOf(el)),
       role,
       text: labelOf(el, role),
       section: sectionFinder()(el),

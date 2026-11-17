@@ -49,6 +49,7 @@ export const originMatches = (recordedHost, currentHost) =>
  */
 export function sanitizeStep(d = {}) {
   const step = {
+    ...(Number.isInteger(d.at) && d.at >= 0 && d.at < 100000 ? { at: d.at } : {}),
     role: ROLES.includes(d.role) ? d.role : 'button',
     text: clip(d.text, 80),
     section: clip(d.section, 80),

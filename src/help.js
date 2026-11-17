@@ -8,14 +8,22 @@ export const MAX_HELP_CONTROLS = 100;
 export const MAX_NOTE = 100;
 
 /**
- * The controls to share, in the same order as the scan so a helper's tap maps back to the same
- * control. A label that holds a personal detail (a name, number or address) is left out.
+ * The controls to share. On a long page these are the controls on screen (what the person is looking
+ * at), up to `max`, in page order; on a short page, all of them. Each carries `at`, its position in the
+ * scan, so the helper's tap maps back to the same control. A label that holds a personal detail
+ * (a name, number or address) is left out.
  */
 export function controlsForHelp(elements, max = MAX_HELP_CONTROLS) {
-  return elements.slice(0, max).map((e) => {
+  const wanted = [];
+  if (elements.length <= max) elements.forEach((e, at) => wanted.push({ e, at }));
+  else {
+    const onScreen = elements.map((e, at) => ({ e, at })).filter(({ e }) => e.inView);
+    (onScreen.length ? onScreen : elements.map((e, at) => ({ e, at }))).slice(0, max).forEach((x) => wanted.push(x));
+  }
+  return wanted.map(({ e, at }) => {
     const text = String(e.text ?? '').slice(0, 80);
     const personal = text !== '' && maskText(text).items.length > 0;
-    return { role: String(e.role ?? 'button'), text: personal ? '' : text, section: String(e.section ?? '').slice(0, 80), personal };
+    return { at, role: String(e.role ?? 'button'), text: personal ? '' : text, section: String(e.section ?? '').slice(0, 80), personal };
   });
 }
 

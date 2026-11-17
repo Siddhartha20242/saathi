@@ -12,7 +12,7 @@ describe('controlsForHelp', () => {
   it('keeps the labels and order, and nothing else', () => {
     const c = controlsForHelp(page);
     expect(c.map((x) => x.text)).toEqual(['Pay your bill', 'Customer ID', '', 'Check bill']);
-    expect(Object.keys(c[0]).sort()).toEqual(['personal', 'role', 'section', 'text']);
+    expect(Object.keys(c[0]).sort()).toEqual(['at', 'personal', 'role', 'section', 'text']);
     expect(JSON.stringify(c)).not.toContain('/bill');
     expect(JSON.stringify(c)).not.toContain('customer"');
   });
@@ -24,6 +24,23 @@ describe('controlsForHelp', () => {
   it('caps a long page', () => {
     const big = Array.from({ length: 300 }, (_, i) => ({ role: 'link', text: `L${i}` }));
     expect(controlsForHelp(big)).toHaveLength(MAX_HELP_CONTROLS);
+  });
+});
+
+describe('controlsForHelp on a long page', () => {
+  const long = Array.from({ length: 400 }, (_, i) => ({ role: 'link', text: `Link ${i}`, section: 'x', inView: i >= 250 && i < 290 }));
+  it('sends the controls on screen, and remembers where each one is on the page', () => {
+    const c = controlsForHelp(long);
+    expect(c).toHaveLength(40);
+    expect(c[0]).toMatchObject({ text: 'Link 250', at: 250 });
+    expect(c[39]).toMatchObject({ text: 'Link 289', at: 289 });
+  });
+  it('keeps at most the limit, and falls back to the start of the page when nothing is marked on screen', () => {
+    expect(controlsForHelp(long.map((e) => ({ ...e, inView: true })))).toHaveLength(MAX_HELP_CONTROLS);
+    expect(controlsForHelp(long.map((e) => ({ ...e, inView: false })))[0].at).toBe(0);
+  });
+  it('sends all of a short page, in order, with their positions', () => {
+    expect(controlsForHelp(long.slice(0, 5)).map((c) => c.at)).toEqual([0, 1, 2, 3, 4]);
   });
 });
 

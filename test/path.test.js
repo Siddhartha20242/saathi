@@ -46,6 +46,12 @@ describe('sanitizeStep', () => {
     expect(sanitizeStep({ role: 'link', text: 'Home', href: '/' }).href).toBe('');
     expect(sanitizeStep({ role: 'link', text: 'Pay', href: '/pay?x=1' }).href).toBe('/pay');
   });
+  it('remembers where on the page the control was, when that is a sensible number', () => {
+    expect(sanitizeStep({ role: 'link', text: 'Pay', at: 4098 }).at).toBe(4098);
+    expect(sanitizeStep({ role: 'link', text: 'Pay' }).at).toBeUndefined();
+    expect(sanitizeStep({ role: 'link', text: 'Pay', at: -1 }).at).toBeUndefined();
+    expect(sanitizeStep({ role: 'link', text: 'Pay', at: '5' }).at).toBeUndefined();
+  });
   it('recognises the same step twice', () => {
     const a = sanitizeStep({ role: 'link', text: 'Pay', href: '/pay', page: '/' });
     expect(sameStep(a, { ...a })).toBe(true);

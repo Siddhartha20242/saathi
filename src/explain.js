@@ -4,9 +4,14 @@
 
 const MAX_CONTROLS = 60;
 
+/** The controls to describe: those on screen first, since that is what the person is looking at. */
+export function forPrompt(page, max = MAX_CONTROLS) {
+  const seen = page.elements.filter((e) => e.inView);
+  return (seen.length ? seen : page.elements).slice(0, max);
+}
+
 export function explainPrompt(page, max = MAX_CONTROLS) {
-  const list = page.elements
-    .slice(0, max)
+  const list = forPrompt(page, max)
     .map((e) => `- ${e.role}: ${e.text}${e.section ? ` (under "${e.section}")` : ''}`)
     .join('\n');
   return `A person who is not used to computers has opened a web page. Explain it to them.
@@ -21,5 +26,5 @@ Use simple everyday words. Mention only things that are in the list above. Do no
 
 /** What would be sent if the cloud answered: counts only, for the privacy line shown to the person. */
 export function explainPayloadSummary(page, max = MAX_CONTROLS) {
-  return { labels: Math.min(page.elements.length, max), typedValues: 0 };
+  return { labels: forPrompt(page, max).length, typedValues: 0 };
 }

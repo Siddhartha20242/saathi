@@ -182,6 +182,23 @@ export function anchorFind(step, elements) {
 }
 
 export const MAX_REGION = 40;
+export const MAX_MODEL = 60;
+
+/**
+ * However long the page is, the model is shown at most MAX_MODEL controls. When there are more, the
+ * ones nearest the step's original position on the page (its recorded `at`) are kept, in page order.
+ * A step recorded before positions were saved has no `at`, so the first MAX_MODEL are kept.
+ */
+export function nearestTo(candidates, step, max = MAX_MODEL) {
+  if (candidates.length <= max) return candidates;
+  if (!Number.isInteger(step.at)) return candidates.slice(0, max);
+  return candidates
+    .map((c) => ({ c, d: Math.abs(c.index - step.at) }))
+    .sort((a, b) => a.d - b.d)
+    .slice(0, max)
+    .map(({ c }) => c)
+    .sort((a, b) => a.index - b.index);
+}
 
 /**
  * On a long page the model is shown too many controls to choose from. A redesign usually keeps a
@@ -221,7 +238,8 @@ export async function refind(step, elements, context, ask) {
 
   // A model pick, with the guards: two orders must agree, and a strict yes/no check must say yes.
   const verify = context?.strictVerify === false ? verifyPrompt : strictVerifyPrompt;
-  const pickAmong = async (candidates) => {
+  const pickAmong = async (all) => {
+    const candidates = nearestTo(all, step);
     const schema = choiceSchema(candidates.length);
     const pickA = parseChoice(await ask(meaningPrompt(step, candidates, context), schema), candidates);
     if (pickA === null || pickA === 'none') return { index: null, reason: 'no match' };

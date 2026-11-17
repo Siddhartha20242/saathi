@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { textSimilarity, codeFind, candidatesFor, refindPrompt, parseChoice, parseYesNo, refind, anchorFind, narrowToRegion } from '../src/refind.js';
+import { textSimilarity, codeFind, candidatesFor, refindPrompt, parseChoice, parseYesNo, refind, anchorFind, narrowToRegion, nearestTo, MAX_MODEL } from '../src/refind.js';
 import { buildCases, SITES } from '../src/refindCases.js';
 
 const PAGE = [
@@ -155,6 +155,30 @@ describe('refind', () => {
     const many = Array.from({ length: 41 }, (_, i) => ({ role: 'link', text: `L${i}`, section: 'Menu' }));
     expect(narrowToRegion(many, { section: 'Menu' })).toBe(many);
     expect(narrowToRegion(few, { section: '' })).toBe(few);
+  });
+  it('shows the model only the controls nearest the step on a very long page', () => {
+    const page = Array.from({ length: 4000 }, (_, index) => ({ role: 'link', text: `L${index}`, index }));
+    const near = nearestTo(page, { at: 3500 });
+    expect(near).toHaveLength(MAX_MODEL);
+    expect(near[0].index).toBe(3470);
+    expect(near[MAX_MODEL - 1].index).toBe(3529);
+    expect(near.map((c) => c.index)).toEqual([...near.map((c) => c.index)].sort((a, b) => a - b)); // page order
+    expect(nearestTo(page, {})).toHaveLength(MAX_MODEL); // an older step with no position: the first ones
+    expect(nearestTo(page.slice(0, 10), { at: 5 })).toHaveLength(10); // a short page is left alone
+  });
+  it('lets the model find a control far down a long page', async () => {
+    const page = [
+      ...Array.from({ length: 3000 }, (_, i) => ({ role: 'link', text: `Article link ${i}`, section: 'Body' })),
+      { role: 'link', text: 'Data policy', section: 'Footer' },
+      { role: 'link', text: 'Contact us', section: 'Footer' },
+    ];
+    const step = { role: 'link', text: 'Privacy policy', section: 'Footer', at: 3000 };
+    const seen = [];
+    const ask = async (prompt) => (seen.push(prompt), ['1', '2', 'YES'][seen.length - 1]);
+    const res = await refind(step, page, { task: 'Read the site rules' }, ask);
+    expect(res).toEqual({ index: 3000, by: 'model' });
+    expect(seen[0]).toContain('1. Data policy');
+    expect(seen[0]).not.toContain('Article link');
   });
   it('never offers a control that belongs to another step', async () => {
     const res = await refind(payNow, renamed, { others: ['Remind me later', 'Home'], region: false }, fake(['1', '1', 'YES']));
