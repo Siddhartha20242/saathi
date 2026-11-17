@@ -2,11 +2,26 @@
 
 **Someone who has done it shows the way once. Everyone with the group code gets a patient guide that highlights each button, in their own language. Saathi highlights. You do it.**
 
-Saathi is a Chrome extension for older parents, students and people far from home who get stuck on bill, bank and government websites. A son, a daughter or an experienced friend records the task once. After that, the person following it sees one step at a time, with the right button outlined on their own screen. If the website changes, the guide finds the button again. If they are still stuck, a helper on a phone can tap the right button from afar, and it lights up on the person's screen.
+Saathi is a Chrome extension for **older adults and the family who look after them**, often from far away. Bill, bank and government websites are where an older person gets stuck and where scammers go after them. A son, a daughter or an experienced friend records a task once. After that, the older person sees one step at a time, with the right button outlined on their own screen, in English, Nepali or Hindi, with large text and read-aloud. They can speak what they need instead of searching a list. If a website changes, the guide finds the button again. If they are still stuck, a family member on a phone taps the right button from afar and it lights up on their screen.
 
 It never clicks, types or submits for anyone. It also watches for scam pages: when the page in front of an older person looks like a bank or wallet page that is not the real one, a red warning appears on the page, in their language, and they can tell their family with one tap.
 
 Built for the #BuildHybridAI hackathon with Firebase AI Logic. Licence: MIT.
+
+## For older adults and their caregivers
+
+Saathi was built for the *AI for the aging population* theme: voice interfaces, monitoring and caregiver coordination software built for older adults. Here is how it fits, and where it does not.
+
+| Theme | What Saathi has | What it is not |
+|---|---|---|
+| **Voice interface** | **Speak**: say a request in Nepali, Hindi or English and Saathi starts the right guide. Read-aloud for each step. | Not a hands-free assistant. Real Nepali speech has not been tested (see below). |
+| **Monitoring** | A scam guard that watches the page in front of the person and warns on the page, in their language. It is a safety watch on the web page, with no cameras, sensors or location. | Not health, fall or location monitoring. |
+| **Caregiver coordination** | A group shared by a family. Guides recorded once, shared with everyone. A live "I'm stuck" request that a family member answers from a phone. Scam alerts that reach the family. | Not a care-planning or medication tool. |
+| **Built for older adults** | One step at a time, large text, a clear next button, and no automatic clicking or typing: Saathi highlights and the person does it. Warnings and steps in their own language. | It has not been tried with older people yet. |
+| **Home robotics** | Not covered. | |
+
+The older person's data stays with them by design: the page they are on is read on their laptop, and what a family member sees is only the names of buttons, a website's address, or a short alert (see "What is saved and what is sent").
+
 
 ## Try it in two minutes, no install
 
