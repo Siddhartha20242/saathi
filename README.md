@@ -67,7 +67,7 @@ Toggle `cloud_enabled` to false in the Firebase console and the panel's cloud ch
 | **Sent to a helper's phone** | No | Names only, and the person sees exactly what will be sent before pressing Send | Never | Never |
 | **Sent anywhere when re-finding** | No | No. It stays on the laptop. | Never | Never |
 
-The page script reads a field's label, never its value. A path step has no field that could hold a typed value ([src/path.js](src/path.js)), so one cannot be saved by mistake. Help requests are deleted when the person stops sharing.
+The page script reads a field's label, never its value. A path step has no field that could hold a typed value ([src/path.js](src/path.js)), so one cannot be saved by mistake. A step also stores a small number, its position among the page's controls, to help find it again on a long page. Help requests are deleted when the person stops sharing.
 
 ## What we measured
 
@@ -104,23 +104,26 @@ Caveats: the earlier improvements were designed after looking at failures on the
 - The wrong picks that remain are near-synonyms: a removed "Socialize" matched to "Community", and, on the Bengali page, "all services" matched to an existing "all e-services" card.
 - Bengali: the model does not read Bengali, yet it matched some Bengali labels. 3 renamed Bengali controls: 1 right, 1 declined, 1 wrong, so no claim is made for Bengali.
 - A model step on a real page takes about 4 seconds, from 2 to 6 model calls.
+- **Long pages.** The page script used to read only the first 150 controls, so a control further down, such as a footer link, was invisible. A long Wikipedia article has about 4,000 controls (2,389 after repeats are merged) and its footer links sit near the end, so the script now reads whole pages (up to 6,000 controls; checking 4,000 takes about 17 ms). The model is still never shown a long list: it sees the controls in the step's own section, and at most 60 of them, the ones nearest the step's recorded position on the page. On the long article, 3 of 4 renamed footer controls were found, 1 was declined, none was wrong, and the removed one was declined, each in about 1.5 seconds.
+- After that change the whole replay was run again (the Wikipedia main page now reads 250 controls instead of 150, so the numbers above and these are on slightly different data, and the long-article cases were re-run separately): 22 renamed controls, 14 right, 7 declined, 1 wrong; 6 removed controls, 5 declined and 1 wrong.
 - Not measured: Devanagari pages, pages that need a login, and full multi-step paths with the model.
 
 **Things we tried that did not help, and removed or did not adopt:**
 - Structured (schema-constrained) output for the model's answers: 44 right against 49 for plain text on the 55 model cases, because the constrained model said "not sure" about twice as often. Plain text is used for re-finding. Structured output is used where an answer is a longer shape, for the cloud translation.
 - Offering only same-kind controls first (buttons with buttons) on the practice sites: slightly better on renamed-and-moved steps, but 3 wrong picks against 1 when a control was removed, so it was reverted. Narrowing by section, tried later on real pages, is used (above).
 
-**On real websites.** [tools/e2e-real.mjs](tools/e2e-real.mjs) records a short path on three live public sites, saves it, follows it by clicking through the real pages, and then checks it again after a script simulates a redesign. Nothing is typed or submitted; it only clicks ordinary links. The sites are the Bangladesh national portal (Bengali labels), the Nepal Department of Passports (Nepali labels, with a pop-up notice over the page) and Wikipedia (English), 5 steps in all.
+**On real websites.** [tools/e2e-real.mjs](tools/e2e-real.mjs) records a short path on four live public pages, saves it, follows it by clicking through the real pages, and then checks it again after a script simulates a redesign. Nothing is typed or submitted; it only clicks ordinary links. The pages are the Bangladesh national portal (Bengali labels), the Nepal Department of Passports (Nepali labels, with a pop-up notice over the page), Wikipedia's main page and talk page (English), and a long Wikipedia article (about 4,000 controls, with the footer link "About Wikipedia" near the very end). 7 steps in all.
 
 | | Result |
 |---|---|
-| Record, save and follow through the real pages, unchanged | 3 of 3 sites finished (5 of 5 steps), found by label |
-| Redesign: labels renamed, addresses kept | 4 of 5 steps found and highlighted correctly; 1 declined |
-| Harder redesign: labels, addresses and names all changed | 1 of 5 found (by another link to the same address); 4 declined |
-| Wrong control highlighted | 0 of 10 |
+| Record, save and follow through the real pages, unchanged | 4 of 4 pages finished (7 of 7 steps), found by label |
+| Redesign: labels renamed, addresses kept | 4 of 6 steps found and highlighted correctly; 2 declined |
+| Harder redesign: labels, addresses and names all changed | 2 of 6 found (by another link to the same address); 4 declined |
+| Wrong control highlighted | 0 of 12 |
+| Footer link at the end of a 4,000-control page | Found and scrolled to, after the label was renamed |
 | Pop-up notice covering the control | The passport page's notice was detected and the guide said so |
 
-The harder redesign ran in a headless Chrome that has no on-device model, so "declined" is what the guide does without the model: it says it is not sure and points at nothing. The model's part on real pages was not measured, only on the practice sites above. Earlier, the extension also read the page and drew the highlight on the right control on 5 of 6 other real sites (Wikipedia, GitHub's sign-in page, Nepal Electricity Authority, the passport office, the Bangladesh portal); the sixth refused the automated browser.
+The harder redesign ran in a headless Chrome that has no on-device model, so "declined" is what the guide does without the model: it says it is not sure and points at nothing. The model's part on real pages is measured separately above. Earlier, the extension also read the page and drew the highlight on the right control on 5 of 6 other real sites (Wikipedia, GitHub's sign-in page, Nepal Electricity Authority, the passport office, the Bangladesh portal); the sixth refused the automated browser. One early run reported a wrong highlight on a long page. It was my check reading the page while it was still scrolling to the control; the check now waits for the scroll to finish.
 
 **What the real sites taught us** (all fixed):
 - Many real links have an address that means nothing (`/`, `javascript:void(0)`, a link to the same page). Those are no longer recorded or used as anchors.
@@ -133,7 +136,7 @@ The harder redesign ran in a headless Chrome that has no on-device model, so "de
 
 **Security rules.** [tools/rules-check.js](tools/rules-check.js) runs 24 checks against the live project with two separate anonymous users: all pass. Allowed actions work (a helper can set the pick, a note and the status; a creator can delete). Refusals hold: a helper cannot change the list of controls, pick outside it, write a note over 100 characters or delete someone else's request; a path cannot be edited or created with no steps, 41 steps, an extra field or someone else's name as creator; nothing can be read without signing in, with a wrong-length group code, or outside `groups`. Not covered: the rules were checked on the real project, not the Firebase emulator, and a group code that leaks still gives full access to that group.
 
-**Tests.** 65 unit tests (`npm test`). Four end-to-end scripts drive a throwaway headless Chrome with the extension loaded and run against the live site: [tools/e2e.mjs](tools/e2e.mjs) (record, save, follow), [tools/e2e-help.mjs](tools/e2e-help.mjs) (ask for help, a phone-sized helper taps, the highlight moves, the request is deleted), [tools/e2e-try.mjs](tools/e2e-try.mjs) (the same flow on the try page) and [tools/e2e-real.mjs](tools/e2e-real.mjs) (real public websites, above). In the headless browser, App Check sometimes refuses the cloud translation (reCAPTCHA scores it as a bot); the path is then saved without translations, as designed, and the test reports it. In a normal Chrome the cloud call works. The on-device model is not available in that headless Chrome, so the model path was checked separately in a normal Chrome.
+**Tests.** 72 unit tests (`npm test`). Four end-to-end scripts drive a throwaway headless Chrome with the extension loaded and run against the live site: [tools/e2e.mjs](tools/e2e.mjs) (record, save, follow), [tools/e2e-help.mjs](tools/e2e-help.mjs) (ask for help, a phone-sized helper taps, the highlight moves, the request is deleted), [tools/e2e-try.mjs](tools/e2e-try.mjs) (the same flow on the try page) and [tools/e2e-real.mjs](tools/e2e-real.mjs) (real public websites, above). In the headless browser, App Check sometimes refuses the cloud translation (reCAPTCHA scores it as a bot); the path is then saved without translations, as designed, and the test reports it. In a normal Chrome the cloud call works. The on-device model is not available in that headless Chrome, so the model path was checked separately in a normal Chrome.
 
 ## Design
 
@@ -152,12 +155,13 @@ Not done: a screen-reader pass, an automated accessibility audit, or any test wi
 - **Laptop only.** The on-device model runs in desktop Chrome, not on phones. The helper page does work on a phone, because the helper needs no model.
 - **The on-device model reads only English, Spanish and Japanese.** On a website in Nepali or Bengali, a renamed button can still be found by its link address or internal name, but not by the model. Saathi then says it is not sure.
 - **The model is weak on long real pages.** When a control's label, address and name all change, the on-device model finds the right one in roughly half the cases on real pages (9 of 18 in the latest replay), declines in most of the rest, and occasionally points at a near-synonym. Declining is the safe failure and is the usual one.
-- **Real sites: short public paths only.** Full record and follow was tested on two-step paths on three public sites. Sites that need a login, forms with typed answers, long paths and pages with more than 150 controls were not tested. On a page with more than 150 controls, only the first 150 are read.
+- **Real sites: short public paths only.** Full record and follow was tested on two-step paths on three public sites. Sites that need a login, forms with typed answers and long paths were not tested.
 - **Nepali and Hindi were not reviewed by a native speaker.** One early Nepali translation added a detail that was not in the step. The prompt now forbids that, and later samples did not repeat it, but review is still needed.
 - **Read-aloud was not tested with Nepali or Hindi voices.** It uses the browser's own voices, and many computers have no Nepali voice. The step card is always shown on screen.
 - **A group code is the only key.** Anyone who learns it can read that group's paths and help requests. That suits a family, not a public community.
 - **Not an offline app.** The websites Saathi guides need the internet anyway.
 - **No real user yet.** This was built and tested by one person on practice sites and public pages. It has not been used by a parent, student or migrant worker.
+- **Help and explain on long pages.** A help request sends the controls on screen (at most 100) and "Explain this page" describes the controls on screen (at most 60), so the helper and the explainer see what the person is looking at. A control that is off screen is not offered until the person scrolls to it and asks again.
 - **The helper page is heavy** (about 200 KB compressed) because it shares code with the panel.
 
 ## Install the extension
