@@ -88,8 +88,35 @@ window.__err = null;
     t('help: a group code of the wrong length is refused', await read('groups/SHORT/help/h1', tok1), 403);
     t('help: the creator deleting works', await del(`${H}h1`, tok1), 200);
 
+    // Scam alerts.
+    const A = `groups/${G}/alerts/`;
+    const alert = (over = {}) => ({ host: 'fake.example', brand: 'Some Bank', level: 'stop', reasons: ['pretends'], createdBy: uid1, expiresAt: ts(), ...over });
+    t('alert: valid create by user 1', await create(`${A}a1`, alert()), 200);
+    t('alert: create with an extra field is refused', await create(`${A}a2`, alert({ url: 'https://x' })), 403);
+    t('alert: create naming someone else as creator is refused', await create(`${A}a3`, alert({ createdBy: uid2 })), 403);
+    t('alert: create with an unknown level is refused', await create(`${A}a4`, alert({ level: 'panic' })), 403);
+    t('alert: create with 9 reasons is refused', await create(`${A}a5`, alert({ reasons: Array(9).fill('urgency') })), 403);
+    t('alert: any edit is refused', await update(`${A}a1`, { brand: 'Other' }, ['brand'], tok1), 403);
+    t('alert: reading without signing in is refused', await read(`${A}a1`, null), 403);
+    t('alert: another user deleting is refused', await del(`${A}a1`, tok2), 403);
+    t('alert: the creator deleting works', await del(`${A}a1`, tok1), 200);
+
+    // Check-ins.
+    const C = `groups/${G}/checkins/`;
+    const checkin = (over = {}) => ({ title: 'Pay bill', steps: 5, createdBy: uid1, expiresAt: ts(), ...over });
+    t('checkin: valid create by user 1', await create(`${C}c1`, checkin()), 200);
+    t('checkin: create with an extra field is refused', await create(`${C}c2`, checkin({ host: 'bank.example' })), 403);
+    t('checkin: create naming someone else as creator is refused', await create(`${C}c3`, checkin({ createdBy: uid2 })), 403);
+    t('checkin: create with an empty title is refused', await create(`${C}c4`, checkin({ title: '' })), 403);
+    t('checkin: create with 41 steps is refused', await create(`${C}c5`, checkin({ steps: 41 })), 403);
+    t('checkin: create with steps as text is refused', await create(`${C}c6`, checkin({ steps: 'five' })), 403);
+    t('checkin: any edit is refused', await update(`${C}c1`, { title: 'Changed' }, ['title'], tok1), 403);
+    t('checkin: reading without signing in is refused', await read(`${C}c1`, null), 403);
+    t('checkin: another user deleting is refused', await del(`${C}c1`, tok2), 403);
+    t('checkin: the creator deleting works', await del(`${C}c1`, tok1), 200);
+
     // Saved paths.
-    const P = `groups/${G}/paths/`;
+    const P =`groups/${G}/paths/`;
     const path = (over = {}) => ({
       title: 'Pay bill', host: 'a.example',
       steps: [{ role: 'button', text: 'Pay', section: '', page: '/', href: '', name: '' }],

@@ -68,6 +68,18 @@ try {
   }
   out.how = how;
   check('followed to the end on the renamed copy', await c.evalIn(s, P('return w.__saathi.done === true')), how);
+
+  // The finished card offers to tell the family. Pressing it writes a check-in with only a title and a step count.
+  check('finished card offers to tell the family', await c.evalIn(s, P(`const b = d.getElementById('fo-tell-btn'); return !d.getElementById('fo-tell').hidden && !b.disabled`)));
+  await c.evalIn(s, P(`d.getElementById('fo-tell-btn').click()`));
+  await c.waitFor(s, P(`return d.getElementById('fo-tell-msg').textContent.length > 0`), 15000);
+  check('family told after the button is pressed', await c.evalIn(s, P(`return /told|Well done/.test(d.getElementById('fo-tell-msg').textContent)`)), await c.evalIn(s, P(`return d.getElementById('fo-tell-msg').textContent`)));
+  const written = await c.evalIn(s, P(`return w.__saathi.user.getIdToken()
+    .then((tok) => fetch('https://firestore.googleapis.com/v1/projects/paperwork-decoder/databases/(default)/documents/groups/' + w.__saathi.group + '/checkins', { headers: { Authorization: 'Bearer ' + tok } }))
+    .then((r) => r.json())
+    .then((j) => JSON.stringify((j.documents || []).map((x) => Object.keys(x.fields).sort().join(',') + ' | ' + x.fields.title.stringValue + ' | ' + x.fields.steps.integerValue)));`));
+  out.checkin = JSON.parse(written);
+  check('check-in holds only title, steps and bookkeeping fields', out.checkin.length === 1 && out.checkin[0].startsWith('createdAt,createdBy,expiresAt,steps,title | Pay the electricity bill | 5'), out.checkin);
 } catch (err) {
   out.error = err.message;
 } finally {

@@ -1,8 +1,8 @@
 // The helper's phone page. It shows the names of the controls on another person's page, and
 // writes back which one to point at. No extension and no on-device model are needed here.
 
-import { ensureUser, watchHelpRequests, watchHelp, answerHelp, watchAlerts } from './backend.js';
-import { alertsForMe, alertSentence } from './alerts.js';
+import { ensureUser, watchHelpRequests, watchHelp, answerHelp, watchAlerts, watchCheckins } from './backend.js';
+import { alertsForMe, alertSentence, recentCheckins, checkinSentence } from './alerts.js';
 import { GROUP_RE, normaliseGroup } from './path.js';
 import { groupBySection, kindWord, cleanNote, isLive } from './help.js';
 
@@ -19,6 +19,7 @@ window.__helper = state; // read by the end-to-end test
 let stopList = null;
 let stopOne = null;
 let stopAlerts = null;
+let stopCheckins = null;
 
 function say(id, text, kind = '') {
   const el = $(id);
@@ -57,6 +58,18 @@ async function join(code) {
     },
     () => {},
   );
+  stopCheckins?.();
+  stopCheckins = watchCheckins(
+    code,
+    (all) => {
+      const recent = recentCheckins(all, Date.now(), 24);
+      $('s-checkins').hidden = recent.length === 0;
+      $('checkins').innerHTML = recent
+        .map((c) => `<li>${esc(checkinSentence(c))}<small>${new Date(c.createdAt?.toMillis?.() ?? Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</small></li>`)
+        .join('');
+    },
+    () => {},
+  );
   stopList?.();
   stopList = watchHelpRequests(
     code,
@@ -87,7 +100,9 @@ $('group-join').addEventListener('click', () => {
 $('group-leave').addEventListener('click', () => {
   stopList?.();
   stopAlerts?.();
+  stopCheckins?.();
   $('s-alerts').hidden = true;
+  $('s-checkins').hidden = true;
   store.del('saathi-helper:group');
   state.group = '';
   show('group');

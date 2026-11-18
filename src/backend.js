@@ -10,7 +10,7 @@ import {
 import { getRemoteConfig, fetchAndActivate, getValue } from 'firebase/remote-config';
 import { getFirebaseApp, run } from './firebase.js';
 import { stepInstruction } from './path.js';
-import { cleanAlert, ALERT_HOURS } from './alerts.js';
+import { cleanAlert, ALERT_HOURS, cleanCheckin, CHECKIN_HOURS } from './alerts.js';
 
 let auth = null;
 let db = null;
@@ -183,6 +183,32 @@ export async function createAlert(code, alert) {
 export function watchAlerts(code, onChange, onError) {
   return onSnapshot(
     alertsOf(code),
+    (snap) => onChange(snap.docs.map((d) => ({ id: d.id, ...d.data() }))),
+    onError,
+  );
+}
+
+// ---------- Check-ins (Firestore, real-time) ----------
+
+const checkinsOf = (code) => collection(services().db, 'groups', code, 'checkins');
+
+/** Tells the group a guide was finished. Only the guide's title and its number of steps are written. */
+export async function createCheckin(code, checkin) {
+  const user = await ensureUser();
+  const clean = cleanCheckin(checkin);
+  const id = crypto.randomUUID().replace(/-/g, '').slice(0, 12);
+  await setDoc(doc(checkinsOf(code), id), {
+    ...clean,
+    createdBy: user.uid,
+    createdAt: serverTimestamp(),
+    expiresAt: Timestamp.fromMillis(Date.now() + CHECKIN_HOURS * 3600e3),
+  });
+  return id;
+}
+
+export function watchCheckins(code, onChange, onError) {
+  return onSnapshot(
+    checkinsOf(code),
     (snap) => onChange(snap.docs.map((d) => ({ id: d.id, ...d.data() }))),
     onError,
   );

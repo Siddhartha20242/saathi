@@ -35,7 +35,9 @@
       .ok { color: var(--accent); } .bad { color: var(--bad); }
       #alerts li { background: #fbeceb; border: 2px solid var(--bad); border-radius: 10px; padding: 10px 12px; margin: 8px 0; }
       #alerts small { display: block; color: var(--muted); margin-top: 4px; }
-      @media (prefers-color-scheme: dark) { #alerts li { background: #3a1511; } }
+      #checkins li { background: #e6f2ee; border: 2px solid var(--accent); border-radius: 10px; padding: 10px 12px; margin: 8px 0; }
+      #checkins small { display: block; color: var(--muted); margin-top: 4px; }
+      @media (prefers-color-scheme: dark) { #alerts li { background: #3a1511; } #checkins li { background: #12302a; } }
       [hidden] { display: none !important; }
     </style>
   </head>
@@ -59,6 +61,12 @@
         <h2>Scam alerts</h2>
         <p class="muted">Someone in your group pressed "Tell my family" on a page that looks like a scam. Call them, and tell them not to type anything.</p>
         <ul id="alerts"></ul>
+      </section>
+
+      <section id="s-checkins" hidden>
+        <h2>Finished on their own</h2>
+        <p class="muted">Someone in your group pressed "Let my family know I finished". Only the guide's name is shared.</p>
+        <ul id="checkins"></ul>
       </section>
 
       <section id="s-list" hidden>

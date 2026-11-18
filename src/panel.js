@@ -16,7 +16,7 @@ import {
 import { controlsForHelp, helpPreview } from './help.js';
 import {
   ensureUser, loadConfig, savePath, listPaths, deletePath, translatePath, createHelp, watchHelp, closeHelp,
-  createAlert, watchAlerts,
+  createAlert, watchAlerts, createCheckin,
 } from './backend.js';
 
 const $ = (id) => document.getElementById(id);
@@ -475,9 +475,9 @@ $('rec-save').addEventListener('click', async () => {
 // ---------- Following ----------
 
 const WORDS = {
-  en: { step: (i, n) => `Step ${i} of ${n}`, done: 'You did it. Saathi only showed the way.' },
-  ne: { step: (i, n) => `चरण ${i} / ${n}`, done: 'तपाईंले आफैं गर्नुभयो। साथीले बाटो मात्र देखायो।' },
-  hi: { step: (i, n) => `चरण ${i} / ${n}`, done: 'आपने खुद कर दिखाया। साथी ने बस रास्ता दिखाया।' },
+  en: { step: (i, n) => `Step ${i} of ${n}`, done: 'You did it. Saathi only showed the way.', tell: 'Let my family know I finished', told: 'Your family has been told. Well done.', noGroup: 'Join a group to tell your family.' },
+  ne: { step: (i, n) => `चरण ${i} / ${n}`, done: 'तपाईंले आफैं गर्नुभयो। साथीले बाटो मात्र देखायो।', tell: 'परिवारलाई भन्नुहोस् कि मैले सकें', told: 'तपाईंको परिवारलाई जानकारी गराइयो। धेरै राम्रो।', noGroup: 'परिवारलाई भन्न समूहमा जोडिनुहोस्।' },
+  hi: { step: (i, n) => `चरण ${i} / ${n}`, done: 'आपने खुद कर दिखाया। साथी ने बस रास्ता दिखाया।', tell: 'परिवार को बताइए कि मैंने कर लिया', told: 'आपके परिवार को बता दिया गया है। बहुत अच्छा।', noGroup: 'परिवार को बताने के लिए किसी समूह से जुड़िए।' },
 };
 const VOICE = { en: 'en-US', ne: 'ne-NP', hi: 'hi-IN' };
 
@@ -637,6 +637,8 @@ async function startFollow(path) {
   if (!path) return;
   state.follow = { path, index: 0, found: null };
   state.done = false;
+  state.lastDone = null;
+  $('fo-tell').hidden = true;
   document.body.dataset.following = 'true';
   showTab('follow');
   $('fo-done').hidden = true;
@@ -644,17 +646,44 @@ async function startFollow(path) {
   await showStep();
 }
 
+// The finished card can tell the family. It sends only the guide's title and its number of steps,
+// and only when the person presses the button.
+function renderTell() {
+  const w = WORDS[state.lang] ?? WORDS.en;
+  $('fo-tell').hidden = !state.lastDone;
+  $('fo-tell-btn').textContent = state.group ? w.tell : w.noGroup;
+  $('fo-tell-btn').disabled = !state.group;
+  $('fo-tell-btn').hidden = false;
+  $('fo-tell-msg').textContent = '';
+}
+
+$('fo-tell-btn').addEventListener('click', async () => {
+  if (!state.lastDone || !state.group) return;
+  const w = WORDS[state.lang] ?? WORDS.en;
+  $('fo-tell-btn').disabled = true;
+  try {
+    await createCheckin(state.group, state.lastDone);
+    $('fo-tell-msg').textContent = w.told;
+    $('fo-tell-btn').hidden = true;
+  } catch (err) {
+    $('fo-tell-msg').textContent = `Could not tell your family: ${err.message}`;
+    $('fo-tell-btn').disabled = false;
+  }
+});
+
 async function nextStep() {
   const f = state.follow;
   if (!f) return;
   f.index++;
   if (f.index >= f.path.steps.length) {
+    state.lastDone = { title: f.path.title, steps: f.path.steps.length };
     state.follow = null;
     state.done = true;
     document.body.dataset.following = 'false';
     $('follow').hidden = true;
     $('fo-done').hidden = false;
     $('fo-done').textContent = (WORDS[state.lang] ?? WORDS.en).done;
+    renderTell();
     if (state.speak) speak($('fo-done').textContent, state.lang);
     return;
   }

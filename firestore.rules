@@ -45,6 +45,26 @@ service cloud.firestore {
       allow delete: if request.auth != null && resource.data.createdBy == request.auth.uid;
     }
 
+    // Check-ins: "I finished this guide". Only the guide's title and its number of steps, sent when the
+    // person presses a button. It cannot be edited.
+    match /groups/{code}/checkins/{id} {
+      allow get, list: if request.auth != null && code.size() == 8;
+
+      allow create: if request.auth != null
+        && code.size() == 8
+        && request.resource.data.keys().hasOnly(['title', 'steps', 'createdBy', 'createdAt', 'expiresAt'])
+        && request.resource.data.createdBy == request.auth.uid
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.title is string
+        && request.resource.data.title.size() > 0 && request.resource.data.title.size() <= 80
+        && request.resource.data.steps is int
+        && request.resource.data.steps >= 1 && request.resource.data.steps <= 40
+        && request.resource.data.expiresAt is timestamp;
+
+      allow update: if false;
+      allow delete: if request.auth != null && resource.data.createdBy == request.auth.uid;
+    }
+
     // "I'm stuck" help. The person who asks writes the names of the controls on one page.
     // Anyone in the group can answer, but only by setting the pick, a short note and the status.
     match /groups/{code}/help/{id} {

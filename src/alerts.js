@@ -28,4 +28,27 @@ export function alertsForMe(list, uid, seen = [], now = Date.now(), hours = 24) 
     .sort((a, b) => millis(b.createdAt) - millis(a.createdAt));
 }
 
+// ---------- Check-ins: "I finished this guide" ----------
+// Sent only when the person presses a button on the finished card. It holds the guide's title and how
+// many steps it had. Nothing from the website and nothing typed.
+
+export const CHECKIN_HOURS = 48;
+
+export function cleanCheckin(c) {
+  const steps = Number.isInteger(c?.steps) ? Math.min(40, Math.max(1, c.steps)) : 1;
+  return { title: String(c?.title ?? '').trim().slice(0, 80) || 'A guide', steps };
+}
+
+/** Everyone's recent check-ins (the helper page shows all of them), newest first. */
+export function recentCheckins(list, now = Date.now(), hours = 24) {
+  return list
+    .filter((c) => now - millis(c.createdAt) < hours * 3600e3 && (millis(c.expiresAt) || Infinity) > now)
+    .sort((a, b) => millis(b.createdAt) - millis(a.createdAt));
+}
+
+export function checkinSentence(c) {
+  const n = c.steps === 1 ? '1 step' : `${c.steps} steps`;
+  return `Someone in your group finished "${c.title}" (${n}) on their own.`;
+}
+
 export { alertSentence };
