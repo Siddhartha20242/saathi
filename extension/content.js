@@ -150,6 +150,22 @@
   let scanId = '';
   let indexByKey = new Map(); // the position in the list of each label, so a repeated one can still be placed
 
+  // Controls inside open shadow roots (web components) are read as well. A closed one cannot be read by any
+  // extension. Saathi's own warning bar lives in a shadow root and is skipped.
+  const MAX_ROOTS = 200;
+  function allControls() {
+    const found = [];
+    const roots = [document];
+    for (let i = 0; i < roots.length && i < MAX_ROOTS; i++) {
+      const root = roots[i];
+      found.push(...root.querySelectorAll(SELECTOR));
+      for (const host of root.querySelectorAll('*')) {
+        if (host.shadowRoot && !host.hasAttribute('data-saathi') && !host.closest('[data-saathi]')) roots.push(host.shadowRoot);
+      }
+    }
+    return found;
+  }
+
   function scan() {
     const sectionOf = sectionFinder();
     const seen = new Map(); // key -> the element's entry, so a repeated label can be counted
@@ -158,7 +174,7 @@
     lastScan = [];
     const elements = [];
     let truncated = false;
-    for (const el of document.querySelectorAll(SELECTOR)) {
+    for (const el of allControls()) {
       if (elements.length >= MAX_CONTROLS) {
         truncated = true;
         break;
@@ -304,7 +320,8 @@
     let covered = false;
     if (inView) {
       box.style.display = 'none';
-      const top = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+      const rootNode = el.getRootNode();
+      const top = (rootNode.elementFromPoint ? rootNode : document).elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
       box.style.display = '';
       covered = Boolean(top) && top !== el && !el.contains(top) && !top.contains(el);
     }
@@ -339,7 +356,7 @@
     'click',
     (ev) => {
       if (!recording) return;
-      const el = controlOf(ev.target);
+      const el = controlOf(ev.composedPath?.()[0] ?? ev.target);
       if (!el || el.closest('[data-saathi]') || !isVisible(el)) return;
       const role = roleOf(el);
       // Boxes and lists are recorded when focused, not when clicked.
@@ -352,7 +369,7 @@
     'focusin',
     (ev) => {
       if (!recording) return;
-      const el = ev.target;
+      const el = ev.composedPath?.()[0] ?? ev.target;
       if (!el?.matches?.('input, select, textarea') || el === lastFocused) return;
       const role = roleOf(el);
       if (role === 'field' || role === 'select') {

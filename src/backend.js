@@ -5,12 +5,12 @@
 import { getAuth, signInAnonymously } from 'firebase/auth';
 import {
   initializeFirestore, getFirestore, persistentLocalCache, collection, doc, setDoc, getDocs, deleteDoc, updateDoc,
-  onSnapshot, serverTimestamp, Timestamp,
+  onSnapshot, serverTimestamp, Timestamp, query, where,
 } from 'firebase/firestore';
 import { getRemoteConfig, fetchAndActivate, getValue } from 'firebase/remote-config';
-import { getFirebaseApp, run } from './firebase.js';
+import { getFirebaseApp, run, pickCloudModel, setCloudModel } from './firebase.js';
 import { stepInstruction, cleanLoadedPath } from './path.js';
-import { cleanAlert, ALERT_HOURS, cleanCheckin, CHECKIN_HOURS } from './alerts.js';
+import { cleanAlert, ALERT_HOURS, cleanCheckin, CHECKIN_HOURS, expiredOwn } from './alerts.js';
 
 let auth = null;
 let db = null;
@@ -39,7 +39,7 @@ export async function ensureUser() {
 
 // ---------- Remote Config ----------
 
-const DEFAULTS = { cloud_enabled: true, max_labels: 60, languages: 'ne,hi' };
+const DEFAULTS = { cloud_enabled: true, max_labels: 60, languages: 'ne,hi', cloud_model: '' };
 
 export function parseLanguages(text) {
   return String(text ?? '')
@@ -64,10 +64,13 @@ export async function loadConfig() {
   const cloud = get('cloud_enabled');
   const labels = get('max_labels');
   const langs = get('languages');
+  const model = get('cloud_model');
+  setCloudModel(model ? model.asString() : '');
   return {
     cloudEnabled: cloud ? cloud.asBoolean() : DEFAULTS.cloud_enabled,
     maxLabels: Math.min(150, Math.max(10, (labels && labels.asNumber()) || DEFAULTS.max_labels)),
     languages: parseLanguages(langs ? langs.asString() : DEFAULTS.languages),
+    cloudModel: pickCloudModel(model ? model.asString() : ''),
     source: cloud ? cloud.getSource() : 'default',
   };
 }
@@ -212,6 +215,30 @@ export function watchCheckins(code, onChange, onError) {
     (snap) => onChange(snap.docs.map((d) => ({ id: d.id, ...d.data() }))),
     onError,
   );
+}
+
+// ---------- Housekeeping ----------
+
+/**
+ * Deletes this person's own help requests, alerts and check-ins that have expired. Anyone who knows a group code can
+ * read the group, so old records should not sit there. Best effort: a failure is ignored. Returns how many were removed.
+ */
+export async function cleanUpOwn(code) {
+  const user = await ensureUser();
+  let removed = 0;
+  for (const make of [helpOf, alertsOf, checkinsOf]) {
+    try {
+      const snap = await getDocs(query(make(code), where('createdBy', '==', user.uid)));
+      const old = expiredOwn(snap.docs.map((d) => ({ id: d.id, ...d.data() })), user.uid);
+      for (const id of old) {
+        await deleteDoc(doc(make(code), id));
+        removed++;
+      }
+    } catch {
+      // not allowed, or offline: try again next time
+    }
+  }
+  return removed;
 }
 
 // ---------- Translation (cloud, labels only) ----------

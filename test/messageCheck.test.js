@@ -184,3 +184,18 @@ describe('review findings', () => {
     expect(assessMessage('short').truncated).toBe(false);
   });
 });
+
+describe('home passwords', () => {
+  it('does not warn when a friend asks for the wifi or a streaming password', () => {
+    for (const t of ['Can you send me the wifi password? I am at your house.', 'Please share the Netflix password with me, thanks', 'give me the router password']) {
+      expect(assessMessage(t).level, t).toBe('ok');
+    }
+  });
+  it('still warns when a bank word is anywhere in the message', () => {
+    expect(assessMessage('Your bank account is blocked. Send the wifi password and OTP now').level).not.toBe('ok');
+    expect(assessMessage('Send your bank account password').level).not.toBe('ok');
+  });
+});
+it('a wifi ask that also wants an OTP is still a warning', () => {
+  expect(assessMessage('send the wifi password and the OTP').level).not.toBe('ok');
+});

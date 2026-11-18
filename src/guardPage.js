@@ -147,9 +147,19 @@ export function startGuard(chromeApi, doc = document, win = window) {
     lastKey = key;
     last = { host: snapshot.host, ...result };
     tell({ saathi: 'guard', guard: last });
-    if (result.level === 'ok') return doc.querySelector('[data-saathi="guard"]')?.remove();
+    if (result.level === 'ok') {
+      barWanted = null;
+      return doc.querySelector('[data-saathi="guard"]')?.remove();
+    }
     if (dismissed) return;
     lang = await readLang();
+    present(result);
+  }
+
+  // The bar as it should look. If the page removes it, hides it or squashes it, it is put back.
+  let barWanted = null;
+  function present(result) {
+    barWanted = result;
     showBar(doc, result, lang, {
       // Only the open side panel can write the alert. If it is closed, say how to open it.
       onFamily: () =>
@@ -161,9 +171,27 @@ export function startGuard(chromeApi, doc = document, win = window) {
           hint.textContent = warning(last, lang).openPanel;
           host.__bar.append(hint);
         }),
-      onDismiss: () => (dismissed = true),
+      onDismiss: () => {
+        dismissed = true;
+        barWanted = null;
+      },
     });
   }
+
+  const barIntact = () => {
+    const host = doc.querySelector('[data-saathi="guard"]');
+    if (!host || !host.isConnected) return false;
+    try {
+      const style = win.getComputedStyle(host);
+      const box = host.getBoundingClientRect();
+      return style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity) > 0.5 && box.width > 50 && box.height > 10;
+    } catch {
+      return true;
+    }
+  };
+  setInterval(() => {
+    if (barWanted && !dismissed && !barIntact()) present(barWanted);
+  }, 1000);
 
   // Pages fill in after they load, and single-page sites change address without reloading.
   setTimeout(run, 600);

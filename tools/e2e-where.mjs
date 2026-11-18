@@ -46,6 +46,11 @@ try {
   check('nothing was pressed or moved on', await c.evalIn(s, P(`return w.__saathi.follow && w.__saathi.follow.index === 0`)));
   const none = await ask('refund');
   check('an unknown name is answered, not guessed', /could not find/.test(none), none);
+  // A button inside an open shadow root (a web component) can be found too.
+  await c.evalIn(s, S(`const h = d.createElement('div'); d.body.prepend(h); const r = h.attachShadow({ mode: 'open' }); r.innerHTML = '<button style="padding:10px 20px">Shadow gift</button>'; return true;`));
+  await c.evalIn(s, S(`d.querySelector('[data-saathi="point"]')?.remove(); return true;`));
+  const sh = await ask('shadow gift');
+  check('a button inside a shadow root is found and outlined', (await pointBox()) && /Shadow gift/.test(sh), sh);
   await c.shot(s, 'where-is.png');
 } catch (err) {
   out.error = String(err?.message ?? err);

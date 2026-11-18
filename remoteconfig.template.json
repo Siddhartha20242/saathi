@@ -20,6 +20,13 @@
       },
       "valueType": "STRING",
       "description": "Languages a saved path is translated into (ne = Nepali, hi = Hindi)."
+    },
+    "cloud_model": {
+      "defaultValue": {
+        "value": ""
+      },
+      "valueType": "STRING",
+      "description": "Cloud model name. Empty means the app's built-in default. Only Gemini 3 names are accepted; anything else is ignored."
     }
   }
 }

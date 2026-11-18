@@ -68,3 +68,18 @@ describe('alertSentence', () => {
     expect(alertSentence({ host: 'fake.top', brand: 'Nabil Bank', reasons: ['pretends'] })).toContain('a page pretending to be Nabil Bank (fake.top)');
   });
 });
+
+import { expiredOwn } from '../src/alerts.js';
+describe('expiredOwn', () => {
+  const at = (ms) => ({ toMillis: () => ms });
+  it('picks only my own records that have expired', () => {
+    const docs = [
+      { id: 'a', createdBy: 'me', expiresAt: at(1000) },
+      { id: 'b', createdBy: 'me', expiresAt: at(9e12) },
+      { id: 'c', createdBy: 'other', expiresAt: at(1000) },
+      { id: 'd', createdBy: 'me' },
+    ];
+    expect(expiredOwn(docs, 'me', 5000)).toEqual(['a']);
+    expect(expiredOwn(undefined, 'me')).toEqual([]);
+  });
+});

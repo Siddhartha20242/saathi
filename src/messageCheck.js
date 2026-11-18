@@ -70,10 +70,19 @@ const HAND_OVER_NE_HI = /(ओटीपी|पिन|पासवर्ड|सी
 const NEG_BEFORE = /(do not|don't|dont|never|not to|must not|should not)\s+(?:\w+\s+){0,2}$/i;
 const NEG_NE_HI = /नदिनु|न दिनु|नभन्नु|न भन्नु|न बता|न भेज|कसैलाई\s*न|मत\s|कभी\s*न/;
 
+// "Send me the wifi password" is a friend asking for the home network. It is not a bank secret. Only a password for
+// a named home device or streaming service is let through, and only when no bank word is nearby, so "your bank wifi"
+// style tricks do not slip past.
+const HOME_PASSWORD = /\b(?:wi-?fi|wifi|router|hotspot|netflix|prime|hotstar|zoom|laptop|tv)\s+(?:password|pass)\b/i;
+const BANK_WORDS = /\b(?:bank|account|a\/c|card|upi|wallet|esewa|khalti|kyc|blocked|suspended|otp|pin|mpin|cvv)\b/i;
+
 function asksToHandOver(text) {
   const normal = text.replace(/\bo\.t\.p\b\.?/gi, 'otp'); // "O.T.P" written with dots
   for (const m of normal.matchAll(HAND_OVER)) {
-    if (!NEG_BEFORE.test(normal.slice(Math.max(0, m.index - 40), m.index))) return true;
+    if (!NEG_BEFORE.test(normal.slice(Math.max(0, m.index - 40), m.index))) {
+      if (HOME_PASSWORD.test(m[0]) && !BANK_WORDS.test(normal)) continue;
+      return true;
+    }
   }
   for (const clause of normal.split(/[.!?\n।,;:]+/)) {
     if (HAND_OVER_NE_HI.test(clause) && !NEG_NE_HI.test(clause)) return true;

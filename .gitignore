@@ -11,3 +11,6 @@ public/demo-bridge
 .claude/
 tools/real-model/out
 public/test-audio
+.claude/skills
+.agents
+skills-lock.json

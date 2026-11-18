@@ -20,7 +20,7 @@ import { whereIs } from './where.js';
 import { controlsForHelp, helpPreview, cleanTitle } from './help.js';
 import {
   ensureUser, loadConfig, savePath, listPaths, deletePath, translatePath, createHelp, watchHelp, closeHelp,
-  createAlert, watchAlerts, createCheckin,
+  createAlert, watchAlerts, createCheckin, cleanUpOwn,
 } from './backend.js';
 
 const $ = (id) => document.getElementById(id);
@@ -170,6 +170,7 @@ async function setGroup(code) {
   renderTell();
   renderMessage();
   watchFamilyAlerts();
+  cleanUpOwn(code).catch(() => {}); // remove this person's own expired records
   await refreshLibrary();
 }
 
@@ -1270,6 +1271,7 @@ async function start() {
   callExtension('setLang', { lang: state.lang }).catch(() => {});
   callExtension('guardStatus').then(renderGuard).catch(() => {});
   watchFamilyAlerts();
+  if (state.group) cleanUpOwn(state.group).catch(() => {});
   if (state.group) await refreshLibrary();
   else say('lib-msg', 'Join or start a group to see its paths.');
 }

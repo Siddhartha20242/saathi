@@ -39,6 +39,13 @@ try {
   await sleep(600);
   await c.shot(s, 'guard-warning.png');
   check('it offers a family button and a dismiss button', bar.buttons.length === 3, bar.buttons);
+  // A hostile page that removes or hides the bar gets it put back.
+  await c.evalIn(s, S(`d.querySelector('[data-saathi="guard"]').remove(); return true;`));
+  await sleep(2600);
+  check('a page that removes the warning bar gets it put back', await c.evalIn(s, S(`return !!d.querySelector('[data-saathi="guard"]')`)));
+  await c.evalIn(s, S(`d.querySelector('[data-saathi="guard"]').style.setProperty('display', 'none', 'important'); return true;`));
+  await sleep(2600);
+  check('a page that hides the warning bar gets it shown again', await c.evalIn(s, S(`const h = d.querySelector('[data-saathi="guard"]'); return !!h && getComputedStyle(h).display !== 'none'`)));
   await c.waitFor(s, P(`return !d.getElementById('guard').hidden`), 10000);
   const panel = await c.evalIn(s, P(`return { headline: d.getElementById('guard-headline').textContent, cls: d.getElementById('guard').className, reasons: d.querySelectorAll('#guard-reasons li').length }`));
   check('the panel shows the same warning', panel.headline.includes('रोकिनुहोस्') && /stop/.test(panel.cls), panel);
@@ -53,9 +60,9 @@ try {
   await c.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: where.x, y: where.y }, s);
   await c.send('Input.dispatchMouseEvent', { type: 'mousePressed', x: where.x, y: where.y, button: 'left', clickCount: 1 }, s);
   await c.send('Input.dispatchMouseEvent', { type: 'mouseReleased', x: where.x, y: where.y, button: 'left', clickCount: 1 }, s);
-  await c.waitFor(s, P(`return /परिवारलाई जानकारी/.test(d.getElementById('guard-msg').textContent)`), 30000);
+  await c.waitFor(s, P(`return /परिवारलाई खबर पठाइयो/.test(d.getElementById('guard-msg').textContent)`), 30000);
   check('pressing it on the page tells the family', true, await c.evalIn(s, P(`return d.getElementById('guard-msg').textContent`)));
-  check('the page then confirms it', await c.waitFor(s, S(`const h = d.querySelector('[data-saathi="guard"]'); const b = h && h.shadowRoot.firstChild; return b && [...b.querySelectorAll('button')][1].disabled && b.querySelectorAll('button')[1].textContent`), 15000).then((x) => /परिवारलाई जानकारी/.test(x)));
+  check('the page then confirms it', await c.waitFor(s, S(`const h = d.querySelector('[data-saathi="guard"]'); const b = h && h.shadowRoot.firstChild; return b && [...b.querySelectorAll('button')][1].disabled && b.querySelectorAll('button')[1].textContent`), 15000).then((x) => /परिवारलाई खबर पठाइयो/.test(x)));
 
   // The helper page for the same group.
   const helper = await c.open('https://paperwork-decoder.web.app/help.html', { background: true });

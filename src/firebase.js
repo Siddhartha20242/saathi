@@ -41,15 +41,33 @@ function init() {
     isTokenAutoRefreshEnabled: true,
   });
 
-  ai = getAI(app, { backend: new GoogleAIBackend() });
+  // Replay protection: each AI call carries a fresh single-use App Check token. Off unless asked for, because it
+  // needs a real (not bot-scored) browser to check, and a refused token would stop every cloud call.
+  ai = getAI(app, {
+    backend: new GoogleAIBackend(),
+    ...(env.VITE_APPCHECK_LIMITED_USE === 'true' && { useLimitedUseAppCheckTokens: true }),
+  });
   return ai;
 }
 
 // Gemini Nano (Prompt API) supports only these. Declaring others makes Chrome report it unavailable.
 const LANGS = ['en', 'es', 'ja'];
 
-// The cloud model is named here, so an SDK update cannot change it without us noticing.
-export const CLOUD_MODEL = 'gemini-3.5-flash-lite';
+// The cloud model is named here, so an SDK update cannot change it without us noticing. Remote Config
+// (`cloud_model`) can switch it without a new release, but only to a Gemini 3 model name.
+export const DEFAULT_CLOUD_MODEL = 'gemini-3.5-flash-lite';
+let cloudModel = DEFAULT_CLOUD_MODEL;
+export const CLOUD_MODEL_PATTERN = /^gemini-3(?:\.\d+)?-[a-z0-9.-]{1,40}$/;
+
+/** The cloud model to use: the Remote Config value if it is a Gemini 3 name, otherwise the default. */
+export function pickCloudModel(value) {
+  const v = String(value ?? '').trim();
+  return CLOUD_MODEL_PATTERN.test(v) ? v : DEFAULT_CLOUD_MODEL;
+}
+export function setCloudModel(value) {
+  cloudModel = pickCloudModel(value);
+}
+export const getCloudModel = () => cloudModel;
 
 /**
  * @param {string} mode ONLY_ON_DEVICE | PREFER_ON_DEVICE | PREFER_IN_CLOUD | ONLY_IN_CLOUD
@@ -58,7 +76,7 @@ export const CLOUD_MODEL = 'gemini-3.5-flash-lite';
  *   model must answer in that shape (structured output), so the answer needs no guessing to read.
  */
 function getModel(mode, withImage = false, schema = null) {
-  const key = `${mode}|${withImage}|${schema ? JSON.stringify(schema) : ''}`;
+  const key = `${cloudModel}|${mode}|${withImage}|${schema ? JSON.stringify(schema) : ''}`;
   if (models.has(key)) return models.get(key);
   const expectedInputs = [{ type: 'text', languages: LANGS }];
   if (withImage) expectedInputs.push({ type: 'image' });
@@ -66,7 +84,7 @@ function getModel(mode, withImage = false, schema = null) {
   const model = getGenerativeModel(init(), {
     mode: InferenceMode[mode],
     inCloudParams: {
-      model: CLOUD_MODEL,
+      model: cloudModel,
       ...(schema && {
         generationConfig: { responseMimeType: isEnum ? 'text/x.enum' : 'application/json', responseSchema: schema },
       }),

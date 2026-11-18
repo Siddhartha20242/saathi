@@ -53,3 +53,14 @@ export function checkinSentence(c) {
 }
 
 export { alertSentence };
+
+/**
+ * Which of a person's own records are past their expiry. The free Firebase plan has no automatic deletion,
+ * so each person's panel removes their own old help requests, alerts and check-ins when it opens.
+ */
+export function expiredOwn(docs, uid, nowMs = Date.now()) {
+  return (docs ?? [])
+    .filter((d) => d && d.createdBy === uid && d.expiresAt)
+    .filter((d) => (typeof d.expiresAt.toMillis === 'function' ? d.expiresAt.toMillis() : Number(d.expiresAt) * 1000) < nowMs)
+    .map((d) => d.id);
+}
