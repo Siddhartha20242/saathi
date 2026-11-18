@@ -10,6 +10,7 @@ export const ALERT_HOURS = 48;
 export function cleanAlert(a) {
   const level = a?.level === 'careful' ? 'careful' : 'stop';
   return {
+    kind: a?.kind === 'message' ? 'message' : 'page',
     host: String(a?.host ?? '').replace(/[^\w.\-:[\]]/g, '').slice(0, 100),
     brand: String(a?.brand ?? '').slice(0, 60),
     level,

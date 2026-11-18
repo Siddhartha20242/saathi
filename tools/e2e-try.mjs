@@ -80,6 +80,25 @@ try {
     .then((j) => JSON.stringify((j.documents || []).map((x) => Object.keys(x.fields).sort().join(',') + ' | ' + x.fields.title.stringValue + ' | ' + x.fields.steps.integerValue)));`));
   out.checkin = JSON.parse(written);
   check('check-in holds only title, steps and bookkeeping fields', out.checkin.length === 1 && out.checkin[0].startsWith('createdAt,createdBy,expiresAt,steps,title | Pay the electricity bill | 5'), out.checkin);
+
+  // Check a pasted message: plain code on the laptop. Telling the family sends no message text.
+  await c.evalIn(s, P(`d.getElementById('tab-help').click()`));
+  const scam = 'Dear customer your Nabil Bank account will be blocked within 24 hours. Update your KYC now: http://nabilbank-kyc.top/login';
+  await c.evalIn(s, P(`d.getElementById('msg-text').value = ${JSON.stringify(scam)}; d.getElementById('msg-check').click()`));
+  out.message = await c.evalIn(s, P(`return JSON.stringify({ cls: d.getElementById('msg-result').className, head: d.getElementById('msg-headline').textContent, reasons: [...d.querySelectorAll('#msg-reasons li')].length, family: !d.getElementById('msg-family').hidden && !d.getElementById('msg-family').disabled })`)).then(JSON.parse);
+  await c.evalIn(s, P(`d.getElementById('msg-result').scrollIntoView({ block: 'center' })`)); await sleep(500);
+  await c.shot(s, phone ? 'try-message-phone.png' : 'try-message-check.png');
+  check('pasted scam message gets a stop warning with reasons and a family button', /stop/.test(out.message.cls) && /Stop/.test(out.message.head) && out.message.reasons >= 3 && out.message.family, out.message);
+  await c.evalIn(s, P(`d.getElementById('msg-text').value = 'Are you coming for dinner on Saturday? Bring the photos.'; d.getElementById('msg-check').click()`));
+  check('an ordinary message gets no warning', await c.evalIn(s, P(`return /ok/.test(d.getElementById('msg-result').className) && d.getElementById('msg-family').hidden`)));
+  await c.evalIn(s, P(`d.getElementById('msg-text').value = ${JSON.stringify(scam)}; d.getElementById('msg-check').click(); d.getElementById('msg-family').click()`));
+  await c.waitFor(s, P(`return d.getElementById('msg-note').textContent.length > 0`), 15000);
+  const alerts = await c.evalIn(s, P(`return w.__saathi.user.getIdToken()
+    .then((tok) => fetch('https://firestore.googleapis.com/v1/projects/paperwork-decoder/databases/(default)/documents/groups/' + w.__saathi.group + '/alerts', { headers: { Authorization: 'Bearer ' + tok } }))
+    .then((r) => r.json())
+    .then((j) => JSON.stringify((j.documents || []).map((x) => Object.keys(x.fields).sort().join(',') + ' | ' + x.fields.kind.stringValue + ' | ' + x.fields.host.stringValue)));`)).then(JSON.parse);
+  out.messageAlert = alerts;
+  check('message alert holds only kind, host, brand, level, reasons and bookkeeping (no message text)', alerts.length === 1 && alerts[0] === 'brand,createdAt,createdBy,expiresAt,host,kind,level,reasons | message | nabilbank-kyc.top', alerts);
 } catch (err) {
   out.error = err.message;
 } finally {

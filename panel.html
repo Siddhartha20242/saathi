@@ -41,6 +41,12 @@
       .guard ul { margin: 8px 0 12px; padding-left: 20px; }
       .guard button.primary { background: #fff; color: #a3271f; border-color: #fff; }
       .guard .out { margin-top: 8px; color: var(--ink); }
+      .guard.inline { border-radius: var(--radius); }
+      .guard.ok { background: var(--accent-soft); color: var(--ink); }
+      .guard.ok .headline { font-weight: 600; font-size: 1em; }
+      textarea { width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); color: var(--ink); font: inherit; resize: vertical; }
+      textarea::placeholder { color: var(--muted); }
+      textarea:focus-visible { outline: 3px solid var(--accent); outline-offset: 1px; }
       .guard.family { background: var(--warn-soft); color: var(--ink); border-bottom: 2px solid var(--warn); }
       .guard.family button { margin-top: 8px; }
 
@@ -270,6 +276,19 @@
 
       <!-- Get help -->
       <div class="panel-body" role="tabpanel" id="panel-help" aria-labelledby="tab-help" hidden>
+        <div class="stack" id="sec-msg">
+          <h2>Got a strange message?</h2>
+          <p class="muted">Paste a text, WhatsApp or email message. Saathi checks it on this computer. The message is never sent anywhere.</p>
+          <textarea id="msg-text" rows="4" maxlength="2000" placeholder="Paste the message here" aria-label="Message to check"></textarea>
+          <button class="primary wide" id="msg-check">Check a message · सन्देश जाँच्नुहोस्</button>
+          <div class="guard inline" id="msg-result" hidden role="status">
+            <p class="headline" id="msg-headline"></p>
+            <ul id="msg-reasons"></ul>
+            <button class="primary wide" id="msg-family" hidden>Tell my family</button>
+            <p class="out" id="msg-note"></p>
+          </div>
+          <button class="quiet" id="msg-clear" hidden>Clear</button>
+        </div>
         <div class="stack" id="sec-help">
           <h2>Ask a helper</h2>
           <p class="muted">Your helper sees the names of the buttons and boxes on this page, on their phone. They tap the right one and it lights up here. They never see the page, a picture of it, or anything you typed.</p>

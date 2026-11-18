@@ -115,15 +115,15 @@ export function secretKind(field) {
 }
 
 // Phrases scam pages lean on, in English, Nepali and Hindi.
-const URGENCY = [
+export const URGENCY = [
   'will be blocked', 'will be suspended', 'will be closed', 'account is blocked', 'within 24 hours', 'within 48 hours',
   'immediately', 'urgent', 'act now', 'last warning', 'final notice', 'verify your account', 'update your kyc', 'kyc update',
   'kyc expired', 'you have won', 'lottery', 'prize', 'arrest', 'legal action', 'your parcel',
   'खाता बन्द', 'तुरुन्त', 'केवाईसी', 'पुरस्कार', 'लटरी', 'पक्राउ',
   'खाता बंद', 'तुरंत', 'इनाम', 'गिरफ्तार',
 ];
-const PAYMENT = ['gift card', 'giftcard', 'bitcoin', 'crypto', 'processing fee', 'release fee', 'send money to', 'wire transfer'];
-const REMOTE = ['anydesk', 'teamviewer', 'quicksupport', 'install the apk', 'download the apk', '.apk'];
+export const PAYMENT = ['gift card', 'giftcard', 'bitcoin', 'crypto', 'processing fee', 'release fee', 'send money to', 'wire transfer'];
+export const REMOTE = ['anydesk', 'teamviewer', 'quicksupport', 'install the apk', 'download the apk', '.apk'];
 
 const countMatches = (text, list) => list.filter((p) => text.includes(p)).length;
 

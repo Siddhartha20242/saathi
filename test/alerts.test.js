@@ -7,12 +7,16 @@ const NOW = 1_000_000_000_000;
 describe('cleanAlert', () => {
   it('keeps only the address, the brand, the level and reason codes', () => {
     const a = cleanAlert({ host: 'fake.top', brand: 'Nabil Bank', level: 'stop', reasons: ['pretends', 'asksSecret'], title: 'secret title', text: 'page words', url: 'https://fake.top/x?id=1' });
-    expect(a).toEqual({ host: 'fake.top', brand: 'Nabil Bank', level: 'stop', reasons: ['pretends', 'asksSecret'] });
+    expect(a).toEqual({ kind: 'page', host: 'fake.top', brand: 'Nabil Bank', level: 'stop', reasons: ['pretends', 'asksSecret'] });
   });
   it('drops anything in a reason that is not a plain code, and limits how many', () => {
     const a = cleanAlert({ host: 'x.top', reasons: ['ok', 'has space', '<script>', 'a'.repeat(40), ...Array(20).fill('urgency')] });
     expect(a.reasons.every((r) => /^[a-zA-Z]{3,20}$/.test(r))).toBe(true);
     expect(a.reasons.length).toBeLessThanOrEqual(MAX_REASONS);
+  });
+  it('keeps a message alert as a message, and anything else as a page', () => {
+    expect(cleanAlert({ host: 'message', kind: 'message' }).kind).toBe('message');
+    expect(cleanAlert({ host: 'a.top', kind: 'weird' }).kind).toBe('page');
   });
   it('strips odd characters from the address, and defaults to stop', () => {
     expect(cleanAlert({ host: 'fake.top/path?x=1 secret' }).host).toBe('fake.toppathx1secret'.slice(0, 100));

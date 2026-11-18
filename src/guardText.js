@@ -21,6 +21,18 @@ const TEXT = {
       paymentAsk: 'It asks for money as a gift card, crypto or a fee.',
       insecure: 'The connection is not secure, and it asks for secrets.',
       crossForm: 'What you type here would be sent to a different website.',
+      lookalikeLink: 'The link looks like {brand}, but its address is spelled differently.',
+      pretendsMsg: 'This message says it is from {brand}, but the link goes somewhere else.',
+      shortLink: 'The link is shortened, so you cannot see where it really goes.',
+      shareSecret: 'It asks you to share or send a code, PIN or password. A real bank never asks for these.',
+      impersonation: 'It says "this is my new number" and asks for money. Call the person on the number you already have.',
+    },
+    msg: {
+      stop: 'Stop. This message may be a scam. Do not click, reply, or share any code.',
+      careful: 'Be careful with this message. Check with your family before you do anything.',
+      ok: 'Nothing suspicious was found, but this does not prove it is safe. If it asks for money, a code or a PIN, ask your family first.',
+      empty: 'Paste a message first.',
+      sent: 'Your family has been told.',
     },
   },
   ne: {
@@ -40,6 +52,18 @@ const TEXT = {
       paymentAsk: 'यसले गिफ्ट कार्ड, क्रिप्टो वा शुल्कको रूपमा पैसा माग्छ।',
       insecure: 'जडान सुरक्षित छैन, र यसले गोप्य कुरा माग्छ।',
       crossForm: 'तपाईंले यहाँ लेखेको कुरा अर्कै वेबसाइटमा पठाइन्छ।',
+      lookalikeLink: 'लिङ्क {brand} जस्तै देखिन्छ, तर ठेगाना फरक तरिकाले लेखिएको छ।',
+      pretendsMsg: 'यो सन्देशले आफूलाई {brand} को भन्छ, तर लिङ्क अर्कै ठाउँमा जान्छ।',
+      shortLink: 'लिङ्क छोटो पारिएको छ, त्यसैले यो साँच्चै कहाँ जान्छ भन्ने देखिँदैन।',
+      shareSecret: 'यसले कोड, पिन वा पासवर्ड पठाउन वा भन्न लगाउँछ। साँचो बैंकले कहिल्यै यी माग्दैन।',
+      impersonation: 'यसले "यो मेरो नयाँ नम्बर हो" भनेर पैसा माग्छ। तपाईंसँग भएको नम्बरमा नै फोन गर्नुहोस्।',
+    },
+    msg: {
+      stop: 'रोकिनुहोस्। यो सन्देश ठगी हुन सक्छ। लिङ्क नथिच्नुहोस्, जवाफ नदिनुहोस्, कुनै कोड नभन्नुहोस्।',
+      careful: 'यो सन्देशमा होसियार रहनुहोस्। केही गर्नुअघि परिवारसँग सोध्नुहोस्।',
+      ok: 'शंकास्पद केही भेटिएन, तर यसको अर्थ यो सुरक्षित हो भन्ने होइन। पैसा, कोड वा पिन मागेको छ भने पहिले परिवारलाई सोध्नुहोस्।',
+      empty: 'पहिले सन्देश टाँस्नुहोस्।',
+      sent: 'तपाईंको परिवारलाई जानकारी गराइयो।',
     },
   },
   hi: {
@@ -59,6 +83,18 @@ const TEXT = {
       paymentAsk: 'यह गिफ्ट कार्ड, क्रिप्टो या शुल्क के रूप में पैसे माँगता है।',
       insecure: 'कनेक्शन सुरक्षित नहीं है, और यह गोपनीय जानकारी माँगता है।',
       crossForm: 'आप यहाँ जो लिखेंगे वह किसी दूसरी वेबसाइट पर भेजा जाएगा।',
+      lookalikeLink: 'लिंक {brand} जैसा दिखता है, लेकिन उसका पता अलग लिखा है।',
+      pretendsMsg: 'यह संदेश खुद को {brand} का बताता है, लेकिन लिंक कहीं और जाता है।',
+      shortLink: 'लिंक छोटा किया गया है, इसलिए पता नहीं चलता कि यह असल में कहाँ जाता है।',
+      shareSecret: 'यह कोड, पिन या पासवर्ड बताने या भेजने को कहता है। असली बैंक कभी ये नहीं माँगता।',
+      impersonation: 'यह "यह मेरा नया नंबर है" कहकर पैसे माँगता है। आपके पास जो नंबर पहले से है, उसी पर फोन कीजिए।',
+    },
+    msg: {
+      stop: 'रुकिए। यह संदेश ठगी हो सकता है। लिंक मत दबाइए, जवाब मत दीजिए, कोई कोड मत बताइए।',
+      careful: 'इस संदेश पर सावधान रहिए। कुछ करने से पहले परिवार से पूछिए।',
+      ok: 'कुछ संदिग्ध नहीं मिला, लेकिन इसका मतलब यह नहीं कि यह सुरक्षित है। अगर यह पैसे, कोड या पिन माँगे तो पहले परिवार से पूछिए।',
+      empty: 'पहले संदेश चिपकाइए।',
+      sent: 'आपके परिवार को बता दिया गया है।',
     },
   },
 };
@@ -86,14 +122,32 @@ export function warning(assessment, lang = 'en') {
   };
 }
 
-/** The same alert in plain English for the family, from the reason codes (no page content). */
+/** The warning for a pasted message: a headline for the level, the reasons, and the family button's words. */
+export function messageWarning(assessment, lang = 'en') {
+  const t = TEXT[pickLang(lang)];
+  return {
+    level: assessment.level,
+    headline: t.msg[assessment.level] ?? '',
+    reasons: assessment.reasons.map((r) => reasonText(r, lang)),
+    family: t.family,
+    sent: t.msg.sent,
+    empty: t.msg.empty,
+  };
+}
+
+/** The same alert in plain English for the family, from the reason codes (no page or message content). */
 export function alertSentence(alert) {
-  const brand = alert.brand ? `a page pretending to be ${alert.brand}` : 'a page that looks like a scam';
   const why = (alert.reasons ?? [])
     .map((code) => TEXT.en.reasons[code])
     .filter(Boolean)
     .map((s) => s.replaceAll('{brand}', alert.brand ?? ''))
     .slice(0, 3)
     .join(' ');
+  if (alert.kind === 'message') {
+    const brand = alert.brand ? `a message pretending to be ${alert.brand}` : 'a message that looks like a scam';
+    const link = alert.host && alert.host !== 'message' ? ` (link to ${alert.host})` : '';
+    return `Someone in your group received ${brand}${link}. ${why}`.trim();
+  }
+  const brand = alert.brand ? `a page pretending to be ${alert.brand}` : 'a page that looks like a scam';
   return `Someone in your group opened ${brand} (${alert.host}). ${why}`.trim();
 }

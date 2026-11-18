@@ -96,10 +96,14 @@ window.__err = null;
     t('alert: create naming someone else as creator is refused', await create(`${A}a3`, alert({ createdBy: uid2 })), 403);
     t('alert: create with an unknown level is refused', await create(`${A}a4`, alert({ level: 'panic' })), 403);
     t('alert: create with 9 reasons is refused', await create(`${A}a5`, alert({ reasons: Array(9).fill('urgency') })), 403);
+    t('alert: a message alert (kind message) is accepted', await create(`${A}a6`, alert({ kind: 'message', host: 'message' })), 200);
+    t('alert: an unknown kind is refused', await create(`${A}a7`, alert({ kind: 'weird' })), 403);
+    t('alert: a message alert with a text field is refused', await create(`${A}a8`, alert({ kind: 'message', text: 'the whole message' })), 403);
     t('alert: any edit is refused', await update(`${A}a1`, { brand: 'Other' }, ['brand'], tok1), 403);
     t('alert: reading without signing in is refused', await read(`${A}a1`, null), 403);
     t('alert: another user deleting is refused', await del(`${A}a1`, tok2), 403);
     t('alert: the creator deleting works', await del(`${A}a1`, tok1), 200);
+    await del(`${A}a6`, tok1);
 
     // Check-ins.
     const C = `groups/${G}/checkins/`;

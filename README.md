@@ -15,7 +15,7 @@ Saathi was built for the *AI for the aging population* theme: voice interfaces, 
 | Theme | What Saathi has | What it is not |
 |---|---|---|
 | **Voice interface** | **Speak**: say a request in Nepali, Hindi or English and Saathi starts the right guide. Read-aloud for each step. | Not a hands-free assistant. Real Nepali speech has not been tested (see below). |
-| **Monitoring** | A scam guard that watches the page in front of the person and warns on the page, in their language. It is a safety watch on the web page, with no cameras, sensors or location. | Not health, fall or location monitoring. |
+| **Monitoring** | A scam guard that watches the page in front of the person and warns on the page, in their language, and a checker for suspicious texts and WhatsApp messages pasted into the panel. It is a safety watch on the web page, with no cameras, sensors or location. | Not health, fall or location monitoring. |
 | **Caregiver coordination** | A group shared by a family. Guides recorded once, shared with everyone. A live "I'm stuck" request that a family member answers from a phone. Scam alerts that reach the family. A "Let my family know I finished" button on the finished card, which shows the family only the guide's name and step count. | Not a care-planning or medication tool. |
 | **Built for older adults** | One step at a time, large text, a clear next button, and no automatic clicking or typing: Saathi highlights and the person does it. Warnings and steps in their own language. | It has not been tried with older people yet. |
 | **Home robotics** | Not covered. | |
@@ -36,6 +36,7 @@ The practice website (a made-up electricity board) is on the left and the real S
 5. Switch the language to नेपाली or हिन्दी. Turn on large text or read-aloud.
 6. Press **Ask my helper**, then open [/help.html](https://paperwork-decoder.web.app/help.html) on a phone, enter the group code and tap a control.
 7. Choose **Pretend scam page** under the title. A red warning appears on the page, in the language you chose. Press **Tell my family**, then open the helper page with the same group code to see the alert. The pretend page is made inside your browser and is never a page on the hosted site.
+8. Open **Get help**, paste a pretend scam text under *Got a strange message?* (for example `Dear customer your Nabil Bank account will be blocked within 24 hours. Update your KYC now: http://nabilbank-kyc.top/login`) and press **Check a message**. A red warning appears in the language you chose, with the reasons. Nothing is sent anywhere.
 
 No login is needed. Nothing is paid and nothing on the practice website is real. It works on a phone too: the website sits above Saathi, so both are on screen at once (see below).
 
@@ -124,6 +125,18 @@ The made-up pages were written by me, so they show that the rules do what I inte
 
 **Limits.** A clever scam can score below "stop". The on-page family button only works while the side panel is open (the page tells the person how to open it). The extension's own relay of the family alert was not exercised in a real scam situation, only through the try page's stand-in. The pretend scam page claims a made-up address, as a real scam would, which is how the try page can show it without hosting a fake bank page.
 
+### Checking a pasted message
+
+Scams also arrive as texts and WhatsApp messages, so the panel has a **Got a strange message?** box. The person pastes the message and presses **Check a message** ([src/messageCheck.js](src/messageCheck.js)). It uses the same plain-code approach as the page guard, on the computer, with no model, and the message is never sent anywhere. It looks for: a link whose address imitates a listed bank (or names a bank while the link goes elsewhere), a shortened link, a request to read out or send a code, PIN or password (a sentence that tells you *not* to share one, as real banks do, is not counted), a rush, an app to install, and "this is my new number, send money". The warning comes in English, Nepali or Hindi. "Tell my family" sends only the link's address (if any), the brand and reason codes, never the message.
+
+| Test | Result |
+|---|---|
+| 12 made-up scam messages ([test/message.fixtures.js](test/message.fixtures.js)): fake KYC, lottery, parcel fee, "my new number", OTP request, APK, remote support, in English, Nepali and Hindi | All 12 get a warning: 5 "stop" and 7 "be careful" |
+| 12 made-up ordinary messages, including real bank OTP texts that say not to share the code, a real bill reminder, a real bank link and everyday chat | None warned |
+| The try page ([tools/e2e-try.mjs](tools/e2e-try.mjs)): paste the scam text, see the warning, press "Tell my family", read what was written | Passes. The alert holds only the kind, the link's address, the brand, the level and the reasons |
+
+The messages were written by me to look like common scams, so this shows the rules do what I intended, not how many real scams they catch. Known false alarms: "Can you send me the wifi password?" gets "be careful", because a request for a password looks the same as a scam's. A brand whose name is shorter than six letters (eSewa, SBI) is caught by the "names a bank but the link goes elsewhere" rule but not the lookalike-address rule, so those messages reach "be careful" rather than "stop". "Nothing suspicious found" is worded as *not proof of safety*. No real scam message was used.
+
 ## What we measured
 
 All numbers are from the real on-device model in desktop Chrome. Reproduce them with the test pages and scripts below.
@@ -209,9 +222,9 @@ The harder redesign ran in a headless Chrome that has no on-device model, so "de
 
 **Speed.** A model call takes about 0.4 to 0.6 seconds once the model is loaded (10 to 15 seconds the first time). A step that needs the model takes three calls, so about 1.5 seconds. Steps found by label or by link address take milliseconds.
 
-**Security rules.** [tools/rules-check.js](tools/rules-check.js) runs 43 checks against the live project with two separate anonymous users: all pass. Allowed actions work (a helper can set the pick, a note and the status; a creator can delete). Refusals hold: a helper cannot change the list of controls, pick outside it, write a note over 100 characters or delete someone else's request; a path cannot be edited or created with no steps, 41 steps, an extra field or someone else's name as creator; alerts and check-ins refuse extra fields, someone else's name as creator, an unknown level, too many reasons, an empty title or 41 steps, and cannot be edited; nothing can be read without signing in, with a wrong-length group code, or outside `groups`. Not covered: the rules were checked on the real project, not the Firebase emulator, and a group code that leaks still gives full access to that group.
+**Security rules.** [tools/rules-check.js](tools/rules-check.js) runs 46 checks against the live project with two separate anonymous users: all pass. Allowed actions work (a helper can set the pick, a note and the status; a creator can delete). Refusals hold: a helper cannot change the list of controls, pick outside it, write a note over 100 characters or delete someone else's request; a path cannot be edited or created with no steps, 41 steps, an extra field or someone else's name as creator; alerts and check-ins refuse extra fields, someone else's name as creator, an unknown level, too many reasons, an empty title or 41 steps, and cannot be edited; nothing can be read without signing in, with a wrong-length group code, or outside `groups`. Not covered: the rules were checked on the real project, not the Firebase emulator, and a group code that leaks still gives full access to that group.
 
-**Tests.** 132 unit tests (`npm test`). Six end-to-end scripts drive a throwaway headless Chrome with the extension loaded and run against the live site: [tools/e2e.mjs](tools/e2e.mjs) (record, save, follow), [tools/e2e-help.mjs](tools/e2e-help.mjs) (ask for help, a phone-sized helper taps, the highlight moves, the request is deleted), [tools/e2e-try.mjs](tools/e2e-try.mjs) (the same flow on the try page, ending with the finished-guide check-in) and [tools/e2e-real.mjs](tools/e2e-real.mjs) (real public websites, above) [tools/e2e-cloud.mjs](tools/e2e-cloud.mjs) (the cloud button's consent screen, in a browser with no on-device model) and [tools/e2e-guard.mjs](tools/e2e-guard.mjs) (the scam guard and family alert, and a pass over real legitimate pages). In the headless browser, App Check sometimes refuses the cloud translation (reCAPTCHA scores it as a bot); the path is then saved without translations, as designed, and the test reports it. In a normal Chrome the cloud call works. The on-device model is not available in that headless Chrome, so the model path was checked separately in a normal Chrome.
+**Tests.** 149 unit tests (`npm test`). Six end-to-end scripts drive a throwaway headless Chrome with the extension loaded and run against the live site: [tools/e2e.mjs](tools/e2e.mjs) (record, save, follow), [tools/e2e-help.mjs](tools/e2e-help.mjs) (ask for help, a phone-sized helper taps, the highlight moves, the request is deleted), [tools/e2e-try.mjs](tools/e2e-try.mjs) (the same flow on the try page, ending with the finished-guide check-in and a pasted scam message) and [tools/e2e-real.mjs](tools/e2e-real.mjs) (real public websites, above) [tools/e2e-cloud.mjs](tools/e2e-cloud.mjs) (the cloud button's consent screen, in a browser with no on-device model) and [tools/e2e-guard.mjs](tools/e2e-guard.mjs) (the scam guard and family alert, and a pass over real legitimate pages). In the headless browser, App Check sometimes refuses the cloud translation (reCAPTCHA scores it as a bot); the path is then saved without translations, as designed, and the test reports it. In a normal Chrome the cloud call works. The on-device model is not available in that headless Chrome, so the model path was checked separately in a normal Chrome.
 
 ## Design
 
@@ -279,7 +292,7 @@ The Firebase project is named `paperwork-decoder`, from an earlier idea. It is o
 | [src/backend.js](src/backend.js) | Auth, Firestore, Remote Config, live help, cloud translation |
 | [src/panel.js](src/panel.js), [panel.html](panel.html) | The side panel |
 | [src/helper.js](src/helper.js), [help.html](help.html) | The helper's phone page |
-| [src/guard.js](src/guard.js), [src/guardText.js](src/guardText.js), [src/guardPage.js](src/guardPage.js), [src/alerts.js](src/alerts.js) | The scam guard: the rules, the warning words, the page code, and family alerts |
+| [src/guard.js](src/guard.js), [src/messageCheck.js](src/messageCheck.js), [src/guardText.js](src/guardText.js), [src/guardPage.js](src/guardPage.js), [src/alerts.js](src/alerts.js) | The scam guard: the page rules, the pasted-message rules, the warning words, the page code, and family alerts and check-ins |
 | [src/audio.js](src/audio.js), [src/voice.js](src/voice.js) | Recording a spoken request, and asking the cloud which path it means |
 | [src/try.js](src/try.js), [try.html](try.html) | The try page that stands in for the extension |
 | [extension](extension) | The Chrome extension (page script, side panel shell) |

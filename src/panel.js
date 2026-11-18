@@ -7,7 +7,8 @@ import { refind, codeFind, cloudPreview } from './refind.js';
 import { maskText } from './masking.js';
 import { recordSpeech } from './audio.js';
 import { voicePrompt, parseVoice, VOICE_SCHEMA } from './voice.js';
-import { warning } from './guardText.js';
+import { warning, messageWarning } from './guardText.js';
+import { assessMessage } from './messageCheck.js';
 import { alertsForMe, alertSentence } from './alerts.js';
 import { explainPrompt, explainPayloadSummary } from './explain.js';
 import {
@@ -313,6 +314,67 @@ function watchFamilyAlerts() {
     renderFamilyAlert();
   }, () => {});
 }
+
+// ---------- Checking a pasted message ----------
+// Plain code on this computer. The message is never sent. Telling the family sends only the link's
+// address (if any), the brand it imitates and reason codes, and only when the person presses the button.
+
+let msgNow = null;
+
+function renderMessage() {
+  const box = $('msg-result');
+  if (!msgNow) {
+    box.hidden = true;
+    $('msg-clear').hidden = true;
+    return;
+  }
+  const w = messageWarning(msgNow, state.lang);
+  box.className = `guard inline ${msgNow.level}`;
+  box.hidden = false;
+  $('msg-clear').hidden = false;
+  $('msg-headline').textContent = w.headline;
+  $('msg-reasons').innerHTML = w.reasons.map((r) => `<li>${esc(r)}</li>`).join('');
+  const button = $('msg-family');
+  button.hidden = msgNow.level !== 'stop';
+  button.textContent = state.group ? w.family : `${w.family} (join a group first)`;
+  button.disabled = !state.group;
+  $('msg-note').textContent = '';
+}
+
+$('msg-check').addEventListener('click', () => {
+  const text = $('msg-text').value;
+  if (!text.trim()) {
+    msgNow = null;
+    renderMessage();
+    $('msg-result').hidden = false;
+    $('msg-result').className = 'guard inline ok';
+    $('msg-headline').textContent = messageWarning({ level: 'ok', reasons: [] }, state.lang).empty;
+    $('msg-reasons').innerHTML = '';
+    $('msg-family').hidden = true;
+    return;
+  }
+  msgNow = assessMessage(text);
+  renderMessage();
+});
+
+$('msg-clear').addEventListener('click', () => {
+  $('msg-text').value = '';
+  msgNow = null;
+  renderMessage();
+});
+
+$('msg-family').addEventListener('click', async () => {
+  if (!msgNow || !state.group) return;
+  const w = messageWarning(msgNow, state.lang);
+  try {
+    await createAlert(state.group, { kind: 'message', host: msgNow.host || 'message', brand: msgNow.brand ?? '', level: msgNow.level, reasons: msgNow.reasons.map((r) => r.code) });
+    $('msg-note').textContent = w.sent;
+    $('msg-note').className = 'out ok';
+  } catch (err) {
+    $('msg-note').textContent = `Could not tell your family: ${err.message}`;
+    $('msg-note').className = 'out bad';
+  }
+});
 
 // ---------- Speaking a request ----------
 // The recording and the titles of the group's paths go to the cloud model, which says which path is
@@ -711,6 +773,7 @@ document.querySelectorAll('[data-lang]').forEach((b) =>
     store.set('saathi:lang', state.lang);
     callExtension('setLang', { lang: state.lang }).catch(() => {});
     renderGuard(guardNow);
+    renderMessage();
     renderChips();
     if (state.follow) renderStepCard();
   }),
