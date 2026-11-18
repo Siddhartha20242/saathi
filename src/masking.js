@@ -4,6 +4,15 @@
 
 const MONEY_LIKE = /^[$€£]/;
 
+// Devanagari digits (०-९) are not matched by \d, so a number written in them would pass as plain text.
+// They are turned into ASCII digits first, one character for one, so every other pattern sees them.
+const DEVANAGARI_DIGITS = '०१२३४५६७८९';
+export const normaliseDigits = (s) => String(s ?? '').replace(/[०-९]/g, (d) => String(DEVANAGARI_DIGITS.indexOf(d)));
+
+// Words that are part of a button's own wording, not a person's name: "Log out All Devices", "Welcome Back".
+const UI_WORDS = new Set(['all', 'devices', 'now', 'settings', 'account', 'profile', 'page', 'site', 'back', 'here', 'again', 'everywhere', 'other', 'sessions', 'menu', 'help', 'home', 'user', 'users', 'guest', 'customer', 'member', 'portal', 'dashboard', 'online', 'banking', 'bank', 'today', 'to', 'the', 'our', 'your', 'my']);
+const notUiWording = (m) => !m.split(/\s+/).some((w) => UI_WORDS.has(w.toLowerCase()));
+
 const looksLikeDate = (s) =>
   /^\d{4}-\d{1,2}-\d{1,2}$/.test(s) || /^\d{1,2}[-/]\d{1,2}[-/]\d{2,4}$/.test(s);
 
@@ -29,6 +38,25 @@ const PATTERNS = [
     kind: 'NAME',
     re: /(?<=\b(?:Patient|Applicant|Customer|Tenant|Taxpayer|Member|Insured|Name|Dear|Mr\.?|Mrs\.?|Ms\.?)[:\s,]{1,3})[A-Z][a-z]+(?: [A-Z][a-z]+){1,2}\b/g,
   },
+  // A greeting or "signed in as" label puts a name right after it: "Hello, Ram Sharma", "Welcome back Sita".
+  {
+    kind: 'NAME',
+    re: /(?<=\b(?:Hello|Hi|Hey|Welcome(?: back)?|Namaste|Namaskar|Logged in as|Signed in as|Signed in|Logged in|Sign out|Sign Out|Log out|Log Out|Logout)[:,\s]{1,3})[A-Z][a-z]+(?: [A-Z][a-z]+){0,2}\b/g,
+    reject: (m) => !notUiWording(m),
+  },
+  // The same in Nepali and Hindi, and Devanagari names after a greeting.
+  {
+    kind: 'NAME',
+    re: /(?<=(?:नमस्ते|नमस्कार|स्वागत(?: छ| है)?|लगइन|साइन)[,:\s]{1,3})[\u0900-\u097F]+(?: [\u0900-\u097F]+){0,2}/g,
+  },
+  // A user name: "Logged in as ram_sharma", "Profile: ram.sharma".
+  {
+    kind: 'NAME',
+    re: /(?<=\b(?:as|Profile|User|Username)[:\s]{1,3})[a-z0-9]+[_.][a-z0-9_.]+\b/gi,
+    reject: (m) => /^(?:www\.|\w+\.(?:com|org|net|np|in|gov|edu)$)/i.test(m),
+  },
+  // Card numbers shown with only the last digits: "**** 1234", "Card ending 4321", "xxxx 4321".
+  { kind: 'CARD', re: /(?:[*•●xX]{2,}[\s-]*|\b(?:ending|ends|last 4|last four)(?: in| with)?[\s:-]*)\d{3,4}\b/g },
   {
     kind: 'ADDRESS',
     re: /\b\d{1,6}\s+(?:[A-Z][\w.']*\s+){1,3}(?:St|Street|Ave|Avenue|Rd|Road|Blvd|Boulevard|Dr|Drive|Ln|Lane|Ct|Court|Way|Pl|Place)\b\.?/g,
@@ -36,6 +64,20 @@ const PATTERNS = [
 ];
 
 const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+/** True when a label holds something personal that pattern matching can recognise. */
+export const isPersonalText = (text) => maskText(String(text ?? '')).items.length > 0;
+
+// Controls in the page header that show who is signed in (an avatar menu, "Ram Sharma ▾") carry the person's
+// name as their label with nothing around it to recognise. These plain words are fine to keep.
+const ACCOUNT_WORDS = new Set(['sign in', 'log in', 'login', 'sign out', 'log out', 'logout', 'register', 'sign up', 'my account', 'account', 'profile', 'settings', 'help', 'home', 'cart', 'menu', 'search', 'notifications', 'messages', 'language', 'contact', 'contact us', 'about us', 'close', 'back', 'open menu', 'close menu']);
+/** A label from the account corner of a page (`acct`) is kept only if it is one of the plain words above. */
+export const isPersonalControl = (text, acct = false) => {
+  const t = String(text ?? '').trim();
+  if (!t) return false;
+  if (isPersonalText(t)) return true;
+  return Boolean(acct) && !ACCOUNT_WORDS.has(t.toLowerCase());
+};
 
 /**
  * @param {string} text
@@ -57,6 +99,7 @@ export function maskText(text, extra = []) {
     return token;
   };
 
+  text = normaliseDigits(text);
   let masked = text;
 
   for (const { kind, re, reject } of PATTERNS) {

@@ -22,11 +22,11 @@ describe('explainPrompt', () => {
     const p = explainPrompt(big);
     expect(p).toContain('Link 59');
     expect(p).not.toContain('Link 60');
-    expect(explainPayloadSummary(big)).toEqual({ labels: 60, typedValues: 0 });
+    expect(explainPayloadSummary(big)).toEqual({ labels: 60, hidden: 0, typedValues: 0 });
   });  it('describes what is on screen first, on a long page', () => {
     const long = { title: 'x', elements: Array.from({ length: 300 }, (_, i) => ({ role: 'link', text: `Link ${i}`, section: '', inView: i >= 200 && i < 210 })) };
     expect(forPrompt(long).map((e) => e.text)).toEqual(Array.from({ length: 10 }, (_, i) => `Link ${200 + i}`));
     expect(explainPrompt(long)).not.toContain('Link 0\n');
-    expect(explainPayloadSummary(long)).toEqual({ labels: 10, typedValues: 0 });
+    expect(explainPayloadSummary(long)).toEqual({ labels: 10, hidden: 0, typedValues: 0 });
   });
 });

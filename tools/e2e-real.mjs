@@ -160,7 +160,11 @@ try {
               : sameAddress ? 'right (another link, same address)'
               : r.covered ? 'right (pop-up in front, and the guide says so)'
               : 'WRONG';
-            if (r.result === 'WRONG') r.under = under;
+            if (r.result === 'WRONG') {
+              r.under = under;
+              // What is on the page for the control the guide named, and where the box is, to see why it was judged wrong.
+              r.debug = await c.evalIn(site.session, `(() => { const norm = ${norm}; const b = document.querySelector('[data-saathi="highlight"]'); const box = b ? b.getBoundingClientRect().toJSON() : null; const links = [...document.querySelectorAll('a[href], button, input, select, textarea, summary, [role=button], [role=link], [role=tab], [role=menuitem]')].filter((a) => a.outerHTML.includes(${JSON.stringify(r.text)}) && !a.outerHTML.includes('সকল সেবা')).map((a) => ({ href: a.getAttribute('href'), rect: a.getBoundingClientRect().toJSON(), ariaHidden: Boolean(a.closest('[aria-hidden="true"]')), vis: getComputedStyle(a).visibility, display: getComputedStyle(a).display, html: a.outerHTML.slice(0, 200) })); return { box, links, scrollY: Math.round(scrollY) }; })()`);
+            }
           } else {
             r.result = r.notSure ? 'not sure' : 'timed out';
           }

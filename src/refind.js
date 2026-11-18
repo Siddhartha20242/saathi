@@ -6,8 +6,15 @@
 //   role: 'button' | 'link' | 'field' | 'select' | 'checkbox'
 //   section: the nearest heading above it
 
+import { safePath } from './path.js';
+
+// A link address of "/" or nothing points at too many controls to tell them apart.
+const usable = (href) => Boolean(href) && href !== '/';
+
 const CLICKABLE = new Set(['button', 'link']);
-const sameKind = (a, b) => CLICKABLE.has(a) === CLICKABLE.has(b);
+// Pressing and filling in are different jobs, and a tick box, a list and a typing box are different again.
+const kindOf = (role) => (CLICKABLE.has(role) ? 'press' : role === 'checkbox' ? 'tick' : role === 'select' ? 'list' : 'type');
+const sameKind = (a, b) => kindOf(a) === kindOf(b);
 
 // Letters and digits of any script are kept, so Nepali, Hindi and Bengali labels compare correctly.
 const norm = (s) =>
@@ -54,21 +61,19 @@ export function candidatesFor(step, elements) {
  */
 export function codeFind(step, elements) {
   const candidates = candidatesFor(step, elements);
-  const scored = candidates
-    .map((el) => ({
-      el,
-      // The same section breaks ties between two controls with the same label.
-      score: textSimilarity(step.text, el.text) + (norm(el.section) === norm(step.section) ? 0.02 : 0),
-    }))
-    .sort((a, b) => b.score - a.score);
-  const [best, second] = scored;
-  // Accept when one control clearly has the saved label. Two equally good ones stay unclear,
-  // unless the saved section singles one of them out.
-  const clear = best && best.score >= THRESHOLDS.found && (!second || second.score < THRESHOLDS.found || best.score - second.score >= THRESHOLDS.lead);
-  if (clear) {
-    return { verdict: 'found', index: best.el.index, score: best.score };
-  }
-  return { verdict: 'unclear', candidates };
+  // The label must be the same, apart from capital letters and punctuation. "Pay Rs 500" and "Pay Rs 5000",
+  // "Send money to Sita" and "...Gita", "Turn on" and "Turn off" are one character apart and not at all the
+  // same control, so a close match is not enough: those go on to the link address, then to the model.
+  const same = candidates.filter((el) => norm(el.text) !== '' && norm(el.text) === norm(step.text));
+  if (!same.length) return { verdict: 'unclear', candidates };
+  const here = same.filter((el) => norm(el.section) === norm(step.section));
+  const pool = here.length ? here : same;
+  // Several controls with the same label that all go to the same address do the same thing (a logo and a menu
+  // entry). Several with no way to tell them apart, such as three buttons that each say "Edit", are not guessed at.
+  const sameDestination = pool.length > 1 && usable(pool[0].href) && pool.every((el) => el.href === pool[0].href);
+  const repeated = pool.some((el) => el.dups > 1 && !usable(el.href));
+  if ((pool.length > 1 && !sameDestination) || repeated) return { verdict: 'ambiguous', candidates };
+  return { verdict: 'found', index: pool[0].index, score: 1 };
 }
 
 /** The question for the on-device model. Candidates are numbered from 1; 0 means "none of these". */
@@ -152,8 +157,8 @@ export function parseYesNo(text) {
   return yes < no;
 }
 
-// A link address of "/" or nothing points at too many controls to tell them apart.
-const usable = (href) => Boolean(href) && href !== '/';
+// Internal names that many pages use for unrelated controls. A match on one of these says nothing.
+const GENERIC_NAME = /^(submit|button|btn|commit|action|go|ok|next|prev|previous|save|cancel|continue|send|search|login|signin|register|input|text|q|search-button|toggle|menu|close|open)\d*$/i;
 
 /**
  * Layer two, also plain code: the label is gone, but the control may still have the same link
@@ -170,14 +175,14 @@ export function anchorFind(step, elements) {
   const indexed = elements.map((el, index) => ({ el, index })).filter(({ el }) => same(el));
 
   if (usable(step.href)) {
-    const links = indexed.filter(({ el }) => el.href === step.href);
+    const links = indexed.filter(({ el }) => safePath(el.href) === step.href || el.href === step.href);
     const labels = new Set(links.map(({ el }) => norm(el.text)));
     if (links.length === 1 || (links.length > 1 && labels.size === 1 && !labels.has(''))) {
       const here = links.find(({ el }) => norm(el.section) === norm(step.section));
       return (here ?? links[0]).index;
     }
   }
-  const named = indexed.filter(({ el }) => step.name && el.name && el.name === step.name);
+  const named = indexed.filter(({ el }) => step.name && el.name && el.name === step.name && !GENERIC_NAME.test(step.name));
   return named.length === 1 ? named[0].index : null;
 }
 
@@ -241,6 +246,11 @@ export async function refind(step, elements, context, ask) {
 
   const anchored = anchorFind(step, elements);
   if (anchored !== null) return { index: anchored, by: 'anchor' };
+
+  // Several controls say the same thing and nothing else tells them apart: asking a model would only make it a guess.
+  if (first.verdict === 'ambiguous') return { index: null, by: 'code', reason: 'several controls look the same' };
+  // A step saved without its label (it held a name or number) has nothing to ask a model about.
+  if (!step.text) return { index: null, by: 'model', reason: 'no label was saved for this step' };
 
   const open = withoutOtherSteps(first.candidates, context?.others);
   if (!open.length) return { index: null, by: 'model', reason: 'no candidates' };

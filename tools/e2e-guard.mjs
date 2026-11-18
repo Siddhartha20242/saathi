@@ -33,7 +33,7 @@ try {
   await c.evalIn(s, P(`d.querySelector('[data-lang="ne"]').click()`));
   await c.evalIn(s, `document.querySelector('[data-variant="scam"]').click()`);
   await c.waitFor(s, S(`return !!d.querySelector('[data-saathi="guard"]')`), 20000);
-  const bar = await c.evalIn(s, S(`const b = d.querySelector('[data-saathi="guard"]'); return { headline: b.firstChild.textContent, buttons: [...b.querySelectorAll('button')].map((x) => x.textContent), reasons: [...b.querySelectorAll('li')].map((x) => x.textContent) }`));
+  const bar = await c.evalIn(s, S(`const h = d.querySelector('[data-saathi="guard"]'); const b = h.shadowRoot.firstChild; return { headline: b.firstChild.textContent, buttons: [...b.querySelectorAll('button')].map((x) => x.textContent), reasons: [...b.querySelectorAll('li')].map((x) => x.textContent) }`));
   check('the page shows a stop warning in Nepali', bar.headline.includes('रोकिनुहोस्'), bar.headline);
   check('it lists reasons in Nepali, naming the imitated bank', bar.reasons.length >= 3 && bar.reasons.some((r) => r.includes('Himal Bank')), bar.reasons);
   await sleep(600);
@@ -44,10 +44,18 @@ try {
   check('the panel shows the same warning', panel.headline.includes('रोकिनुहोस्') && /stop/.test(panel.cls), panel);
 
   // Tell the family from the warning on the page itself.
-  await c.evalIn(s, S(`const b = d.querySelector('[data-saathi="guard"]'); [...b.querySelectorAll('button')][1].click(); return true`));
+  // A script on the page can call .click() on the button, but that click is not a person's. It must do nothing.
+  await c.evalIn(s, S(`const h = d.querySelector('[data-saathi="guard"]'); const b = h.shadowRoot.firstChild; [...b.querySelectorAll('button')][1].click(); return true`));
+  await sleep(2500);
+  check('a click made by a script on the page does not tell the family', await c.evalIn(s, P(`return d.getElementById('guard-msg').textContent === ''`)));
+  // A real click, as a person would make it, at the button's place on the screen.
+  const where = await c.evalIn(s, `(() => { const f = document.getElementById('site').getBoundingClientRect(); const h = document.getElementById('site').contentDocument.querySelector('[data-saathi="guard"]'); const r = [...h.shadowRoot.firstChild.querySelectorAll('button')][1].getBoundingClientRect(); return { x: Math.round(f.x + r.x + r.width / 2), y: Math.round(f.y + r.y + r.height / 2) }; })()`);
+  await c.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: where.x, y: where.y }, s);
+  await c.send('Input.dispatchMouseEvent', { type: 'mousePressed', x: where.x, y: where.y, button: 'left', clickCount: 1 }, s);
+  await c.send('Input.dispatchMouseEvent', { type: 'mouseReleased', x: where.x, y: where.y, button: 'left', clickCount: 1 }, s);
   await c.waitFor(s, P(`return /परिवारलाई जानकारी/.test(d.getElementById('guard-msg').textContent)`), 30000);
   check('pressing it on the page tells the family', true, await c.evalIn(s, P(`return d.getElementById('guard-msg').textContent`)));
-  check('the page then confirms it', await c.waitFor(s, S(`const b = d.querySelector('[data-saathi="guard"]'); return b && [...b.querySelectorAll('button')][1].disabled && b.querySelectorAll('button')[1].textContent`), 15000).then((x) => /परिवारलाई जानकारी/.test(x)));
+  check('the page then confirms it', await c.waitFor(s, S(`const h = d.querySelector('[data-saathi="guard"]'); const b = h && h.shadowRoot.firstChild; return b && [...b.querySelectorAll('button')][1].disabled && b.querySelectorAll('button')[1].textContent`), 15000).then((x) => /परिवारलाई जानकारी/.test(x)));
 
   // The helper page for the same group.
   const helper = await c.open('https://paperwork-decoder.web.app/help.html', { background: true });

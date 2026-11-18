@@ -2,7 +2,7 @@
 // phone. The helper taps the right one and it lights up on the person's screen.
 // Only labels travel. A page is never sent as a picture or as text, and nothing typed is read.
 
-import { maskText } from './masking.js';
+import { maskText, isPersonalControl, isPersonalText } from './masking.js';
 
 export const MAX_HELP_CONTROLS = 100;
 export const MAX_NOTE = 100;
@@ -22,8 +22,9 @@ export function controlsForHelp(elements, max = MAX_HELP_CONTROLS) {
   }
   return wanted.map(({ e, at }) => {
     const text = String(e.text ?? '').slice(0, 80);
-    const personal = text !== '' && maskText(text).items.length > 0;
-    return { at, role: String(e.role ?? 'button'), text: personal ? '' : text, section: String(e.section ?? '').slice(0, 80), personal };
+    const personal = isPersonalControl(text, e.acct);
+    const section = String(e.section ?? '').slice(0, 80);
+    return { at, role: String(e.role ?? 'button'), text: personal ? '' : text, section: isPersonalText(section) ? '' : section, personal };
   });
 }
 
@@ -53,6 +54,12 @@ export function helpPreview(controls, host) {
     hidden ? ` (${hidden} with personal details left out)` : ''
   }. Anything you typed: none. Pictures of the page: none.`;
 }
+
+/** The page title sent with a help request. A title can hold an email address or a name ("Inbox (ram@gmail.com)"). */
+export const cleanTitle = (title, host) => {
+  const t = String(title ?? '').replace(/\s+/g, ' ').trim().slice(0, 80);
+  return t && !isPersonalText(t) ? t : String(host ?? '').slice(0, 80);
+};
 
 export const cleanNote = (note) => String(note ?? '').replace(/\s+/g, ' ').trim().slice(0, MAX_NOTE);
 

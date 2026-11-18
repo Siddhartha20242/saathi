@@ -6,7 +6,7 @@
 // only thing that can leave is a family alert, which the person sends by pressing a button, and that
 // carries only the website's address, the brand it imitates, and the reason codes.
 
-import { assess } from './guard.js';
+import { assess, secretKind } from './guard.js';
 import { warning, pickLang } from './guardText.js';
 
 const clean = (s, n) => String(s ?? '').replace(/\s+/g, ' ').trim().slice(0, n);
@@ -20,16 +20,17 @@ export function collectSnapshot(doc = document, loc = location, win = window) {
       return '';
     }
   };
-  const fields = [...doc.querySelectorAll('input, textarea, select')]
-    .filter((el) => !['hidden', 'submit', 'button', 'reset', 'image', 'checkbox', 'radio'].includes((el.getAttribute('type') || '').toLowerCase()))
-    .slice(0, 60)
-    .map((el) => ({
-      type: (el.getAttribute('type') || el.tagName).toLowerCase(),
-      label: clean(el.labels?.[0]?.textContent || el.getAttribute('aria-label') || el.getAttribute('placeholder'), 80),
-      name: clean(el.getAttribute('name') || el.id, 60),
-      autocomplete: clean(el.getAttribute('autocomplete'), 40),
-    }));
-  const forms = [...doc.querySelectorAll('form')].filter((f) => f.querySelector('input, textarea'));
+  const isBox = (el) => !['hidden', 'submit', 'button', 'reset', 'image', 'checkbox', 'radio'].includes((el.getAttribute('type') || '').toLowerCase());
+  const describe = (el) => ({
+    type: (el.getAttribute('type') || el.tagName).toLowerCase(),
+    label: clean(el.labels?.[0]?.textContent || el.getAttribute('aria-label') || el.getAttribute('placeholder'), 80),
+    name: clean(el.getAttribute('name') || el.id, 60),
+    autocomplete: clean(el.getAttribute('autocomplete'), 40),
+  });
+  const fields = [...doc.querySelectorAll('input, textarea, select')].filter(isBox).slice(0, 60).map(describe);
+  // Only a form that holds a box asking for a secret matters for "this sends what you type somewhere else":
+  // a newsletter box on the same page posting to a mailing service does not.
+  const forms = [...doc.querySelectorAll('form')].filter((f) => [...f.querySelectorAll('input, textarea')].filter(isBox).some((el) => secretKind(describe(el))));
   const links = [...doc.querySelectorAll('a[href]')].map((a) => a.getAttribute('href') || '');
   return {
     host: win.__saathiDemoHost || loc.hostname,
@@ -49,10 +50,16 @@ const COLORS = { stop: '#a3271f', careful: '#8a5a00' };
 export function showBar(doc, assessment, lang, { onFamily, onDismiss }) {
   doc.querySelector('[data-saathi="guard"]')?.remove();
   const w = warning(assessment, lang);
+  // The bar lives in a shadow root, so the page's own style rules cannot hide or restyle it, and the host has
+  // its position set inline with !important, which beats any rule in the page's style sheets.
+  const host = doc.createElement('div');
+  host.setAttribute('data-saathi', 'guard');
+  host.style.cssText = 'all:initial!important;position:fixed!important;top:0!important;left:0!important;right:0!important;z-index:2147483647!important;display:block!important;';
+  const root = host.attachShadow({ mode: 'open' });
   const bar = doc.createElement('div');
-  bar.setAttribute('data-saathi', 'guard');
   bar.setAttribute('role', 'alert');
-  bar.style.cssText = `position:fixed;top:0;left:0;right:0;z-index:2147483646;background:${COLORS[assessment.level]};color:#fff;font:600 18px/1.4 system-ui,sans-serif;padding:12px 16px;box-shadow:0 2px 12px rgba(0,0,0,.4);`;
+  bar.style.cssText = `background:${COLORS[assessment.level]};color:#fff;font:600 18px/1.4 system-ui,sans-serif;padding:12px 16px;box-shadow:0 2px 12px rgba(0,0,0,.4);box-sizing:border-box;`;
+  root.append(bar);
 
   const head = doc.createElement('div');
   head.textContent = w.headline;
@@ -75,26 +82,33 @@ export function showBar(doc, assessment, lang, { onFamily, onDismiss }) {
     b.style.cssText = `font:600 16px system-ui,sans-serif;min-height:44px;padding:8px 16px;border-radius:10px;border:2px solid #fff;cursor:pointer;background:${primary ? '#fff' : 'transparent'};color:${primary ? COLORS[assessment.level] : '#fff'};`;
     return b;
   };
+  // Only a real click by the person counts. A page script can call .click() on a button, but that event is not "trusted".
   const why = button(w.why, false);
-  why.addEventListener('click', () => (list.style.display = list.style.display === 'none' ? 'block' : 'none'));
+  why.addEventListener('click', (ev) => {
+    if (ev.isTrusted) list.style.display = list.style.display === 'none' ? 'block' : 'none';
+  });
   row.append(why);
   let familyButton = null;
   if (assessment.level === 'stop' && onFamily) {
     familyButton = button(w.family, true);
-    familyButton.addEventListener('click', () => onFamily(familyButton));
+    familyButton.addEventListener('click', (ev) => {
+      if (ev.isTrusted) onFamily(familyButton);
+    });
     row.append(familyButton);
   }
   const dismiss = button(w.dismiss, false);
-  dismiss.addEventListener('click', () => {
-    bar.remove();
+  dismiss.addEventListener('click', (ev) => {
+    if (!ev.isTrusted) return;
+    host.remove();
     onDismiss?.();
   });
   row.append(dismiss);
   bar.append(list, row);
-  doc.documentElement.append(bar);
-  bar.__familyButton = familyButton;
-  bar.__sent = w.sent;
-  return bar;
+  doc.documentElement.append(host);
+  host.__bar = bar;
+  host.__familyButton = familyButton;
+  host.__sent = w.sent;
+  return host;
 }
 
 /** Starts watching the page it is loaded in. `chromeApi` is the extension API (or a stand-in on the try page). */
@@ -140,12 +154,12 @@ export function startGuard(chromeApi, doc = document, win = window) {
       // Only the open side panel can write the alert. If it is closed, say how to open it.
       onFamily: () =>
         tell({ saathi: 'guardAlert', alert: { host: last.host, brand: last.brand ?? '', level: last.level, reasons: last.reasons.map((r) => r.code) } }, (response) => {
-          const bar = doc.querySelector('[data-saathi="guard"]');
-          if (response?.ok || !bar) return;
+          const host = doc.querySelector('[data-saathi="guard"]');
+          if (response?.ok || !host?.__bar) return;
           const hint = doc.createElement('div');
           hint.style.cssText = 'margin-top:8px;font-weight:400;font-size:16px;';
           hint.textContent = warning(last, lang).openPanel;
-          bar.append(hint);
+          host.__bar.append(hint);
         }),
       onDismiss: () => (dismissed = true),
     });
@@ -155,23 +169,36 @@ export function startGuard(chromeApi, doc = document, win = window) {
   setTimeout(run, 600);
   setTimeout(run, 2500);
   let href = win.location.href;
-  const watcher = setInterval(() => {
+  setInterval(() => {
     if (win.location.href !== href) {
       href = win.location.href;
       dismissed = false;
       setTimeout(run, 800);
     }
   }, 1500);
-  setTimeout(() => clearInterval(watcher), 120000);
+  // A login box that appears later (a pop-up, or a page that fills in after it loads) is assessed too: when the
+  // page changes, look again, at most once every three seconds. run() does nothing if the result is unchanged.
+  let pending = null;
+  try {
+    new win.MutationObserver(() => {
+      if (pending) return;
+      pending = setTimeout(() => {
+        pending = null;
+        run();
+      }, 3000);
+    }).observe(doc.documentElement, { childList: true, subtree: true });
+  } catch {
+    // no observer on this page
+  }
 
   chromeApi.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
     if (msg?.saathi === 'guardStatus') {
       sendResponse(last ?? { level: 'ok', reasons: [] });
     } else if (msg?.saathi === 'alertSent') {
-      const bar = doc.querySelector('[data-saathi="guard"]');
-      if (bar?.__familyButton) {
-        bar.__familyButton.textContent = bar.__sent;
-        bar.__familyButton.disabled = true;
+      const host = doc.querySelector('[data-saathi="guard"]');
+      if (host?.__familyButton) {
+        host.__familyButton.textContent = host.__sent;
+        host.__familyButton.disabled = true;
       }
       sendResponse({ ok: true });
     }

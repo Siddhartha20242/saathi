@@ -9,7 +9,7 @@ import {
 } from 'firebase/firestore';
 import { getRemoteConfig, fetchAndActivate, getValue } from 'firebase/remote-config';
 import { getFirebaseApp, run } from './firebase.js';
-import { stepInstruction } from './path.js';
+import { stepInstruction, cleanLoadedPath } from './path.js';
 import { cleanAlert, ALERT_HOURS, cleanCheckin, CHECKIN_HOURS } from './alerts.js';
 
 let auth = null;
@@ -94,7 +94,7 @@ export async function listPaths(code) {
   const user = await ensureUser();
   const snap = await getDocs(pathsOf(code));
   return snap.docs
-    .map((d) => ({ id: d.id, ...d.data(), mine: d.data().createdBy === user.uid, fromCache: snap.metadata.fromCache }))
+    .map((d) => ({ id: d.id, ...cleanLoadedPath(d.data()), createdAt: d.data().createdAt, createdBy: d.data().createdBy, mine: d.data().createdBy === user.uid, fromCache: snap.metadata.fromCache }))
     .sort((a, b) => (b.createdAt?.seconds ?? 0) - (a.createdAt?.seconds ?? 0));
 }
 

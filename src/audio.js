@@ -60,7 +60,13 @@ async function toSamples(blob) {
  */
 export async function recordSpeech({ maxMs = 8000, stop = new Promise(() => {}) } = {}) {
   const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-  const recorder = new MediaRecorder(stream);
+  let recorder;
+  try {
+    recorder = new MediaRecorder(stream);
+  } catch (err) {
+    stream.getTracks().forEach((t) => t.stop()); // do not leave the microphone on
+    throw err;
+  }
   const chunks = [];
   recorder.ondataavailable = (e) => e.data.size && chunks.push(e.data);
   const finished = new Promise((resolve) => (recorder.onstop = resolve));

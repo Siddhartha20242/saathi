@@ -4,7 +4,7 @@
 
 import { run, deviceStatus } from './firebase.js';
 import { refind, codeFind, cloudPreview } from './refind.js';
-import { maskText } from './masking.js';
+import { isPersonalControl, isPersonalText } from './masking.js';
 import { recordSpeech } from './audio.js';
 import { voicePrompt, parseVoice, VOICE_SCHEMA } from './voice.js';
 import { warning, messageWarning } from './guardText.js';
@@ -15,7 +15,7 @@ import { explainPrompt, explainPayloadSummary } from './explain.js';
 import {
   sanitizeStep, sameStep, stepInstruction, originMatches, validatePath, newGroupCode, normaliseGroup, GROUP_RE, LANGS, MAX_STEPS,
 } from './path.js';
-import { controlsForHelp, helpPreview } from './help.js';
+import { controlsForHelp, helpPreview, cleanTitle } from './help.js';
 import {
   ensureUser, loadConfig, savePath, listPaths, deletePath, translatePath, createHelp, watchHelp, closeHelp,
   createAlert, watchAlerts, createCheckin,
@@ -103,7 +103,12 @@ function onPageEvent(msg) {
   if (msg.event === 'guardAlert') tellFamily(msg.alert);
   if (msg.event === 'recorded' && state.recording) addRecorded(msg.step);
   if (msg.event === 'clicked' && state.follow && msg.stepIndex === state.follow.index) {
-    setTimeout(() => nextStep(), 1200); // let the next page load
+    // Let the next page load, then go on, but only if the person is still on the same step of the same guide.
+    const f = state.follow;
+    const i = f.index;
+    setTimeout(() => {
+      if (state.follow === f && f.index === i) nextStep();
+    }, 1200);
   }
 }
 
@@ -281,7 +286,13 @@ function renderGuard(g) {
   say('guard-msg', '');
 }
 
+let lastPageAlert = { host: '', at: 0 };
 async function tellFamily(data) {
+  // An alert sent from the page's bar: one per website per minute, so a page cannot flood the family with alerts.
+  if (data) {
+    if (data.host === lastPageAlert.host && Date.now() - lastPageAlert.at < 60000) return;
+    lastPageAlert = { host: data.host, at: Date.now() };
+  }
   const alert = data ?? (guardNow && { host: guardNow.host, brand: guardNow.brand ?? '', level: guardNow.level, reasons: guardNow.reasons.map((r) => r.code) });
   if (!alert) return;
   if (!state.group) return say('guard-msg', 'Join a group first.', 'bad');
@@ -726,7 +737,11 @@ const askCloud = async (prompt) => (await run({ mode: 'ONLY_IN_CLOUD', prompt })
 
 // A label that holds a personal detail is not sent, even to the cloud.
 const scrub = (elements) =>
-  elements.map((e) => (maskText(e.text).items.length ? { ...e, text: '(personal label)' } : e));
+  elements.map((e) => {
+    const personal = isPersonalControl(e.text, e.acct);
+    const section = e.section && isPersonalText(e.section) ? '' : e.section;
+    return personal ? { ...e, text: '(personal label)', section } : { ...e, section };
+  });
 
 function offerCloud(f, step, page, ctx) {
   if (!state.config.cloudEnabled) return;
@@ -753,7 +768,7 @@ $('fo-cloud-go').addEventListener('click', async (ev) => {
     if (state.follow !== f || f.index !== index) return;
     $('fo-cloud').hidden = true;
     if (res.index === null) return setHow('The cloud was not sure either. Try "Ask a helper" in Get help.', 'bad');
-    const drawn = await callExtension('highlight', { index: res.index, stepIndex: index });
+    const drawn = await callExtension('highlight', { index: res.index, stepIndex: index, scanId: page.scanId });
     f.found = { text: page.elements[res.index].text, by: 'cloud' };
     if (drawn?.covered) {
       $('fo-warn').hidden = false;
@@ -814,7 +829,7 @@ async function showStep() {
         'bad',
       );
     }
-    const drawn = await callExtension('highlight', { index: res.index, stepIndex: index });
+    const drawn = await callExtension('highlight', { index: res.index, stepIndex: index, scanId: page.scanId });
     f.found = { text: page.elements[res.index].text, by: res.by };
     if (drawn?.covered) {
       $('fo-warn').hidden = false;
@@ -1004,7 +1019,7 @@ $('help-send').addEventListener('click', async () => {
   if (!h) return;
   $('help-send').disabled = true;
   try {
-    const id = await createHelp(state.group, { title: h.page.title || h.page.host, host: h.page.host, controls: h.controls });
+    const id = await createHelp(state.group, { title: cleanTitle(h.page.title, h.page.host), host: h.page.host, controls: h.controls });
     h.id = id;
     $('help-confirm').hidden = true;
     $('help-live').hidden = false;
@@ -1035,14 +1050,14 @@ async function onHelpAnswer(data) {
   if (data.pick === lastPick && !data.note) return;
   lastPick = data.pick;
   try {
-    await callExtension('highlight', { index: scanIndex });
+    await callExtension('highlight', { index: scanIndex, scanId: h.page?.scanId });
   } catch {
     // The page may have been rescanned since. Find the control again by its name.
     try {
       const page = await callExtension('scan');
       const c = h.controls[data.pick];
       const hit = c && c.text ? codeFind({ role: c.role, text: c.text, section: c.section }, page.elements) : null;
-      if (hit?.verdict === 'found') await callExtension('highlight', { index: hit.index });
+      if (hit?.verdict === 'found') await callExtension('highlight', { index: hit.index, scanId: page.scanId });
       else $('help-status').textContent += ' (The page has changed, so I could not light it up. Ask your helper again.)';
     } catch (err) {
       say('help-msg', err.message, 'bad');
@@ -1050,6 +1065,13 @@ async function onHelpAnswer(data) {
   }
   if (state.speak) speak(`Your helper pointed at ${label}.${note}`, 'en');
 }
+
+// If the panel is closed while a help request is open, try to take the names down. The request also runs out by
+// itself after two hours (and is removed by the database's expiry policy), so this is a best effort.
+addEventListener('pagehide', () => {
+  const id = state.help?.id;
+  if (id && state.group) closeHelp(state.group, id).catch(() => {});
+});
 
 $('help-end').addEventListener('click', async () => {
   const id = state.help?.id;
@@ -1093,12 +1115,12 @@ $('t-find').addEventListener('click', async (ev) => {
       say('o-find', `Read ${page.elements.length} controls. Asking the on-device model (${calls})…`);
       return askLocal(prompt);
     };
-    const res = await refind(step, page.elements, { task: page.title }, ask);
+    const res = await refind(step, page.elements, { task: cleanTitle(page.title, page.host) }, ask);
     const ms = Math.round(performance.now() - started);
     if (res.index === null) {
       say('o-find', `Not sure (${res.reason}). ${page.elements.length} controls read, ${calls} model calls, ${ms} ms.`, 'bad');
     } else {
-      const drawn = await callExtension('highlight', { index: res.index });
+      const drawn = await callExtension('highlight', { index: res.index, scanId: page.scanId });
       const found = page.elements[res.index];
       say(
         'o-find',

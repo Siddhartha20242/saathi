@@ -98,3 +98,57 @@ describe('words', () => {
     expect(s).toContain('asks for a password');
   });
 });
+
+import { skeleton, lookalikeOf, registrable, isIdn, secretKind } from '../src/guard.js';
+
+// Cases from an independent review of the older code. Each one scored "ok" before the fix.
+describe('scam guard review findings', () => {
+  const page = (host, extra = {}) => ({ host, protocol: 'https:', title: 'Sign in', text: 'Sign in to your account', fields: [{ type: 'password', label: 'Password' }], formHosts: [], ...extra });
+  const level = (host, extra) => assess(page(host, extra)).level;
+
+  it('catches the real bank name hidden in a longer address, including short names', () => {
+    for (const h of ['esewa.com.np.verify.top', 'paytm-kyc.com', 'esewa-login.com', 'uidai.gov.in.verify.top', 'nmb.com.np.evil.com', 'nabilbank.com.verify.top']) {
+      expect(`${h}: ${level(h)}`).toBe(`${h}: stop`);
+    }
+  });
+  it('catches look-alike letters, as Chrome writes them (punycode)', () => {
+    expect(skeleton('xn--nbilbank-16g.com')).toBe('nabilbank.com');
+    expect(lookalikeOf('xn--nbilbank-16g.com')?.name).toBe('Nabil Bank');
+    expect(lookalikeOf('xn--esew-83d.com.np')?.name).toBe('eSewa');
+    expect(level('xn--nbilbank-16g.com')).toBe('stop');
+    expect(isIdn('xn--nbilbank-16g.com')).toBe(true);
+  });
+  it('leaves the real addresses alone, with or without a subdomain', () => {
+    for (const h of ['www.esewa.com.np', 'login.nabilbank.com', 'nmb.com.np', 'sbi.co.in', 'onlinesbi.sbi', 'www.uidai.gov.in']) expect(lookalikeOf(h)).toBe(null);
+    expect(level('login.nabilbank.com')).toBe('ok');
+  });
+  it('reads more public endings, so two customers of one host are two owners', () => {
+    expect(registrable('a.org.uk')).toBe('a.org.uk');
+    expect(registrable('x.a.web.app')).toBe('a.web.app');
+    expect(registrable('a.web.app')).not.toBe(registrable('b.web.app'));
+    expect(registrable('foo.com.au')).toBe('foo.com.au');
+    expect(level('a.web.app', { formHosts: ['b.web.app'] })).not.toBe('ok');
+  });
+  it('does not call a school with a bank-like name a scam, but does when it asks for a password under a bank title', () => {
+    expect(assess({ host: 'khaltiacademy.com', protocol: 'https:', title: 'Khalti Academy', text: 'Classes', fields: [] }).level).toBe('ok');
+    expect(level('nea-logistics.com', { title: 'Logistics', text: 'Track', fields: [] })).toBe('ok');
+  });
+  it('only counts the form that holds the secret box, and not a payment processor or sign-in provider', () => {
+    expect(assess(page('shop.example.com', { title: 'Checkout', fields: [{ type: 'text', label: 'Card number' }], formHosts: ['checkout.stripe.com'] })).level).toBe('ok');
+    expect(assess(page('shop.example.com', { title: 'Checkout', fields: [{ type: 'text', label: 'Card number' }], formHosts: ['collect.evil-pay.net'] })).level).not.toBe('ok');
+  });
+  it('does not take a postal PIN code for a secret', () => {
+    expect(secretKind({ type: 'text', label: 'PIN Code' })).toBe(null);
+    expect(secretKind({ type: 'text', label: 'Pin code' })).toBe(null);
+    expect(secretKind({ type: 'text', label: 'Enter your PIN' })).toBe('secret');
+    expect(secretKind({ type: 'text', label: 'ATM PIN' })).toBe('secret');
+  });
+  it('does not warn about a router or a local test site that uses http', () => {
+    expect(assess({ host: '192.168.1.1', protocol: 'http:', title: 'Router login', text: 'Log in', fields: [{ type: 'password' }] }).level).toBe('ok');
+    expect(assess({ host: 'localhost', protocol: 'http:', title: 'My app', text: 'Log in', fields: [{ type: 'password' }] }).level).toBe('ok');
+    expect(assess({ host: '203.0.113.9', protocol: 'http:', title: 'Sign in', text: 'Log in', fields: [{ type: 'password' }] }).reasons.some((r) => r.code === 'insecure')).toBe(true);
+  });
+  it('does not call a news article about a bank a scam page', () => {
+    expect(assess({ host: 'news.example.com', protocol: 'https:', title: 'eSewa users warned of KYC update scam', text: 'Your account will be blocked, urgent, act now, immediately.', fields: [] }).level).toBe('ok');
+  });
+});

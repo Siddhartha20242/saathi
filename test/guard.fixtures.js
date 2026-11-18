@@ -32,6 +32,6 @@ export const ORDINARY = [
   { name: 'the real wallet login', want: 'ok', page: { host: 'esewa.com.np', protocol: 'https:', title: 'eSewa - Login', text: 'Sign in.', fields: [f('tel', 'Mobile'), f('text', 'OTP')] } },
   { name: 'blog post that mentions a wallet', want: 'ok', page: { host: 'myblog.com', protocol: 'https:', title: 'How I learned about Khalti payments', text: 'A short story about paying bills.', fields: [] } },
   { name: 'practice website', want: 'ok', page: { host: 'paperwork-decoder.web.app', protocol: 'https:', title: 'Pay your bill (practice)', text: 'Customer ID. Branch office.', fields: [f('text', 'Customer ID'), f('select', 'Branch office')] } },
-  { name: 'news story about phishing (a known gentle false alarm)', want: 'careful', page: { host: 'kathmandupost.com', protocol: 'https:', title: 'Fake eSewa pages cheat users', text: 'Scammers say your account will be blocked and ask for a KYC update immediately.', fields: [] } },
+  { name: 'news story about phishing (used to be a gentle false alarm)', want: 'ok', page: { host: 'kathmandupost.com', protocol: 'https:', title: 'Fake eSewa pages cheat users', text: 'Scammers say your account will be blocked and ask for a KYC update immediately.', fields: [] } },
   { name: 'old school portal still on http (genuinely not secure)', want: 'careful', page: { host: 'localschool.edu.np', protocol: 'http:', title: 'School portal', text: 'Log in to see results.', fields: [f('password', 'Password')] } },
 ];

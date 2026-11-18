@@ -26,11 +26,45 @@
     }
   };
 
+  // Rotating banners move on by themselves, so a slide that is showing when the page is read can be gone a
+  // moment later. Their links are not offered as controls to point at.
+  const MOVING = /(^|\s)(slide|slides|slider|carousel|swiper-slide|slick-slide|owl-item|rotator|marquee)(\s|$)/i;
+  function inMovingBanner(el) {
+    for (let n = el, i = 0; n && n !== document.body && i < 6; n = n.parentElement, i++) {
+      const cls = typeof n.className === 'string' ? n.className : '';
+      if (MOVING.test(cls) || /carousel|slide/i.test(n.getAttribute?.('aria-roledescription') || '')) return true;
+    }
+    return false;
+  }
+
   function isVisible(el) {
+    if (inMovingBanner(el)) return false;
     const r = el.getBoundingClientRect();
-    if (r.width < 4 || r.height < 4) return false;
+    // A speck of a few pixels is not something a person can press. (A real government portal has an 8-pixel
+    // link in the corner of the page with the same address as a menu item; the guide pointed at it.)
+    const smallest = el.matches('input[type="checkbox"], input[type="radio"]') ? 8 : 12;
+    if (r.width < smallest || r.height < smallest) return false;
+    // Off to the side of the page (a skip link, an off-canvas menu) is not something a person can see.
+    if (r.right <= 0 || r.left >= Math.max(innerWidth, document.documentElement.scrollWidth)) return false;
     const s = getComputedStyle(el);
-    return s.display !== 'none' && s.visibility !== 'hidden' && s.opacity !== '0';
+    if (s.display === 'none' || s.visibility === 'hidden' || s.opacity === '0') return false;
+    // Greyed out, or switched off by the page, is not a control to point at. (aria-hidden is not tested: some sites
+    // put it on things people can see and use, and it only means "leave this out for screen readers".)
+    if (el.matches(':disabled') || el.getAttribute('aria-disabled') === 'true') return false;
+    if (el.closest('[inert]')) return false;
+    return true;
+  }
+
+  // The account corner of a page (an avatar menu that shows who is signed in) carries a person's name as its
+  // label. Only controls in the page header whose own markup says "user", "account" or "profile" are flagged.
+  const ACCT = /(^|[\s_-])(user|account|profile|avatar|member|username|signed|loggedin|customer)([\s_-]|$)/i;
+  function inAccountArea(el) {
+    if (!el.closest('header, nav, [role="banner"], [role="navigation"]')) return false;
+    for (let n = el, i = 0; n && i < 4; n = n.parentElement, i++) {
+      const cls = typeof n.className === 'string' ? n.className : '';
+      if (ACCT.test(`${n.id || ''} ${cls} ${n.getAttribute('aria-label') || ''} ${n.getAttribute('data-testid') || ''}`)) return true;
+    }
+    return false;
   }
 
   function roleOf(el) {
@@ -112,9 +146,15 @@
     return /radix|_R_|^:r|\d{4,}/i.test(name) ? '' : name;
   };
 
+  let scanCount = 0;
+  let scanId = '';
+  let indexByKey = new Map(); // the position in the list of each label, so a repeated one can still be placed
+
   function scan() {
     const sectionOf = sectionFinder();
-    const seen = new Set();
+    const seen = new Map(); // key -> the element's entry, so a repeated label can be counted
+    indexByKey = new Map();
+    scanId = `${Date.now().toString(36)}-${++scanCount}`;
     lastScan = [];
     const elements = [];
     let truncated = false;
@@ -129,15 +169,25 @@
       const text = labelOf(el, role);
       if (!text) continue;
       const section = sectionOf(el);
-      const key = `${role}|${text}|${section}`;
-      if (seen.has(key)) continue; // the same link repeated in a menu is listed once
-      seen.add(key);
+      // Two links with the same label under the same heading but different addresses are different controls
+      // (three rows that each say "Edit"), so the address is part of the key. Same label and same address
+      // is the same destination shown twice (a logo and a menu entry), listed once.
+      const key = `${role}|${text}|${section}|${hrefOf(el, role)}`;
+      if (seen.has(key)) {
+        // The same label again under the same heading (three rows that each say "Edit"). It is listed once, and
+        // marked, so the guide knows the label alone does not say which one it is and will not guess.
+        seen.get(key).dups = (seen.get(key).dups ?? 1) + 1;
+        continue;
+      }
+      indexByKey.set(key, lastScan.length);
       lastScan.push(el);
       const r = el.getBoundingClientRect();
       const inView = r.bottom > 0 && r.top < innerHeight && r.right > 0 && r.left < innerWidth;
-      elements.push({ role, text, section, href: hrefOf(el, role), name: nameOf(el), inView });
+      const entry = { role, text, section, href: hrefOf(el, role), name: nameOf(el), inView, acct: inAccountArea(el) };
+      seen.set(key, entry);
+      elements.push(entry);
     }
-    return { title: clean(document.title), host: location.hostname, path: location.pathname, truncated, elements };
+    return { scanId, title: clean(document.title), host: location.hostname, path: location.pathname, truncated, elements };
   }
 
   // ---------- Highlight ----------
@@ -146,9 +196,15 @@
   let timer = null;
   let pressedAbort = null;
 
-  function highlight(index, stepIndex) {
+  function highlight(index, stepIndex, wantedScan) {
+    // An index means something only for the scan it came from. After another scan, or in another tab, it would
+    // point at a different control while the panel still names the old one.
+    if (wantedScan && wantedScan !== scanId) return { error: 'The page changed since it was read. Try again.' };
     const el = lastScan[index];
     if (!el || !el.isConnected) return { error: 'That control is no longer on the page. Try again.' };
+    // A slide in a rotating banner can be showing when the page is read and hidden a moment later. Outlining the
+    // corner of the page where it used to be would mislead, so say so instead.
+    if (!isVisible(el)) return { error: 'That control is not showing on the page right now. Try again.' };
     el.scrollIntoView({ block: 'center', behavior: 'smooth' });
 
     box?.remove();
@@ -170,6 +226,8 @@
     const place = () => {
       if (!el.isConnected) return stop();
       const r = el.getBoundingClientRect();
+      // If the control disappears (a banner slide moves on), hide the outline until it is back.
+      box.style.display = r.width < 4 || r.height < 4 ? 'none' : '';
       Object.assign(box.style, {
         left: `${r.left - 6}px`,
         top: `${r.top - 6}px`,
@@ -217,14 +275,19 @@
 
   function report(el, role) {
     scan(); // refreshes the list so the control's position on the page can be noted
+    const text = labelOf(el, role);
+    const section = sectionFinder()(el);
+    const found = lastScan.indexOf(el);
     const step = {
-      at: Math.max(0, lastScan.indexOf(el)),
+      // A control that was collapsed into an earlier one with the same label is placed where that one is.
+      at: Math.max(0, found >= 0 ? found : indexByKey.get(`${role}|${text}|${section}|${hrefOf(el, role)}`) ?? 0),
       role,
-      text: labelOf(el, role),
-      section: sectionFinder()(el),
+      text,
+      section,
       page: location.pathname,
       href: hrefOf(el, role),
       name: nameOf(el),
+      acct: inAccountArea(el),
     };
     tell({ saathi: 'recorded', step });
   }
@@ -275,7 +338,7 @@
 
   chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
     if (msg?.saathi === 'scan') sendResponse(scan());
-    else if (msg?.saathi === 'highlight') sendResponse(highlight(msg.index, msg.stepIndex));
+    else if (msg?.saathi === 'highlight') sendResponse(highlight(msg.index, msg.stepIndex, msg.scanId));
     else if (msg?.saathi === 'recordStart') {
       recording = true;
       lastFocused = null;

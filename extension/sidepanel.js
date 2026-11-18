@@ -11,8 +11,10 @@ const ALLOWED = new Set(['scan', 'highlight', 'recordStart', 'recordStop', 'setL
 const frame = document.getElementById('panel');
 frame.src = PANEL_URL;
 
-// While the helper is recording, pages that load later are told to keep recording.
+// While the helper is recording, pages that load later in the same tab are told to keep recording. Only one
+// tab records, so a click in an unrelated tab (webmail, a bank) never becomes a step.
 let recording = false;
+let recordingTab = null;
 
 // For the test: is the on-device model also visible directly in an extension page?
 (async () => {
@@ -38,8 +40,17 @@ addEventListener('message', async (ev) => {
   if (!msg || msg.source !== 'saathi-panel' || !ALLOWED.has(msg.type)) return;
 
   const reply = (body) => frame.contentWindow.postMessage({ id: msg.id, ...body }, PANEL_ORIGIN);
-  if (msg.type === 'recordStart') recording = true;
-  if (msg.type === 'recordStop') recording = false;
+  if (msg.type === 'recordStart') {
+    recording = true;
+    recordingTab = await activeTabId().catch(() => null);
+  }
+  if (msg.type === 'recordStop') {
+    recording = false;
+    const was = recordingTab;
+    recordingTab = null;
+    // Tell the tab that was recording to stop, even if it is no longer the open one.
+    if (was !== null) chrome.tabs.sendMessage(was, { saathi: 'recordStop' }).catch(() => {});
+  }
   // The person's language is kept in the extension, so the warning on a page can use it even when this panel is closed.
   if (msg.type === 'setLang') {
     chrome.storage.local.set({ 'saathi:lang': ['en', 'ne', 'hi'].includes(msg.lang) ? msg.lang : 'en' });
@@ -50,6 +61,7 @@ addEventListener('message', async (ev) => {
       saathi: msg.type,
       index: msg.index,
       stepIndex: msg.stepIndex,
+      scanId: typeof msg.scanId === 'string' ? msg.scanId.slice(0, 40) : undefined,
     });
     if (!result) throw new Error('empty');
     if (result.error) return reply({ error: result.error });
@@ -63,15 +75,18 @@ addEventListener('message', async (ev) => {
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (sender.id !== chrome.runtime.id || !msg) return;
   if (msg.saathi === 'hello') {
-    sendResponse({ recording });
+    sendResponse({ recording: recording && sender.tab?.id === recordingTab });
   } else if (msg.saathi === 'recorded' || msg.saathi === 'clicked') {
+    if (msg.saathi === 'recorded' && recordingTab !== null && sender.tab?.id !== recordingTab) return;
     frame.contentWindow?.postMessage(
       { event: msg.saathi, step: msg.step, stepIndex: msg.stepIndex },
       PANEL_ORIGIN,
     );
   } else if (msg.saathi === 'guard' || msg.saathi === 'guardAlert') {
     // The scam guard on a page: what it found, or a request to tell the family. Only the active tab counts.
-    if (msg.saathi === 'guardAlert' && !sender.tab?.active) return;
+    // A page in the background (a tab that finished loading behind this one) must not change or clear the warning
+    // for the tab the person is looking at.
+    if (!sender.tab?.active) return;
     frame.contentWindow?.postMessage({ event: msg.saathi, guard: msg.guard, alert: msg.alert }, PANEL_ORIGIN);
     sendResponse({ ok: true }); // the page can tell that the panel is open
   }

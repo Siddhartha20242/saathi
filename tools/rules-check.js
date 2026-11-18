@@ -134,6 +134,22 @@ window.__err = null;
     t('path: any edit is refused, even by the creator', await update(`${P}p1`, { title: 'Changed' }, ['title'], tok1), 403);
     t('path: another user deleting is refused', await del(`${P}p1`, tok2), 403);
     t('path: the creator deleting works', await del(`${P}p1`, tok1), 200);
+    // Translations must be Nepali and Hindi only, with one line per step.
+    const tr = (n) => ({ title: 'T', steps: Array.from({ length: n }, () => 's') });
+    t('path: translations with one line per step are accepted', await create(`${P}p6`, path({ translations: { ne: tr(1), hi: tr(1) } })), 200);
+    t('path: a translation with the wrong number of steps is refused', await create(`${P}p7`, path({ translations: { ne: tr(3) } })), 403);
+    t('path: a translation in another language is refused', await create(`${P}p8`, path({ translations: { fr: tr(1) } })), 403);
+    t('path: a translation with an extra field is refused', await create(`${P}p9`, path({ translations: { ne: { ...tr(1), note: 'x' } } })), 403);
+    t('path: a translation title over 120 characters is refused', await create(`${P}p10`, path({ translations: { ne: { title: 'x'.repeat(121), steps: ['s'] } } })), 403);
+    await del(`${P}p6`, tok1);
+    // Time limits.
+    const far = (hours) => ({ __ts: new Date(Date.now() + hours * 3600e3).toISOString() });
+    t('help: a request that lasts 2 hours is accepted', await create(`${H}h20`, help({ expiresAt: far(2) })), 200);
+    t('help: a request that lasts 5 hours is refused', await create(`${H}h21`, help({ expiresAt: far(5) })), 403);
+    t('help: a request that has already run out is refused', await create(`${H}h22`, help({ expiresAt: far(-1) })), 403);
+    await del(`${H}h20`, tok1);
+    t('alert: one that lasts 10 days is refused', await create(`${A}a9`, alert({ expiresAt: far(240) })), 403);
+    t('checkin: one that lasts 10 days is refused', await create(`${C}c9`, checkin({ expiresAt: far(240) })), 403);
     t('anything outside groups is refused', await read('other/doc', tok1), 403);
 
     window.__R = {
