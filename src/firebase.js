@@ -132,12 +132,25 @@ async function toPart(image) {
   return { type: 'inlineData', inlineData: { data, mimeType: image.type } };
 }
 
+// A plain record of where each AI call ran in this session: the mode asked for, where it actually ran, how long
+// it took and how much was sent. Never the prompt or the answer. Shown under "Technical details".
+const usage = [];
+export const getUsage = () => usage.slice();
+
 /** The runner the pipeline uses. Returns the text and where it actually ran. */
 export async function run({ mode, prompt, image, audio, schema = null }) {
   const model = getModel(mode, Boolean(image), schema);
   const media = image ?? audio; // a picture or a short spoken recording
+  const started = Date.now();
   const input = media ? [prompt, await toPart(media)] : prompt;
-  const result = await model.generateContent(input);
-  const text = result.response.text();
-  return { text, source: normaliseSource(result.response.inferenceSource, mode) };
+  try {
+    const result = await model.generateContent(input);
+    const text = result.response.text();
+    const source = normaliseSource(result.response.inferenceSource, mode);
+    usage.push({ at: started, asked: mode, ran: source, ms: Date.now() - started, sentChars: source === 'ON_DEVICE' ? 0 : String(prompt).length, media: Boolean(media), ok: true });
+    return { text, source };
+  } catch (err) {
+    usage.push({ at: started, asked: mode, ran: 'NONE', ms: Date.now() - started, sentChars: 0, media: Boolean(media), ok: false });
+    throw err;
+  }
 }

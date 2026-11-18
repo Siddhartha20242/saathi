@@ -61,6 +61,10 @@ Every model call goes through one file, [src/firebase.js](src/firebase.js), usin
 
 ### Verify the hybrid split yourself
 
+**Where the AI ran.** Under *Technical details* in the panel, *Where the AI ran this session* lists every model call: what was asked for (on-device, cloud, prefer on-device), where it actually ran, how long it took and how many characters were sent (nothing for an on-device call). It never keeps the prompt or the answer. It exists so the hybrid split can be checked on screen instead of taken on trust.
+
+
+
 1. Open the try page in desktop Chrome and expand **Developer checks** in the panel.
 2. Press **Run on this laptop**. The result says *Ran: on this laptop*.
 3. Press **Run in the cloud**. The result says *Ran: in the cloud*.

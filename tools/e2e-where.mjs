@@ -58,6 +58,9 @@ try {
   await sleep(12000);
   const asked = await c.evalIn(s, P(`return d.getElementById('ask-out').textContent + ' | disabled: ' + d.getElementById('ask-go').disabled`));
   check('an answer or a kind failure, button usable again, guide unmoved', /disabled: false/.test(asked) && !/Thinking/.test(asked) && (await c.evalIn(s, P(`return w.__saathi.follow.index === 0`))), asked);
+  await c.evalIn(s, P(`d.querySelector('footer details').open = true; d.getElementById('t-usage').click()`));
+  const usage = await c.evalIn(s, P(`return d.getElementById('o-usage').textContent`));
+  check('the AI use log lists the call that was made, with where it ran and what was sent', /\d+ calls?:/.test(usage) && /asked/.test(usage), usage);
   await c.shot(s, 'where-is.png');
 } catch (err) {
   out.error = String(err?.message ?? err);

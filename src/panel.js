@@ -2,7 +2,7 @@
 // Firebase AI Logic, App Check, Auth, Firestore and Remote Config work here as on the web.
 // The extension around it only reads the open tab's controls and draws the highlight.
 
-import { run, deviceStatus } from './firebase.js';
+import { run, deviceStatus, getUsage } from './firebase.js';
 import { refind, codeFind, cloudPreview } from './refind.js';
 import { isPersonalControl, isPersonalText } from './masking.js';
 import { recordSpeech } from './audio.js';
@@ -1268,6 +1268,14 @@ async function modelTest(mode, outId, button) {
   }
 }
 
+$('t-usage').addEventListener('click', () => {
+  const rows = getUsage();
+  const where = { ON_DEVICE: 'on this computer', IN_CLOUD: 'in the cloud', NONE: 'failed', UNKNOWN: 'unknown' };
+  const lines = rows.map((u) => `${new Date(u.at).toLocaleTimeString()}  asked ${u.asked.replace(/_/g, ' ').toLowerCase()} → ran ${where[u.ran] ?? u.ran} · ${u.ms} ms · ${u.ran === 'NONE' ? 'no answer came back' : u.sentChars ? `${u.sentChars} characters sent${u.media ? ' + a recording' : ''}` : 'nothing sent'}`);
+  const device = rows.filter((u) => u.ran === 'ON_DEVICE').length;
+  const cloud = rows.filter((u) => u.ran === 'IN_CLOUD').length;
+  say('o-usage', rows.length ? `${rows.length} calls: ${device} on this computer, ${cloud} in the cloud.\n${lines.join('\n')}` : 'No AI call yet in this session.', rows.length ? 'ok' : '');
+});
 $('t-device').addEventListener('click', (ev) => modelTest('ONLY_ON_DEVICE', 'o-device', ev.currentTarget));
 $('t-cloud').addEventListener('click', (ev) => modelTest('ONLY_IN_CLOUD', 'o-cloud', ev.currentTarget));
 
