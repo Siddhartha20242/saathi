@@ -69,3 +69,23 @@ describe('parseVoice', () => {
     expect(parseVoice('', 2).index).toBeNull();
   });
 });
+
+import { chooseVoice } from '../src/speech.js';
+describe('chooseVoice', () => {
+  const en = { lang: 'en-US', name: 'Samantha' };
+  const hi = { lang: 'hi-IN', name: 'Lekha' };
+  const ne = { lang: 'ne-NP', name: 'Nepali' };
+  it('uses the exact language when installed', () => {
+    expect(chooseVoice([en, hi, ne], 'ne')).toMatchObject({ voice: ne, fallback: false });
+    expect(chooseVoice([en, hi], 'hi').voice).toBe(hi);
+  });
+  it('falls back from Nepali to Hindi and says so', () => {
+    expect(chooseVoice([en, hi], 'ne')).toMatchObject({ voice: hi, fallback: true });
+  });
+  it('gives nothing when no suitable voice exists, never an English voice for Devanagari', () => {
+    expect(chooseVoice([en], 'ne').voice).toBeNull();
+    expect(chooseVoice([en], 'hi').voice).toBeNull();
+    expect(chooseVoice([], 'en').voice).toBeNull();
+    expect(chooseVoice(undefined, 'en').voice).toBeNull();
+  });
+});

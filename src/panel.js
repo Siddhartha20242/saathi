@@ -15,6 +15,7 @@ import { explainPrompt, explainPayloadSummary } from './explain.js';
 import {
   sanitizeStep, sameStep, stepInstruction, originMatches, validatePath, newGroupCode, normaliseGroup, inviteText, joinCodeFrom, GROUP_RE, LANGS, MAX_STEPS,
 } from './path.js';
+import { chooseVoice } from './speech.js';
 import { controlsForHelp, helpPreview, cleanTitle } from './help.js';
 import {
   ensureUser, loadConfig, savePath, listPaths, deletePath, translatePath, createHelp, watchHelp, closeHelp,
@@ -695,16 +696,27 @@ $('rec-save').addEventListener('click', async () => {
 
 const WORDS = {
   en: { step: (i, n) => `Step ${i} of ${n}`, done: 'You did it. Saathi only showed the way.', tell: 'Let my family know I finished', told: 'Your family has been told. Well done.', noGroup: 'Join a group to tell your family.' },
-  ne: { step: (i, n) => `चरण ${i} / ${n}`, done: 'तपाईंले आफैं गर्नुभयो। साथीले बाटो मात्र देखायो।', tell: 'परिवारलाई भन्नुहोस् कि मैले सकें', told: 'तपाईंको परिवारलाई जानकारी गराइयो। धेरै राम्रो।', noGroup: 'परिवारलाई भन्न समूहमा जोडिनुहोस्।' },
-  hi: { step: (i, n) => `चरण ${i} / ${n}`, done: 'आपने खुद कर दिखाया। साथी ने बस रास्ता दिखाया।', tell: 'परिवार को बताइए कि मैंने कर लिया', told: 'आपके परिवार को बता दिया गया है। बहुत अच्छा।', noGroup: 'परिवार को बताने के लिए किसी समूह से जुड़िए।' },
+  ne: { step: (i, n) => `चरण ${i} / ${n}`, done: 'तपाईंले आफैं गर्नुभयो। साथीले बाटो मात्र देखायो।', tell: 'मैले सकेँ भनेर परिवारलाई खबर पठाउनुहोस्', told: 'तपाईंको परिवारलाई खबर पठाइयो। धेरै राम्रो!', noGroup: 'परिवारलाई भन्न समूहमा जोडिनुहोस्।' },
+  hi: { step: (i, n) => `चरण ${i} / ${n}`, done: 'आपने खुद कर दिखाया। साथी ने बस रास्ता दिखाया।', tell: 'परिवार को खबर भेजिए कि मेरा काम हो गया', told: 'आपके परिवार को खबर भेज दी गई है। बहुत बढ़िया!', noGroup: 'परिवार को बताने के लिए किसी समूह से जुड़िए।' },
 };
-const VOICE = { en: 'en-US', ne: 'ne-NP', hi: 'hi-IN' };
+const VOICE_NOTE = {
+  ne: { none: 'यो उपकरणमा नेपाली आवाज छैन। कृपया लेखिएको पढ्नुहोस्।', fallback: 'यो उपकरणमा नेपाली आवाज छैन, त्यसैले हिन्दी आवाज प्रयोग भयो।' },
+  hi: { none: 'इस उपकरण में हिन्दी आवाज़ नहीं है। कृपया लिखा हुआ पढ़िए।' },
+  en: { none: '' },
+};
 
 function speak(text, lang) {
   try {
     speechSynthesis.cancel();
+    const pick = chooseVoice(speechSynthesis.getVoices(), lang);
+    if (!pick.voice) {
+      $('read-note').textContent = VOICE_NOTE[lang]?.none ?? '';
+      return; // nothing suitable is installed: the text stays on screen
+    }
+    $('read-note').textContent = pick.fallback ? VOICE_NOTE[lang].fallback : '';
     const u = new SpeechSynthesisUtterance(text);
-    u.lang = VOICE[lang] ?? 'en-US';
+    u.voice = pick.voice;
+    u.lang = pick.lang;
     speechSynthesis.speak(u);
   } catch { /* no voice available */ }
 }
