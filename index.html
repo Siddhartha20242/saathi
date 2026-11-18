@@ -4,21 +4,79 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Saathi</title>
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" href="/icon-192.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="theme-color" content="#0f5c4a" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Saathi" />
     <style>
-      body { font: 16px/1.5 system-ui, sans-serif; margin: 0; background: #f6f4ef; color: #1d1b16; }
-      main { max-width: 560px; margin: 80px auto; padding: 0 20px; }
-      h1 { font-size: 28px; margin: 0 0 8px; }
-      p { margin: 0 0 12px; }
-      .muted { color: #6b665c; font-size: 14px; }
-      a { color: #0f5c4a; }
+      :root { --ink: #1d1b16; --muted: #5f5a50; --line: #e2ddd2; --bg: #f6f4ef; --card: #fff; --accent: #0f5c4a; --accent-ink: #fff; }
+      @media (prefers-color-scheme: dark) {
+        :root { --ink: #efeadf; --muted: #b3ad9f; --line: #3a372f; --bg: #14130f; --card: #1f1d18; --accent: #4fc3a1; --accent-ink: #0b1f19; }
+      }
+      * { box-sizing: border-box; }
+      body { font: 18px/1.5 system-ui, sans-serif; margin: 0; background: var(--bg); color: var(--ink); }
+      main { max-width: 600px; margin: 0 auto; padding: 24px 16px 48px; }
+      .logo { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 1.4em; }
+      .logo img { width: 40px; height: 40px; border-radius: 10px; }
+      h1 { font-size: 1.5em; margin: 18px 0 6px; line-height: 1.25; }
+      h2 { font-size: 1.1em; margin: 0 0 6px; }
+      p { margin: 6px 0; }
+      .muted { color: var(--muted); font-size: 0.9em; }
+      .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px; margin: 14px 0; }
+      .choices { display: grid; gap: 12px; margin: 16px 0; }
+      a.choice { display: block; text-decoration: none; color: inherit; border: 2px solid var(--line); background: var(--card); border-radius: 14px; padding: 16px; min-height: 64px; }
+      a.choice b { display: block; font-size: 1.05em; }
+      a.choice span { color: var(--muted); font-size: 0.9em; }
+      a.choice.main { border-color: var(--accent); }
+      a.choice:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+      button { font: inherit; padding: 12px 16px; border-radius: 10px; border: 0; background: var(--accent); color: var(--accent-ink); font-weight: 600; cursor: pointer; min-height: 48px; }
+      table { border-collapse: collapse; width: 100%; font-size: 0.85em; }
+      th, td { text-align: left; padding: 8px 6px; border-top: 1px solid var(--line); vertical-align: top; }
+      th { color: var(--muted); font-weight: 600; border-top: 0; }
+      .here td { background: color-mix(in srgb, var(--accent) 12%, transparent); }
+      .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #e0a11b; margin-right: 6px; }
+      .dot.ok { background: #1c8f78; }
+      [hidden] { display: none !important; }
     </style>
   </head>
   <body>
     <main>
-      <h1>Saathi</h1>
-      <p>A guide that shows where to press on a website. It highlights; you do it.</p>
-      <p class="muted">This is an early test build. The guide itself runs as a Chrome extension.</p>
-      <p class="muted"><a href="/try.html"><b>Try it in your browser</b></a> · <a href="/demo/index.html">Practice website</a> · <a href="/panel.html">Panel page</a> · <a href="/help.html">Helper page (for a phone)</a> · <a href="/refindeval.html">Re-finding test page</a></p>
+      <div class="logo"><img src="/icon-192.png" alt="" />Saathi</div>
+      <h1>Someone in your family shows the way once. Saathi shows you each step.</h1>
+      <p class="muted">Saathi highlights where to press on a website. You do it. Nepali, Hindi and English.</p>
+
+      <div class="choices">
+        <a class="choice main" href="/help.html"><b>I help my family</b><span>See who is stuck, point to the right button, get scam alerts. Works on a phone.</span></a>
+        <a class="choice" href="/try.html"><b>I want a guide to follow</b><span>Try it now on a practice website. No install, no login.</span></a>
+        <a class="choice" href="/panel.html"><b>Check a message, or practise spotting scams</b><span>Paste a text or email. Nothing leaves your device.</span></a>
+      </div>
+
+      <div class="card" id="install-card">
+        <h2>Keep Saathi on this device</h2>
+        <p class="muted" id="install-note">It works like an app and still opens with no internet.</p>
+        <button id="install" hidden>Install Saathi</button>
+      </div>
+
+      <div class="card">
+        <h2>This device</h2>
+        <p><span class="dot" id="ai-dot"></span><span id="here"></span></p>
+        <p class="muted" id="ai-note"></p>
+      </div>
+
+      <div class="card">
+        <h2>Where Saathi runs</h2>
+        <p class="muted">One codebase and one Firebase backend. Firebase AI Logic's hybrid inference picks the on-device model or the cloud model on each device.</p>
+        <table id="matrix">
+          <tr><th>Device</th><th>What works</th><th>AI</th></tr>
+          <tr data-kind="computer"><td>Computer, Chrome</td><td>Everything, with the extension: record, follow on any site, scam warning</td><td>On-device first, cloud if not</td></tr>
+          <tr data-kind="phone"><td>Phone or tablet (installed web app)</td><td>Helper, alerts, check-ins, message check, practice, practice site</td><td>Cloud only (no on-device model in phone browsers)</td></tr>
+          <tr data-kind="any"><td>Any browser, no install</td><td>The practice site and helper page</td><td>Whatever the device offers</td></tr>
+        </table>
+        <p class="muted">Following a guide on real websites needs the Chrome extension on a computer. Phone browsers cannot add a guide to other sites.</p>
+      </div>
     </main>
+    <script type="module" src="/src/home.js"></script>
   </body>
 </html>

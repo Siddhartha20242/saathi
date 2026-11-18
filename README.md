@@ -71,6 +71,22 @@ Every model call goes through one file, [src/firebase.js](src/firebase.js), usin
 4. Record and save a path, then follow it on **Labels renamed**. Under the step card, the line says how each step was found: *by its label*, *by the link or box underneath*, or *by the on-device model*.
 5. Press **Explain this page**. The result says *On this laptop. Nothing left it.* or, if the model is unavailable, *In the cloud. Sent: the page title and N labels, 0 typed values.*
 
+## Platforms
+
+One codebase, one Firebase project and one set of security rules serve every device below. What differs is which part of Firebase AI Logic's hybrid inference is available, and the app picks at run time instead of being built twice.
+
+| Device | How it runs | What works | Where the AI runs |
+|---|---|---|---|
+| Computer, Chrome | Chrome extension (side panel) | Everything: record a guide on any site, follow it with highlights, scam warning on pages, family alerts | On-device Gemini Nano when installed (short tasks send nothing), cloud model otherwise |
+| Phone or tablet (Android, iPhone, iPad) | Installable web app (PWA) from the same site | The helper page (answer "I'm stuck", scam alerts, check-ins), pasted-message check, practice quiz, "Ask about this step", the practice site | Cloud only: phone browsers have no on-device model, so the same call falls back to the cloud model |
+| Any other browser | The site, no install | The practice site and the helper page | Whatever the device offers |
+
+The home page ([index.html](index.html)) shows which row the device is, whether the on-device model is ready, and an **Install** button (on iPhone and iPad it explains "Share, Add to Home Screen"). The installed app opens with no internet: [public/sw.js](public/sw.js) keeps the site's own pages and built files, and never keeps Firebase or AI calls; saved guides come from Firestore's on-device cache.
+
+**What I checked:** [tools/e2e-pwa.mjs](tools/e2e-pwa.mjs) on the live site in headless Chrome: a valid manifest with 192, 512 and maskable icons, a service worker that takes control, and the helper page and home page opening with the network switched off (8 of 8). The try-page flow also runs at phone size and with touch (12 of 12).
+
+**What I did not do:** there is no native Android or iOS app. This Mac has no Flutter or Android toolchain, and a full Xcode is not installed. Firebase AI Logic has Android, iOS and Flutter SDKs, and the Firestore data and rules here would serve a native client unchanged, but I did not build one. I did not install the web app on a real Android phone or iPhone, I did not run it on Safari or Firefox, and following a guide on *other* websites from a phone is not possible: phone browsers cannot add a guide to another site, so that part needs the Chrome extension on a computer.
+
 ## Firebase products used
 
 | Product | Use |

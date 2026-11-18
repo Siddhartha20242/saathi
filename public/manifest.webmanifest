@@ -1,0 +1,21 @@
+{
+  "name": "Saathi",
+  "short_name": "Saathi",
+  "description": "A guide that shows where to press on a website, one step at a time. For older adults and the family who helps them.",
+  "start_url": "/?source=app",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f6f4ef",
+  "theme_color": "#0f5c4a",
+  "lang": "en",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Help my family", "url": "/help.html" },
+    { "name": "Try the practice site", "url": "/try.html" }
+  ]
+}
