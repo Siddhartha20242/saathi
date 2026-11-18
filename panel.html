@@ -152,6 +152,9 @@
       .dot.ok { background: var(--accent); } .dot.off { background: var(--warn); }
       details summary { cursor: pointer; }
       details h3 { font-size: 1em; margin: 12px 0 4px; color: var(--ink); }
+          .big-choice { min-height: 56px; font-size: 1.05em; }
+      .steps-list { margin: 8px 0; padding-left: 22px; }
+      .steps-list li { margin: 8px 0; }
     </style>
   </head>
   <body data-joined="false" data-following="false">
@@ -176,25 +179,43 @@
     </div>
 
     <div class="groupbar" id="groupbar" hidden>
-      <span class="label">Group</span><code id="group-now"></code>
+      <span class="label">Family code</span><code id="group-now"></code>
       <button class="small" id="group-copy" aria-label="Copy the group code">Copy</button>
       <button class="small" id="group-invite" aria-label="Invite family: share the group code and a link">Invite</button>
       <span class="spacer"></span>
-      <button class="quiet small" id="group-switch">Change group</button>
+      <button class="quiet small" id="group-switch">Change family</button>
     </div>
 
     <section class="card" id="sec-group">
-      <h2>Start with a group</h2>
-      <p class="muted">A group is a family or a community. Everyone with the code sees the same paths.</p>
+      <h2 id="welcome-title">Welcome to Saathi</h2>
+      <p class="muted">Saathi shows you where to press on a website, one step at a time. It never presses anything for you.</p>
       <div class="stack" style="margin-top: 12px">
-        <div class="row">
-          <input id="group-code" placeholder="Enter a group code" maxlength="12" autocomplete="off" aria-label="Group code" />
-          <button id="group-join">Join</button>
+        <div id="g-choose" class="stack">
+          <button class="primary wide big-choice" id="g-have">My family gave me a code</button>
+          <button class="wide big-choice" id="group-new">I am setting this up for my family</button>
         </div>
-        <button class="primary wide" id="group-new">Start a new group</button>
+        <div id="g-enter" class="stack" hidden>
+          <p class="muted">Type the 8 letters and numbers your family sent you.</p>
+          <div class="row">
+            <input id="group-code" placeholder="For example K7M2QX4P" maxlength="12" autocomplete="off" autocapitalize="characters" aria-label="Family code" />
+            <button class="primary" id="group-join">Join</button>
+          </div>
+          <button class="quiet" id="g-back">Back</button>
+        </div>
         <button class="quiet" id="group-cancel" hidden>Cancel</button>
         <p class="out" id="group-msg"></p>
       </div>
+    </section>
+
+    <section class="card" id="sec-next" hidden>
+      <h2>Your family is ready</h2>
+      <ol class="steps-list">
+        <li>Press <b>Invite</b> above and send it to your family. It has the code.</li>
+        <li>Open a website you want to teach, for example a bank or a form.</li>
+        <li>Open the <b>Show the way</b> tab below, name the guide and press <b>Start</b>. Do the task once, then press <b>Finish and save</b>.</li>
+      </ol>
+      <p class="muted">Your family opens Saathi, presses <b>My family gave me a code</b>, and types the code. Then they can follow your guide.</p>
+      <button class="primary wide" id="next-ok">Got it</button>
     </section>
 
     <nav class="tabs" role="tablist" aria-label="Saathi">
@@ -257,7 +278,7 @@
             <p class="out" id="voice-out"></p>
             <a id="voice-perm" hidden target="_blank" rel="noopener">Open the microphone permission page</a>
           </div>
-          <h2>Paths in your group</h2>
+          <h2>Guides from your family</h2>
           <ul class="paths" id="lib-list"></ul>
           <p class="out" id="lib-msg"></p>
           <div class="row"><button class="quiet" id="lib-refresh">Refresh the list</button></div>
@@ -343,13 +364,13 @@
     </div>
 
     <footer>
-      <div class="status">
-        <span><span class="dot" id="dot-model"></span><span id="chip-model">On-device model: checking…</span></span>
-        <span><span class="dot" id="dot-cloud"></span><span id="chip-cloud">Cloud: checking…</span></span>
-      </div>
-      <p id="where"></p>
       <details>
-        <summary>Developer checks</summary>
+        <summary>Technical details</summary>
+        <div class="status">
+          <span><span class="dot" id="dot-model"></span><span id="chip-model">On-device model: checking…</span></span>
+          <span><span class="dot" id="dot-cloud"></span><span id="chip-cloud">Cloud: checking…</span></span>
+        </div>
+        <p id="where"></p>
         <h3>On-device model</h3>
         <button id="t-device">Run on this laptop</button>
         <p class="out" id="o-device"></p>

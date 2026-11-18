@@ -163,6 +163,8 @@ async function setGroup(code) {
   state.group = code;
   store.set('saathi:group', code);
   $('group-code').value = '';
+  $('g-enter').hidden = true;
+  $('g-choose').hidden = false;
   renderChips();
   renderTell();
   renderMessage();
@@ -173,7 +175,7 @@ async function setGroup(code) {
 $('group-switch').addEventListener('click', () => {
   state.switching = true;
   renderChips();
-  $('group-code').focus();
+  $('g-have').focus();
 });
 $('group-cancel').addEventListener('click', () => {
   state.switching = false;
@@ -203,10 +205,29 @@ $('group-invite').addEventListener('click', async (ev) => {
   }
   setTimeout(() => (button.textContent = 'Invite'), 2000);
 });
-$('group-new').addEventListener('click', () => setGroup(newGroupCode()));
+$('g-have').addEventListener('click', () => {
+  $('g-choose').hidden = true;
+  $('g-enter').hidden = false;
+  $('group-code').focus();
+});
+$('g-back').addEventListener('click', () => {
+  $('g-enter').hidden = true;
+  $('g-choose').hidden = false;
+  say('group-msg', '');
+});
+$('group-new').addEventListener('click', async () => {
+  const shown = !store.get('saathi:welcomed');
+  const done = setGroup(newGroupCode()); // the library may take a moment to load: do not wait for it
+  if (shown) $('sec-next').hidden = false;
+  await done;
+});
+$('next-ok').addEventListener('click', () => {
+  store.set('saathi:welcomed', '1');
+  $('sec-next').hidden = true;
+});
 $('group-join').addEventListener('click', () => {
   const code = normaliseGroup($('group-code').value);
-  if (!GROUP_RE.test(code)) return say('group-msg', 'A group code has 8 letters and numbers, for example K7M2QX4P.', 'bad');
+  if (!GROUP_RE.test(code)) return say('group-msg', 'A family code has 8 letters and numbers, for example K7M2QX4P.', 'bad');
   setGroup(code);
 });
 
