@@ -41,7 +41,10 @@
       .guard ul { margin: 8px 0 12px; padding-left: 20px; }
       .guard button.primary { background: #fff; color: #a3271f; border-color: #fff; }
       .guard .out { margin-top: 8px; color: var(--ink); }
+      blockquote { margin: 0; padding: 10px 12px; border-left: 4px solid var(--accent); background: var(--surface); border-radius: 6px; white-space: pre-wrap; word-break: break-word; }
+      .quiz-answers button { flex: 1; }
       .guard.inline { border-radius: var(--radius); }
+      .guard button.read { background: transparent; color: inherit; border: 2px solid currentColor; margin-bottom: 8px; }
       .guard.ok { background: var(--accent-soft); color: var(--ink); }
       .guard.ok .headline { font-weight: 600; font-size: 1em; }
       textarea { width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); color: var(--ink); font: inherit; resize: vertical; }
@@ -284,10 +287,31 @@
           <div class="guard inline" id="msg-result" hidden role="status">
             <p class="headline" id="msg-headline"></p>
             <ul id="msg-reasons"></ul>
+            <button class="read wide" id="msg-read">Read it to me</button>
             <button class="primary wide" id="msg-family" hidden>Tell my family</button>
             <p class="out" id="msg-note"></p>
           </div>
           <button class="quiet" id="msg-clear" hidden>Clear</button>
+        </div>
+        <div class="stack" id="sec-quiz">
+          <h2 id="quiz-title">Practice: spot the scam</h2>
+          <p class="muted" id="quiz-intro">Six made-up messages. Say which are scams. Nothing is saved or sent.</p>
+          <button class="wide" id="quiz-start">Start practice</button>
+          <div class="stack" id="quiz-card" hidden>
+            <p class="muted" id="quiz-count"></p>
+            <blockquote id="quiz-text"></blockquote>
+            <p><b id="quiz-ask">Is this a scam?</b></p>
+            <div class="row quiz-answers" id="quiz-answers">
+              <button class="primary" id="quiz-scam">Scam</button>
+              <button class="primary" id="quiz-fine">Looks fine</button>
+            </div>
+            <div class="stack" id="quiz-reveal" hidden>
+              <p class="out" id="quiz-result" role="status"></p>
+              <ul id="quiz-reasons"></ul>
+              <button class="wide" id="quiz-next">Next</button>
+            </div>
+          </div>
+          <p class="out" id="quiz-score" role="status"></p>
         </div>
         <div class="stack" id="sec-help">
           <h2>Ask a helper</h2>

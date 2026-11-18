@@ -9,6 +9,7 @@ import { recordSpeech } from './audio.js';
 import { voicePrompt, parseVoice, VOICE_SCHEMA } from './voice.js';
 import { warning, messageWarning } from './guardText.js';
 import { assessMessage } from './messageCheck.js';
+import { buildRound, quizText } from './quiz.js';
 import { alertsForMe, alertSentence } from './alerts.js';
 import { explainPrompt, explainPayloadSummary } from './explain.js';
 import {
@@ -242,6 +243,7 @@ $('lib-list').addEventListener('click', async (ev) => {
 // This panel shows what it found, and sends a family alert when the person presses the button.
 
 let guardNow = null;
+let lastGuardSpoken = '';
 let alertsStop = null;
 let allAlerts = [];
 const SEEN_KEY = 'saathi:seenAlerts';
@@ -261,6 +263,11 @@ function renderGuard(g) {
     return;
   }
   const w = warning(guardNow, state.lang);
+  const spokenKey = `${guardNow.level}|${guardNow.host}|${state.lang}`;
+  if (state.speak && spokenKey !== lastGuardSpoken) {
+    lastGuardSpoken = spokenKey;
+    speak([w.headline, ...w.reasons].join(' '), state.lang);
+  }
   box.className = `guard ${guardNow.level}`;
   box.hidden = false;
   $('guard-headline').textContent = w.headline;
@@ -332,6 +339,7 @@ function renderMessage() {
   box.className = `guard inline ${msgNow.level}`;
   box.hidden = false;
   $('msg-clear').hidden = false;
+  $('msg-read').hidden = false;
   $('msg-headline').textContent = w.headline;
   $('msg-reasons').innerHTML = w.reasons.map((r) => `<li>${esc(r)}</li>`).join('');
   const button = $('msg-family');
@@ -351,11 +359,20 @@ $('msg-check').addEventListener('click', () => {
     $('msg-headline').textContent = messageWarning({ level: 'ok', reasons: [] }, state.lang).empty;
     $('msg-reasons').innerHTML = '';
     $('msg-family').hidden = true;
+    $('msg-read').hidden = true;
     return;
   }
   msgNow = assessMessage(text);
   renderMessage();
+  if (state.speak) readMessageResult();
 });
+
+function readMessageResult() {
+  if (!msgNow) return;
+  const w = messageWarning(msgNow, state.lang);
+  speak([w.headline, ...w.reasons].join(' '), state.lang);
+}
+$('msg-read').addEventListener('click', readMessageResult);
 
 $('msg-clear').addEventListener('click', () => {
   $('msg-text').value = '';
@@ -375,6 +392,78 @@ $('msg-family').addEventListener('click', async () => {
     $('msg-note').className = 'out bad';
   }
 });
+
+// ---------- Practice: spot the scam ----------
+// Made-up messages. The person answers, then sees Saathi's own verdict and reasons. Nothing is saved or sent.
+
+const quiz = { round: [], index: 0, right: 0, answered: false };
+
+function renderQuizStatic() {
+  const t = quizText(state.lang);
+  $('quiz-title').textContent = t.title;
+  $('quiz-intro').textContent = t.intro;
+  $('quiz-start').textContent = quiz.round.length ? t.again : t.start;
+  $('quiz-ask').textContent = t.ask;
+  $('quiz-scam').textContent = t.scam;
+  $('quiz-fine').textContent = t.fine;
+}
+
+function showQuizCard() {
+  const t = quizText(state.lang);
+  const card = quiz.round[quiz.index];
+  quiz.answered = false;
+  $('quiz-card').hidden = false;
+  $('quiz-reveal').hidden = true;
+  $('quiz-answers').hidden = false;
+  $('quiz-score').textContent = '';
+  $('quiz-count').textContent = t.card(quiz.index + 1, quiz.round.length);
+  $('quiz-text').textContent = card.text;
+}
+
+$('quiz-start').addEventListener('click', () => {
+  quiz.round = buildRound();
+  quiz.index = 0;
+  quiz.right = 0;
+  renderQuizStatic();
+  $('quiz-start').hidden = true;
+  showQuizCard();
+});
+
+function answerQuiz(saidScam) {
+  if (quiz.answered) return;
+  quiz.answered = true;
+  const t = quizText(state.lang);
+  const card = quiz.round[quiz.index];
+  const verdict = assessMessage(card.text);
+  const correct = saidScam === card.scam;
+  if (correct) quiz.right++;
+  const w = messageWarning(verdict, state.lang);
+  $('quiz-answers').hidden = true;
+  $('quiz-reveal').hidden = false;
+  $('quiz-result').textContent = `${correct ? t.right : t.wrong} ${card.scam ? t.isScam : t.isFine}`;
+  $('quiz-result').className = `out ${correct ? 'ok' : 'bad'}`;
+  $('quiz-reasons').innerHTML = card.scam ? w.reasons.map((r) => `<li>${esc(r)}</li>`).join('') : '';
+  $('quiz-next').textContent = quiz.index + 1 >= quiz.round.length ? t.finish : t.next;
+  if (state.speak) speak(`${$('quiz-result').textContent} ${card.scam ? w.reasons.join(' ') : ''}`, state.lang);
+}
+$('quiz-scam').addEventListener('click', () => answerQuiz(true));
+$('quiz-fine').addEventListener('click', () => answerQuiz(false));
+
+$('quiz-next').addEventListener('click', () => {
+  const t = quizText(state.lang);
+  quiz.index++;
+  if (quiz.index >= quiz.round.length) {
+    $('quiz-card').hidden = true;
+    $('quiz-start').hidden = false;
+    renderQuizStatic();
+    $('quiz-score').textContent = t.score(quiz.right, quiz.round.length);
+    $('quiz-score').className = 'out ok';
+    return;
+  }
+  showQuizCard();
+});
+
+renderQuizStatic();
 
 // ---------- Speaking a request ----------
 // The recording and the titles of the group's paths go to the cloud model, which says which path is
@@ -774,6 +863,7 @@ document.querySelectorAll('[data-lang]').forEach((b) =>
     callExtension('setLang', { lang: state.lang }).catch(() => {});
     renderGuard(guardNow);
     renderMessage();
+    renderQuizStatic();
     renderChips();
     if (state.follow) renderStepCard();
   }),

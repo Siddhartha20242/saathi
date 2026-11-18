@@ -99,6 +99,20 @@ try {
     .then((j) => JSON.stringify((j.documents || []).map((x) => Object.keys(x.fields).sort().join(',') + ' | ' + x.fields.kind.stringValue + ' | ' + x.fields.host.stringValue)));`)).then(JSON.parse);
   out.messageAlert = alerts;
   check('message alert holds only kind, host, brand, level, reasons and bookkeeping (no message text)', alerts.length === 1 && alerts[0] === 'brand,createdAt,createdBy,expiresAt,host,kind,level,reasons | message | nabilbank-kyc.top', alerts);
+
+  // Practice round: answer "Scam" every time. Half the cards are scams, so the score must be 3 of 6, and a
+  // wrong answer must show Saathi's own verdict.
+  await c.evalIn(s, P(`d.getElementById('quiz-start').click()`));
+  let sawReasons = false;
+  for (let i = 0; i < 6; i++) {
+    await c.waitFor(s, P(`return !d.getElementById('quiz-card').hidden && !d.getElementById('quiz-answers').hidden`), 5000);
+    await c.evalIn(s, P(`d.getElementById('quiz-scam').click()`));
+    await c.waitFor(s, P(`return !d.getElementById('quiz-reveal').hidden`), 5000);
+    sawReasons ||= await c.evalIn(s, P(`return d.querySelectorAll('#quiz-reasons li').length > 0`));
+    await c.evalIn(s, P(`d.getElementById('quiz-next').click()`));
+  }
+  out.quiz = await c.evalIn(s, P(`return d.getElementById('quiz-score').textContent`));
+  check('practice round: six cards, scam reasons shown, score is 3 of 6 when answering "Scam" every time', out.quiz === 'You got 3 of 6.' && sawReasons, out.quiz);
 } catch (err) {
   out.error = err.message;
 } finally {
