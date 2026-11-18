@@ -13,7 +13,7 @@ import { buildRound, quizText } from './quiz.js';
 import { alertsForMe, alertSentence } from './alerts.js';
 import { explainPrompt, explainPayloadSummary } from './explain.js';
 import {
-  sanitizeStep, sameStep, stepInstruction, originMatches, validatePath, newGroupCode, normaliseGroup, GROUP_RE, LANGS, MAX_STEPS,
+  sanitizeStep, sameStep, stepInstruction, originMatches, validatePath, newGroupCode, normaliseGroup, inviteText, joinCodeFrom, GROUP_RE, LANGS, MAX_STEPS,
 } from './path.js';
 import { controlsForHelp, helpPreview, cleanTitle } from './help.js';
 import {
@@ -30,6 +30,7 @@ const store = {
 };
 
 const framed = window.parent !== window;
+if (joinCodeFrom(location.search)) store.set('saathi:group', joinCodeFrom(location.search));
 const demoFlag = new URLSearchParams(location.search).has('demo');
 const parentOrigin = !framed
   ? ''
@@ -40,7 +41,7 @@ const inDemo = framed && demoFlag && parentOrigin === location.origin;
 const bridged = inExtension || inDemo;
 
 const state = {
-  group: store.get('saathi:group') || '',
+  group: joinCodeFrom(location.search) || store.get('saathi:group') || '',
   user: null,
   config: { cloudEnabled: true, maxLabels: 60, languages: ['ne', 'hi'], source: 'default' },
   device: 'checking',
@@ -186,6 +187,20 @@ $('group-copy').addEventListener('click', async (ev) => {
     button.textContent = state.group; // no clipboard here: show the code to read out
   }
   setTimeout(() => (button.textContent = 'Copy'), 2000);
+});
+$('group-invite').addEventListener('click', async (ev) => {
+  const button = ev.currentTarget;
+  const text = inviteText(state.group, location.origin);
+  try {
+    if (navigator.share) await navigator.share({ text });
+    else await navigator.clipboard.writeText(text);
+    button.textContent = navigator.share ? 'Shared' : 'Copied';
+  } catch (err) {
+    if (err?.name === 'AbortError') return;
+    say('group-msg', text); // nothing to share or copy with here: show it to read out
+    $('sec-group').hidden = false;
+  }
+  setTimeout(() => (button.textContent = 'Invite'), 2000);
 });
 $('group-new').addEventListener('click', () => setGroup(newGroupCode()));
 $('group-join').addEventListener('click', () => {

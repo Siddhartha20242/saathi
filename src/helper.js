@@ -3,7 +3,7 @@
 
 import { ensureUser, watchHelpRequests, watchHelp, answerHelp, watchAlerts, watchCheckins } from './backend.js';
 import { alertsForMe, alertSentence, recentCheckins, checkinSentence } from './alerts.js';
-import { GROUP_RE, normaliseGroup } from './path.js';
+import { GROUP_RE, normaliseGroup, joinCodeFrom } from './path.js';
 import { groupBySection, kindWord, cleanNote, isLive } from './help.js';
 
 const $ = (id) => document.getElementById(id);
@@ -14,7 +14,8 @@ const store = {
   del: (k) => { try { localStorage.removeItem(k); } catch { /* storage unavailable */ } },
 };
 
-const state = { group: store.get('saathi-helper:group') || '', requests: [], open: null, current: null };
+if (joinCodeFrom(location.search)) store.set('saathi-helper:group', joinCodeFrom(location.search));
+const state = { group: joinCodeFrom(location.search) || store.get('saathi-helper:group') || '', requests: [], open: null, current: null };
 window.__helper = state; // read by the end-to-end test
 let stopList = null;
 let stopOne = null;

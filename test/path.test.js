@@ -76,3 +76,18 @@ describe('validatePath', () => {
     expect(validatePath({ ...ok, steps: Array(MAX_STEPS + 1).fill({}) })).toMatch(/at most/);
   });
 });
+
+import { inviteText, joinCodeFrom } from '../src/path.js';
+describe('invite', () => {
+  it('builds a message with the code and a helper link', () => {
+    const t = inviteText('K7M2QX4P', 'https://x.web.app');
+    expect(t).toContain('K7M2QX4P');
+    expect(t).toContain('https://x.web.app/help.html?join=K7M2QX4P');
+  });
+  it('reads a valid code from the address and ignores bad ones', () => {
+    expect(joinCodeFrom('?join=k7m2-qx4p')).toBe('K7M2QX4P');
+    expect(joinCodeFrom('?join=SHORT')).toBe('');
+    expect(joinCodeFrom('?join=OOOOOOOO')).toBe('');
+    expect(joinCodeFrom('')).toBe('');
+  });
+});

@@ -19,6 +19,17 @@ export function newGroupCode() {
 
 export const normaliseGroup = (s) => String(s ?? '').toUpperCase().replace(/[^A-Z0-9]/g, '');
 
+/** The message a family member sends to invite someone: the code, and a link that fills it in. */
+export function inviteText(code, origin) {
+  return `Join my family on Saathi. Group code: ${code}\nOn a phone, to help me: ${origin}/help.html?join=${code}\nOn a computer, add the Saathi extension, press "Join" and type the code.`;
+}
+
+/** A valid group code from a page address like "?join=K7M2QX4P", or ''. */
+export function joinCodeFrom(search) {
+  const code = normaliseGroup(new URLSearchParams(String(search ?? '')).get('join'));
+  return /^[A-HJ-NP-Z2-9]{8}$/.test(code) ? code : '';
+}
+
 /** A page address without anything after ? or #, which can hold personal details. */
 export function pathOnly(address) {
   const s = String(address ?? '');
