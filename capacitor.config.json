@@ -1,0 +1,11 @@
+{
+  "appId": "app.saathi.family",
+  "appName": "Saathi",
+  "webDir": "dist",
+  "server": {
+    "url": "https://paperwork-decoder.web.app/?source=android",
+    "cleartext": false,
+    "allowNavigation": ["paperwork-decoder.web.app", "*.googleapis.com", "*.firebaseapp.com", "www.google.com", "www.gstatic.com", "www.recaptcha.net"]
+  },
+  "android": { "allowMixedContent": false }
+}

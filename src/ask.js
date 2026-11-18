@@ -32,13 +32,29 @@ The step they are on: ${step}
 Their question: ${question}
 
 Answer in simple everyday ${LANG_NAMES[lang] ?? LANG_NAMES.en}, in at most three short sentences.
-Explain only what the step and the question say. You cannot see their screen, so do not describe colours, positions or anything else on it.
+Explain only what the step and the question say. You cannot see their screen: never mention a colour, a position (top, bottom, left, right) or anything else about how it looks, even if it seems obvious.
 Never tell them to type a password, PIN, one-time code or card number anywhere. If their question is about money, a code, or something that sounds unsafe, or you are not sure, tell them to ask their family first.`;
 }
 
-/** The answer as it will be shown: plain text, no markdown, not too long. */
+// The model cannot see the screen, yet on a real phone it said "the blue words" in Nepali and Hindi. A colour or
+// a position it invented would send an older person looking for something that is not there, so any sentence that
+// names one is dropped.
+const COLOUR = new RegExp(
+  [
+    '\\b(?:red|green|blue|yellow|orange|purple|pink|black|white|grey|gray|brown|top|bottom|left|right|corner)\\b',
+    'रातो|हरियो|नीलो|निलो|पहेँलो|पहेंलो|सेतो|कालो|बैजनी|गुलाबी|सुन्तला|माथि|तल|दायाँ|बायाँ|कुना',
+    'लाल|हरा|हरे|नीला|नीले|पीला|पीले|सफेद|सफ़ेद|काला|काले|बैंगनी|गुलाबी|नारंगी|भूरा|ऊपर|नीचे|दाएं|बाएं|दायीं|बायीं|कोने',
+  ].join('|'),
+  'i',
+);
+
+/** The answer as it will be shown: plain text, no markdown, not too long, no invented colours or positions. */
 export function cleanAnswer(text) {
-  return String(text ?? '')
+  const plain = String(text ?? '')
+    .split(/(?<=[.!?।\n])\s*/)
+    .filter((sentence) => !COLOUR.test(sentence))
+    .join(' ');
+  return plain
     .replace(/[*_`#>]+/g, '')
     .replace(/\s+\n/g, '\n')
     .replace(/\n{3,}/g, '\n\n')

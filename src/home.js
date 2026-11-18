@@ -4,15 +4,17 @@ const $ = (id) => document.getElementById(id);
 
 const touch = matchMedia('(pointer: coarse)').matches;
 const narrow = Math.min(screen.width, screen.height) < 800;
-const kind = touch && narrow ? 'phone' : 'computer';
+const mobileUA = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+const kind = mobileUA || (touch && narrow) ? 'phone' : 'computer';
 const ios = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-const standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+const inApp = typeof window.Capacitor !== 'undefined'; // the Android app is a native shell around this site
+const standalone = inApp || matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
 
 for (const row of document.querySelectorAll('#matrix tr[data-kind]')) {
   row.classList.toggle('here', row.dataset.kind === kind);
 }
 
-$('here').textContent = `${kind === 'phone' ? 'Phone or tablet' : 'Computer'}${standalone ? ', installed' : ''}`;
+$('here').textContent = `${kind === 'phone' ? 'Phone or tablet' : 'Computer'}${inApp ? ', Saathi Android app' : standalone ? ', installed' : ''}`;
 
 (async () => {
   let status = 'unsupported';

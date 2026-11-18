@@ -1,6 +1,7 @@
 // The only file that talks to a model. Every inference call in the app goes
 // through Firebase AI Logic (hybrid inference). No other model API is used.
 
+import './polyfills.js';
 import { initializeApp } from 'firebase/app';
 import { getAI, getGenerativeModel, GoogleAIBackend, InferenceMode } from 'firebase/ai';
 import { initializeAppCheck, ReCaptchaEnterpriseProvider } from 'firebase/app-check';

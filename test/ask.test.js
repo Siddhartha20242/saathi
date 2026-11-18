@@ -44,9 +44,23 @@ describe('askPrompt', () => {
   });
 });
 
+describe('cleanAnswer drops invented colours and positions', () => {
+  it('keeps the sentences that do not name one', () => {
+    const out = cleanAnswer('It means press the blue words. That opens the next page. Ask your family if unsure.');
+    expect(out).toBe('That opens the next page. Ask your family if unsure.');
+  });
+  it('works in Nepali and Hindi, the way the real phone answers read', () => {
+    expect(cleanAnswer('यसमा तपाईंले नीलो अक्षरमा थिच्नु पर्छ। यसले बिजुलीको बिल तिर्ने ठाउँमा लैजान्छ।')).toBe('यसले बिजुलीको बिल तिर्ने ठाउँमा लैजान्छ।');
+    expect(cleanAnswer('आपको नीले रंग के शब्द पर दबाना है। इससे अगला पन्ना खुलेगा।')).toBe('इससे अगला पन्ना खुलेगा।');
+  });
+  it('is empty when every sentence names one, so the panel says to ask family', () => {
+    expect(cleanAnswer('Press the green button at the top.')).toBe('');
+  });
+});
+
 describe('cleanAnswer', () => {
   it('removes markdown and long runs', () => {
-    expect(cleanAnswer('**Press** the `button`.\n\n\n\nThen wait.')).toBe('Press the button.\nThen wait.');
+    expect(cleanAnswer('**Press** the `button`.\n\n\n\nThen wait.')).toBe('Press the button. Then wait.');
     expect(cleanAnswer('a'.repeat(2000)).length).toBe(600);
     expect(cleanAnswer(null)).toBe('');
   });
