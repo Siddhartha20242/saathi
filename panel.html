@@ -265,6 +265,16 @@
             </div>
           </div>
         </div>
+        <div id="fo-ask" class="where" hidden>
+          <label for="ask-q" id="ask-label">Ask about this step</label>
+          <div class="row">
+            <input id="ask-q" maxlength="200" autocomplete="off" placeholder="For example: What does this mean?" />
+            <button class="primary" id="ask-go">Ask</button>
+          </div>
+          <p class="muted" id="ask-privacy"></p>
+          <p class="out" id="ask-out" role="status" style="white-space: pre-wrap"></p>
+          <p class="muted" id="ask-ran"></p>
+        </div>
         <div id="fo-where" class="where" hidden>
           <label for="where-q" id="where-label">Where is…?</label>
           <div class="row">

@@ -51,6 +51,13 @@ try {
   await c.evalIn(s, S(`d.querySelector('[data-saathi="point"]')?.remove(); return true;`));
   const sh = await ask('shadow gift');
   check('a button inside a shadow root is found and outlined', (await pointBox()) && /Shadow gift/.test(sh), sh);
+  // The ask box is there while following. Here the model is not usable (App Check refuses automated browsers),
+  // so it must fail kindly: a plain message, the button usable again, the guide unmoved.
+  check('ask box shows while following', await c.evalIn(s, P(`return !d.getElementById('fo-ask').hidden && d.getElementById('ask-privacy').textContent.length > 10`)));
+  await c.evalIn(s, P(`d.getElementById('ask-q').value = 'what does this mean? my phone is 9841234567'; d.getElementById('ask-go').click()`));
+  await sleep(12000);
+  const asked = await c.evalIn(s, P(`return d.getElementById('ask-out').textContent + ' | disabled: ' + d.getElementById('ask-go').disabled`));
+  check('an answer or a kind failure, button usable again, guide unmoved', /disabled: false/.test(asked) && !/Thinking/.test(asked) && (await c.evalIn(s, P(`return w.__saathi.follow.index === 0`))), asked);
   await c.shot(s, 'where-is.png');
 } catch (err) {
   out.error = String(err?.message ?? err);

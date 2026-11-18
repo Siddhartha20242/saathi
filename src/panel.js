@@ -17,6 +17,7 @@ import {
 } from './path.js';
 import { chooseVoice } from './speech.js';
 import { whereIs } from './where.js';
+import { askMode, askPrompt, cleanQuestion, cleanAnswer } from './ask.js';
 import { controlsForHelp, helpPreview, cleanTitle } from './help.js';
 import {
   ensureUser, loadConfig, savePath, listPaths, deletePath, translatePath, createHelp, watchHelp, closeHelp,
@@ -231,6 +232,55 @@ $('group-join').addEventListener('click', () => {
   const code = normaliseGroup($('group-code').value);
   if (!GROUP_RE.test(code)) return say('group-msg', 'A family code has 8 letters and numbers, for example K7M2QX4P.', 'bad');
   setGroup(code);
+});
+
+// ---------- Ask about this step ----------
+
+const ASK = {
+  en: { label: 'Ask about this step', ph: 'For example: What does this mean?', go: 'Ask', privacy: 'Sent: the step, the guide name and your question. Never the page.', empty: 'Type your question.', wait: 'Thinking…', ranDevice: 'Answered on this computer. Nothing was sent.', ranCloud: 'Answered in the cloud. Only the step, the guide name and your question were sent.', needsCloud: 'Nepali and Hindi answers need the cloud, and it is switched off. Try English.', noModel: 'No model is available right now. Ask your family.', fail: 'Could not answer. Ask your family.' },
+  ne: { label: 'यो चरणबारे सोध्नुहोस्', ph: 'जस्तै: यसको अर्थ के हो?', go: 'सोध्नुहोस्', privacy: 'पठाइने कुरा: चरण, गाइडको नाम र तपाईंको प्रश्न। पेज कहिल्यै होइन।', empty: 'आफ्नो प्रश्न लेख्नुहोस्।', wait: 'सोच्दै छ…', ranDevice: 'यही कम्प्युटरमा उत्तर आयो। केही पठाइएन।', ranCloud: 'क्लाउडमा उत्तर आयो। चरण, गाइडको नाम र तपाईंको प्रश्न मात्र पठाइयो।', needsCloud: 'नेपाली उत्तरका लागि क्लाउड चाहिन्छ, र त्यो बन्द छ। अंग्रेजी प्रयोग गर्नुहोस्।', noModel: 'अहिले कुनै मोडेल उपलब्ध छैन। परिवारलाई सोध्नुहोस्।', fail: 'उत्तर दिन सकिएन। परिवारलाई सोध्नुहोस्।' },
+  hi: { label: 'इस चरण के बारे में पूछिए', ph: 'जैसे: इसका क्या मतलब है?', go: 'पूछिए', privacy: 'भेजा जाएगा: चरण, गाइड का नाम और आपका सवाल। पेज कभी नहीं।', empty: 'अपना सवाल लिखिए।', wait: 'सोच रहा है…', ranDevice: 'इसी कंप्यूटर पर जवाब आया। कुछ नहीं भेजा गया।', ranCloud: 'क्लाउड में जवाब आया। सिर्फ़ चरण, गाइड का नाम और आपका सवाल भेजा गया।', needsCloud: 'हिन्दी जवाब के लिए क्लाउड चाहिए, और वह बंद है। अंग्रेज़ी आज़माइए।', noModel: 'अभी कोई मॉडल उपलब्ध नहीं है। परिवार से पूछिए।', fail: 'जवाब नहीं दे सका। परिवार से पूछिए।' },
+};
+
+function renderAskLabels() {
+  const a = ASK[state.lang] ?? ASK.en;
+  $('ask-label').textContent = a.label;
+  $('ask-q').placeholder = a.ph;
+  $('ask-go').textContent = a.go;
+  $('ask-privacy').textContent = a.privacy;
+}
+
+$('ask-go').addEventListener('click', async (ev) => {
+  const f = state.follow;
+  const a = ASK[state.lang] ?? ASK.en;
+  const btn = ev.currentTarget;
+  if (!f) return;
+  const question = cleanQuestion($('ask-q').value);
+  if (!question) return say('ask-out', a.empty, 'bad');
+  const pick = askMode(state.lang, { cloudEnabled: state.config.cloudEnabled, deviceAvailable: state.device === 'available' });
+  if (!pick.mode) return say('ask-out', pick.why === 'needs-cloud' ? a.needsCloud : a.noModel, 'bad');
+  const index = f.index;
+  btn.disabled = true;
+  $('ask-ran').textContent = '';
+  say('ask-out', a.wait, '');
+  try {
+    const step = stepInstruction(f.path.steps[index]);
+    const prompt = askPrompt({ lang: state.lang, title: cleanTitle(f.path.title, ''), step, question });
+    const res = await run({ mode: pick.mode, prompt });
+    if (state.follow !== f || f.index !== index) return; // the person moved on
+    const text = cleanAnswer(res.text);
+    if (!text) return say('ask-out', a.fail, 'bad');
+    say('ask-out', text, 'ok');
+    $('ask-ran').textContent = res.source === 'ON_DEVICE' ? a.ranDevice : res.source === 'IN_CLOUD' ? a.ranCloud : '';
+    if (state.speak) speak(text, state.lang);
+  } catch {
+    say('ask-out', a.fail, 'bad');
+  } finally {
+    btn.disabled = false;
+  }
+});
+$('ask-q').addEventListener('keydown', (ev) => {
+  if (ev.key === 'Enter') $('ask-go').click();
 });
 
 // ---------- Where is…? ----------
@@ -805,6 +855,7 @@ const instructionIn = (path, i, lang) => path.translations?.[lang]?.steps?.[i] ?
 
 function renderStepCard() {
   renderWhereLabels();
+  renderAskLabels();
   const f = state.follow;
   const step = f.path.steps[f.index];
   const english = stepInstruction(step);
@@ -962,6 +1013,9 @@ async function startFollow(path) {
   $('fo-done').hidden = true;
   $('follow').hidden = false;
   $('fo-where').hidden = false;
+  $('fo-ask').hidden = false;
+  $('ask-out').textContent = '';
+  $('ask-ran').textContent = '';
   $('where-out').textContent = '';
   $('where-pick').innerHTML = '';
   await showStep();
@@ -1012,6 +1066,7 @@ async function nextStep() {
     document.body.dataset.following = 'false';
     $('follow').hidden = true;
     $('fo-where').hidden = true;
+    $('fo-ask').hidden = true;
     $('fo-done').hidden = false;
     $('fo-done').textContent = (WORDS[state.lang] ?? WORDS.en).done;
     renderTell();
@@ -1034,6 +1089,7 @@ $('fo-stop').addEventListener('click', () => {
   document.body.dataset.following = 'false';
   $('follow').hidden = true;
   $('fo-where').hidden = true;
+  $('fo-ask').hidden = true;
   speechSynthesis?.cancel?.();
 });
 
