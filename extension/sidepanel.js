@@ -61,6 +61,7 @@ addEventListener('message', async (ev) => {
       saathi: msg.type,
       index: msg.index,
       stepIndex: msg.stepIndex,
+      info: msg.info === true,
       scanId: typeof msg.scanId === 'string' ? msg.scanId.slice(0, 40) : undefined,
     });
     if (!result) throw new Error('empty');

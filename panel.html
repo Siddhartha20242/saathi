@@ -155,6 +155,9 @@
           .big-choice { min-height: 56px; font-size: 1.05em; }
       .steps-list { margin: 8px 0; padding-left: 22px; }
       .steps-list li { margin: 8px 0; }
+          .where { margin-top: 14px; }
+      .where label { font-weight: 600; display: block; margin-bottom: 6px; }
+      body[data-big=true] .where input, body.big .where input { font-size: 1.15em; }
     </style>
   </head>
   <body data-joined="false" data-following="false">
@@ -261,6 +264,15 @@
               <button class="quiet" id="fo-stop">Stop</button>
             </div>
           </div>
+        </div>
+        <div id="fo-where" class="where" hidden>
+          <label for="where-q" id="where-label">Where is…?</label>
+          <div class="row">
+            <input id="where-q" maxlength="60" autocomplete="off" placeholder="For example: Sign out" />
+            <button class="primary" id="where-go">Show me</button>
+          </div>
+          <div id="where-pick" class="stack"></div>
+          <p class="out" id="where-out" role="status"></p>
         </div>
         <p class="done" id="fo-done" hidden></p>
         <div id="fo-tell" class="stack" hidden>

@@ -75,7 +75,7 @@ function toPage(msg) {
       }
       let answered = false;
       for (const listener of listeners) {
-        listener({ saathi: msg.type, index: msg.index, stepIndex: msg.stepIndex }, {}, (response) => {
+        listener({ saathi: msg.type, index: msg.index, stepIndex: msg.stepIndex, info: msg.info === true }, {}, (response) => {
           if (answered) return;
           answered = true;
           resolve(response);

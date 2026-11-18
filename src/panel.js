@@ -16,6 +16,7 @@ import {
   sanitizeStep, sameStep, stepInstruction, originMatches, validatePath, newGroupCode, normaliseGroup, inviteText, joinCodeFrom, GROUP_RE, LANGS, MAX_STEPS,
 } from './path.js';
 import { chooseVoice } from './speech.js';
+import { whereIs } from './where.js';
 import { controlsForHelp, helpPreview, cleanTitle } from './help.js';
 import {
   ensureUser, loadConfig, savePath, listPaths, deletePath, translatePath, createHelp, watchHelp, closeHelp,
@@ -229,6 +230,57 @@ $('group-join').addEventListener('click', () => {
   const code = normaliseGroup($('group-code').value);
   if (!GROUP_RE.test(code)) return say('group-msg', 'A family code has 8 letters and numbers, for example K7M2QX4P.', 'bad');
   setGroup(code);
+});
+
+// ---------- Where is…? ----------
+
+function renderWhereLabels() {
+  const w = WHERE[state.lang] ?? WHERE.en;
+  $('where-label').textContent = w.label;
+  $('where-q').placeholder = w.ph;
+  $('where-go').textContent = w.go;
+}
+
+async function pointAtIndex(page, index, text) {
+  const w = WHERE[state.lang] ?? WHERE.en;
+  $('where-pick').innerHTML = '';
+  try {
+    await callExtension('highlight', { index, scanId: page.scanId, info: true });
+    say('where-out', w.found(text), 'ok');
+    if (state.speak) speak(w.found(text), state.lang);
+  } catch (err) {
+    say('where-out', err.message || w.fail, 'bad');
+  }
+}
+
+$('where-go').addEventListener('click', async (ev) => {
+  const w = WHERE[state.lang] ?? WHERE.en;
+  const q = $('where-q').value;
+  if (!q.trim()) return say('where-out', w.empty, 'bad');
+  const btn = ev.currentTarget; // ev.currentTarget is empty once the handler has awaited
+  btn.disabled = true;
+  $('where-pick').innerHTML = '';
+  try {
+    const page = await callExtension('scan');
+    const res = whereIs(q, page.elements);
+    if (res.verdict === 'found') return await pointAtIndex(page, res.index, page.elements[res.index].text);
+    if (res.verdict === 'none') return say('where-out', w.none, 'bad');
+    say('where-out', w.several, '');
+    $('where-pick').innerHTML = res.matches
+      .map((m) => `<button data-i="${m.index}">${esc(m.text)}${m.section ? ` · ${esc(m.section)}` : ''}</button>`)
+      .join('');
+    $('where-pick').onclick = (e) => {
+      const i = e.target.closest('[data-i]')?.dataset.i;
+      if (i !== undefined) pointAtIndex(page, Number(i), page.elements[Number(i)].text);
+    };
+  } catch (err) {
+    say('where-out', err.message || w.fail, 'bad');
+  } finally {
+    btn.disabled = false;
+  }
+});
+$('where-q').addEventListener('keydown', (ev) => {
+  if (ev.key === 'Enter') $('where-go').click();
 });
 
 // ---------- Library ----------
@@ -715,6 +767,12 @@ $('rec-save').addEventListener('click', async () => {
 
 // ---------- Following ----------
 
+const WHERE = {
+  en: { label: 'Where is…?', ph: 'For example: Sign out', go: 'Show me', found: (t) => `Here: "${t}". It has a green dashed outline for a few seconds. Your step is still waiting.`, several: 'More than one fits. Which one?', none: 'I could not find that on this page. Try the word as it is written on the page.', empty: 'Type what you are looking for.', fail: 'Saathi could not read this page. Reload the tab and try again.' },
+  ne: { label: 'कहाँ छ…?', ph: 'जस्तै: Sign out', go: 'देखाउनुहोस्', found: (t) => `यहाँ: "${t}"। केही सेकेन्डसम्म हरियो टुटेको रेखाले घेरिन्छ। तपाईंको चरण अझै पर्खिरहेको छ।`, several: 'एकभन्दा बढी मिल्छन्। कुन?', none: 'यो पेजमा भेटिएन। पेजमा लेखिएको शब्द प्रयोग गरेर हेर्नुहोस्।', empty: 'के खोज्दै हुनुहुन्छ, लेख्नुहोस्।', fail: 'साथीले यो पेज पढ्न सकेन। ट्याब रिलोड गरेर फेरि प्रयास गर्नुहोस्।' },
+  hi: { label: 'कहाँ है…?', ph: 'जैसे: Sign out', go: 'दिखाइए', found: (t) => `यहाँ: "${t}"। कुछ सेकंड हरी टूटी लकीर से घिरा रहेगा। आपका चरण अभी रुका हुआ है।`, several: 'एक से ज़्यादा मिलते हैं। कौन सा?', none: 'यह इस पेज पर नहीं मिला। पेज पर जैसा लिखा है वैसा शब्द आज़माइए।', empty: 'लिखिए कि क्या ढूँढ रहे हैं।', fail: 'साथी यह पेज नहीं पढ़ सका। टैब दोबारा खोलकर कोशिश कीजिए।' },
+};
+
 const WORDS = {
   en: { step: (i, n) => `Step ${i} of ${n}`, done: 'You did it. Saathi only showed the way.', tell: 'Let my family know I finished', told: 'Your family has been told. Well done.', noGroup: 'Join a group to tell your family.' },
   ne: { step: (i, n) => `चरण ${i} / ${n}`, done: 'तपाईंले आफैं गर्नुभयो। साथीले बाटो मात्र देखायो।', tell: 'मैले सकेँ भनेर परिवारलाई खबर पठाउनुहोस्', told: 'तपाईंको परिवारलाई खबर पठाइयो। धेरै राम्रो!', noGroup: 'परिवारलाई भन्न समूहमा जोडिनुहोस्।' },
@@ -745,6 +803,7 @@ function speak(text, lang) {
 const instructionIn = (path, i, lang) => path.translations?.[lang]?.steps?.[i] ?? null;
 
 function renderStepCard() {
+  renderWhereLabels();
   const f = state.follow;
   const step = f.path.steps[f.index];
   const english = stepInstruction(step);
@@ -806,7 +865,8 @@ $('fo-cloud-go').addEventListener('click', async (ev) => {
   if (!f?.cloud) return;
   const { step, page, ctx } = f.cloud;
   const index = f.index;
-  ev.currentTarget.disabled = true;
+  const btn = ev.currentTarget; // ev.currentTarget is empty once the handler has awaited
+  btn.disabled = true;
   setHow('Asking the cloud…');
   try {
     const safe = scrub(page.elements);
@@ -826,7 +886,7 @@ $('fo-cloud-go').addEventListener('click', async (ev) => {
   } catch (err) {
     setHow(`The cloud could not help: ${err.message}`, 'bad');
   } finally {
-    ev.currentTarget.disabled = false;
+    btn.disabled = false;
   }
 });
 
@@ -900,6 +960,9 @@ async function startFollow(path) {
   showTab('follow');
   $('fo-done').hidden = true;
   $('follow').hidden = false;
+  $('fo-where').hidden = false;
+  $('where-out').textContent = '';
+  $('where-pick').innerHTML = '';
   await showStep();
 }
 
@@ -947,6 +1010,7 @@ async function nextStep() {
     state.done = true;
     document.body.dataset.following = 'false';
     $('follow').hidden = true;
+    $('fo-where').hidden = true;
     $('fo-done').hidden = false;
     $('fo-done').textContent = (WORDS[state.lang] ?? WORDS.en).done;
     renderTell();
@@ -968,6 +1032,7 @@ $('fo-stop').addEventListener('click', () => {
   state.follow = null;
   document.body.dataset.following = 'false';
   $('follow').hidden = true;
+  $('fo-where').hidden = true;
   speechSynthesis?.cancel?.();
 });
 
@@ -1003,7 +1068,8 @@ $('opt-speak').addEventListener('click', () => {
 // unless Remote Config has switched the cloud off.
 
 $('t-explain').addEventListener('click', async (ev) => {
-  ev.currentTarget.disabled = true;
+  const btn = ev.currentTarget; // ev.currentTarget is empty once the handler has awaited
+  btn.disabled = true;
   say('o-explain', 'Reading the page…');
   try {
     const page = await callExtension('scan');
@@ -1024,7 +1090,7 @@ $('t-explain').addEventListener('click', async (ev) => {
   } catch (err) {
     say('o-explain', `Failed: ${err.message}`, 'bad');
   } finally {
-    ev.currentTarget.disabled = false;
+    btn.disabled = false;
   }
 });
 
@@ -1151,7 +1217,8 @@ $('t-cloud').addEventListener('click', (ev) => modelTest('ONLY_IN_CLOUD', 'o-clo
 $('t-find').addEventListener('click', async (ev) => {
   const label = $('f-label').value.trim();
   if (!label) return say('o-find', 'Type a label first.', 'bad');
-  ev.currentTarget.disabled = true;
+  const btn = ev.currentTarget; // ev.currentTarget is empty once the handler has awaited
+  btn.disabled = true;
   say('o-find', 'Reading the page…');
   try {
     const page = await callExtension('scan');
@@ -1181,7 +1248,7 @@ $('t-find').addEventListener('click', async (ev) => {
   } catch (err) {
     say('o-find', `Failed: ${err.message}`, 'bad');
   } finally {
-    ev.currentTarget.disabled = false;
+    btn.disabled = false;
   }
 });
 

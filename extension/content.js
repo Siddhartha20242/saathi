@@ -196,6 +196,46 @@
   let timer = null;
   let pressedAbort = null;
 
+  // "Where is…?" outlines a control in another colour for a few seconds. It leaves the step's own outline,
+  // and the wait for that step's press, exactly as they were.
+  let infoBox = null;
+  let infoTimer = null;
+
+  function pointAt(index, wantedScan) {
+    if (wantedScan && wantedScan !== scanId) return { error: 'The page changed since it was read. Try again.' };
+    const el = lastScan[index];
+    if (!el || !el.isConnected || !isVisible(el)) return { error: 'That is not showing on the page right now. Try again.' };
+    el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    infoBox?.remove();
+    clearInterval(infoTimer);
+    infoBox = document.createElement('div');
+    infoBox.setAttribute('data-saathi', 'point');
+    Object.assign(infoBox.style, {
+      position: 'fixed',
+      zIndex: '2147483646',
+      pointerEvents: 'none',
+      border: '4px dashed #1c8f78',
+      borderRadius: '8px',
+      boxShadow: '0 0 0 4px rgba(28,143,120,0.3)',
+    });
+    document.documentElement.append(infoBox);
+    const stop = () => {
+      clearInterval(infoTimer);
+      infoBox?.remove();
+      infoBox = null;
+    };
+    const place = () => {
+      if (!el.isConnected) return stop();
+      const r = el.getBoundingClientRect();
+      infoBox.style.display = r.width < 4 || r.height < 4 ? 'none' : '';
+      Object.assign(infoBox.style, { left: `${r.left - 6}px`, top: `${r.top - 6}px`, width: `${r.width + 12}px`, height: `${r.height + 12}px` });
+    };
+    place();
+    infoTimer = setInterval(place, 100);
+    setTimeout(stop, 10000);
+    return { ok: true };
+  }
+
   function highlight(index, stepIndex, wantedScan) {
     // An index means something only for the scan it came from. After another scan, or in another tab, it would
     // point at a different control while the panel still names the old one.
@@ -338,7 +378,7 @@
 
   chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
     if (msg?.saathi === 'scan') sendResponse(scan());
-    else if (msg?.saathi === 'highlight') sendResponse(highlight(msg.index, msg.stepIndex, msg.scanId));
+    else if (msg?.saathi === 'highlight') sendResponse(msg.info === true ? pointAt(msg.index, msg.scanId) : highlight(msg.index, msg.stepIndex, msg.scanId));
     else if (msg?.saathi === 'recordStart') {
       recording = true;
       lastFocused = null;
