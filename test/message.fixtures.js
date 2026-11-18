@@ -30,3 +30,24 @@ export const ORDINARY = [
   'Your parcel was delivered today at 3 pm. Thank you for shopping with us.',
   'The meeting has moved to Thursday. Please confirm if you can come. Details: https://www.google.com/calendar',
 ];
+
+// Ordinary messages chosen to stress the rules: they use the same words scams do (KYC, expire, update,
+// reward points, "my new number") for ordinary reasons, or link to real addresses.
+export const ORDINARY_TRICKY = [
+  'Your NTC data pack will expire on 25 Nov. Recharge at https://www.ntc.net.np',
+  'Dear customer, your KYC has been successfully updated. Thank you for banking with Nabil Bank.',
+  'Please visit your nearest branch with a citizenship copy to update your KYC. - NIC Asia Bank',
+  'Your Nabil Bank KYC is due. Visit https://www.nabilbank.com/kyc or any branch.',
+  'Your SBI account statement for October is ready at https://www.onlinesbi.sbi',
+  'Your reward points balance is 1,240. Redeem at https://www.hdfcbank.com/rewards',
+  'Your electricity bill has been paid. Receipt: https://www.nea.org.np/r/12345',
+  'Kindly update the app now to continue using Khalti: https://play.google.com/store/apps/details?id=com.khalti',
+  'Mum, I changed my number, this is my new one. Save it. Love you.',
+  'Sending you the family photos: https://photos.google.com/share/abc123',
+  'तपाईंको केवाईसी सफलतापूर्वक अपडेट भयो। धन्यवाद।',
+  'Your OTP for login is 123456. It will expire in 5 minutes. Do not share it.',
+  'आपका खाता अपडेट हो गया है। धन्यवाद।',
+  'Your parcel has been delivered. Track it at https://www.dhl.com/track',
+  'Reminder: your KYC will expire on 31 March. Please visit the branch with your documents.',
+  'Your fixed deposit has matured. Please visit the branch or call us to renew.',
+];

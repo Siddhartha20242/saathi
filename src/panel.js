@@ -157,6 +157,8 @@ async function setGroup(code) {
   store.set('saathi:group', code);
   $('group-code').value = '';
   renderChips();
+  renderTell();
+  renderMessage();
   watchFamilyAlerts();
   await refreshLibrary();
 }
@@ -327,6 +329,8 @@ function watchFamilyAlerts() {
 // address (if any), the brand it imitates and reason codes, and only when the person presses the button.
 
 let msgNow = null;
+let msgSentFor = ''; // the text a family alert was already sent for, so pressing a button twice cannot send two
+let msgSending = false;
 
 function renderMessage() {
   const box = $('msg-result');
@@ -343,10 +347,12 @@ function renderMessage() {
   $('msg-headline').textContent = w.headline;
   $('msg-reasons').innerHTML = w.reasons.map((r) => `<li>${esc(r)}</li>`).join('');
   const button = $('msg-family');
-  button.hidden = msgNow.level !== 'stop';
+  button.hidden = msgNow.level !== 'stop' || Boolean(msgNow.sent);
   button.textContent = state.group ? w.family : `${w.family} (join a group first)`;
-  button.disabled = !state.group;
-  $('msg-note').textContent = '';
+  button.disabled = !state.group || msgSending;
+  const note = [msgNow.sent ? w.sent : '', msgNow.truncated ? w.truncated : ''].filter(Boolean).join(' ');
+  $('msg-note').textContent = note;
+  $('msg-note').className = `out${msgNow.sent ? ' ok' : ''}`;
 }
 
 $('msg-check').addEventListener('click', () => {
@@ -360,10 +366,15 @@ $('msg-check').addEventListener('click', () => {
     $('msg-reasons').innerHTML = '';
     $('msg-family').hidden = true;
     $('msg-read').hidden = true;
+    $('msg-note').textContent = '';
+    announce($('msg-headline').textContent);
     return;
   }
   msgNow = assessMessage(text);
+  msgNow.sent = text === msgSentFor;
   renderMessage();
+  $('msg-result').focus();
+  announce(`${$('msg-headline').textContent} ${[...document.querySelectorAll('#msg-reasons li')].map((li) => li.textContent).join(' ')}`);
   if (state.speak) readMessageResult();
 });
 
@@ -378,16 +389,26 @@ $('msg-clear').addEventListener('click', () => {
   $('msg-text').value = '';
   msgNow = null;
   renderMessage();
+  $('msg-text').focus();
 });
 
 $('msg-family').addEventListener('click', async () => {
-  if (!msgNow || !state.group) return;
+  if (!msgNow || !state.group || msgSending || msgNow.sent) return;
   const w = messageWarning(msgNow, state.lang);
+  const text = $('msg-text').value;
+  msgSending = true;
+  $('msg-family').disabled = true;
   try {
     await createAlert(state.group, { kind: 'message', host: msgNow.host || 'message', brand: msgNow.brand ?? '', level: msgNow.level, reasons: msgNow.reasons.map((r) => r.code) });
-    $('msg-note').textContent = w.sent;
-    $('msg-note').className = 'out ok';
+    msgSentFor = text;
+    if (msgNow) msgNow.sent = true;
+    msgSending = false;
+    renderMessage();
+    announce(w.sent);
+    $('msg-result').focus();
   } catch (err) {
+    msgSending = false;
+    renderMessage();
     $('msg-note').textContent = `Could not tell your family: ${err.message}`;
     $('msg-note').className = 'out bad';
   }
@@ -396,10 +417,11 @@ $('msg-family').addEventListener('click', async () => {
 // ---------- Practice: spot the scam ----------
 // Made-up messages. The person answers, then sees Saathi's own verdict and reasons. Nothing is saved or sent.
 
-const quiz = { round: [], index: 0, right: 0, answered: false };
+const quiz = { round: [], index: 0, right: 0, answered: false, view: null };
 
 function renderQuizStatic() {
   const t = quizText(state.lang);
+  renderQuizView(t);
   $('quiz-title').textContent = t.title;
   $('quiz-intro').textContent = t.intro;
   $('quiz-start').textContent = quiz.round.length ? t.again : t.start;
@@ -408,7 +430,22 @@ function renderQuizStatic() {
   $('quiz-fine').textContent = t.fine;
 }
 
+// Everything in the quiz that is words, drawn again from the saved state, so a language switch changes it all.
+function renderQuizView(t) {
+  const v = quiz.view;
+  if (!v) return;
+  if (v.phase === 'card' || v.phase === 'reveal') $('quiz-count').textContent = t.card(quiz.index + 1, quiz.round.length);
+  if (v.phase === 'reveal') {
+    $('quiz-result').textContent = `${v.correct ? t.right : t.wrong} ${v.card.scam ? t.isScam : t.isFine}`;
+    const w = messageWarning(assessMessage(v.card.text), state.lang);
+    $('quiz-reasons').innerHTML = v.card.scam ? w.reasons.map((r) => `<li>${esc(r)}</li>`).join('') : '';
+    $('quiz-next').textContent = quiz.index + 1 >= quiz.round.length ? t.finish : t.next;
+  }
+  if (v.phase === 'score') $('quiz-score').textContent = t.score(quiz.right, quiz.round.length);
+}
+
 function showQuizCard() {
+  quiz.view = { phase: 'card' };
   const t = quizText(state.lang);
   const card = quiz.round[quiz.index];
   quiz.answered = false;
@@ -418,15 +455,17 @@ function showQuizCard() {
   $('quiz-score').textContent = '';
   $('quiz-count').textContent = t.card(quiz.index + 1, quiz.round.length);
   $('quiz-text').textContent = card.text;
+  $('quiz-scam').focus();
 }
 
 $('quiz-start').addEventListener('click', () => {
   quiz.round = buildRound();
   quiz.index = 0;
   quiz.right = 0;
-  renderQuizStatic();
+  $('quiz-score').textContent = '';
   $('quiz-start').hidden = true;
   showQuizCard();
+  renderQuizStatic();
 });
 
 function answerQuiz(saidScam) {
@@ -438,12 +477,13 @@ function answerQuiz(saidScam) {
   const correct = saidScam === card.scam;
   if (correct) quiz.right++;
   const w = messageWarning(verdict, state.lang);
+  quiz.view = { phase: 'reveal', correct, card };
   $('quiz-answers').hidden = true;
   $('quiz-reveal').hidden = false;
-  $('quiz-result').textContent = `${correct ? t.right : t.wrong} ${card.scam ? t.isScam : t.isFine}`;
   $('quiz-result').className = `out ${correct ? 'ok' : 'bad'}`;
-  $('quiz-reasons').innerHTML = card.scam ? w.reasons.map((r) => `<li>${esc(r)}</li>`).join('') : '';
-  $('quiz-next').textContent = quiz.index + 1 >= quiz.round.length ? t.finish : t.next;
+  renderQuizView(t);
+  $('quiz-next').focus();
+  announce(`${$('quiz-result').textContent} ${card.scam ? w.reasons.join(' ') : ''}`);
   if (state.speak) speak(`${$('quiz-result').textContent} ${card.scam ? w.reasons.join(' ') : ''}`, state.lang);
 }
 $('quiz-scam').addEventListener('click', () => answerQuiz(true));
@@ -455,9 +495,11 @@ $('quiz-next').addEventListener('click', () => {
   if (quiz.index >= quiz.round.length) {
     $('quiz-card').hidden = true;
     $('quiz-start').hidden = false;
+    quiz.view = { phase: 'score' };
     renderQuizStatic();
-    $('quiz-score').textContent = t.score(quiz.right, quiz.round.length);
     $('quiz-score').className = 'out ok';
+    announce($('quiz-score').textContent);
+    $('quiz-start').focus();
     return;
   }
   showQuizCard();
@@ -789,6 +831,7 @@ async function startFollow(path) {
   state.follow = { path, index: 0, found: null };
   state.done = false;
   state.lastDone = null;
+  state.told = false;
   $('fo-tell').hidden = true;
   document.body.dataset.following = 'true';
   showTab('follow');
@@ -797,6 +840,12 @@ async function startFollow(path) {
   await showStep();
 }
 
+const announce = (text) => {
+  const el = $('live');
+  el.textContent = '';
+  setTimeout(() => (el.textContent = text), 50); // a change after a pause is read out by screen readers
+};
+
 // The finished card can tell the family. It sends only the guide's title and its number of steps,
 // and only when the person presses the button.
 function renderTell() {
@@ -804,8 +853,8 @@ function renderTell() {
   $('fo-tell').hidden = !state.lastDone;
   $('fo-tell-btn').textContent = state.group ? w.tell : w.noGroup;
   $('fo-tell-btn').disabled = !state.group;
-  $('fo-tell-btn').hidden = false;
-  $('fo-tell-msg').textContent = '';
+  $('fo-tell-btn').hidden = state.told;
+  $('fo-tell-msg').textContent = state.told ? w.told : '';
 }
 
 $('fo-tell-btn').addEventListener('click', async () => {
@@ -814,8 +863,11 @@ $('fo-tell-btn').addEventListener('click', async () => {
   $('fo-tell-btn').disabled = true;
   try {
     await createCheckin(state.group, state.lastDone);
-    $('fo-tell-msg').textContent = w.told;
-    $('fo-tell-btn').hidden = true;
+    state.told = true;
+    renderTell();
+    $('fo-tell-msg').tabIndex = -1;
+    $('fo-tell-msg').focus();
+    announce(w.told);
   } catch (err) {
     $('fo-tell-msg').textContent = `Could not tell your family: ${err.message}`;
     $('fo-tell-btn').disabled = false;
@@ -864,6 +916,10 @@ document.querySelectorAll('[data-lang]').forEach((b) =>
     renderGuard(guardNow);
     renderMessage();
     renderQuizStatic();
+    if (state.done) {
+      $('fo-done').textContent = (WORDS[state.lang] ?? WORDS.en).done;
+      renderTell();
+    }
     renderChips();
     if (state.follow) renderStepCard();
   }),

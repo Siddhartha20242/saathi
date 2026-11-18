@@ -43,6 +43,7 @@
       .guard .out { margin-top: 8px; color: var(--ink); }
       blockquote { margin: 0; padding: 10px 12px; border-left: 4px solid var(--accent); background: var(--surface); border-radius: 6px; white-space: pre-wrap; word-break: break-word; }
       .quiz-answers button { flex: 1; }
+      .sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
       .guard.inline { border-radius: var(--radius); }
       .guard button.read { background: transparent; color: inherit; border: 2px solid currentColor; margin-bottom: 8px; }
       .guard.ok { background: var(--accent-soft); color: var(--ink); }
@@ -162,6 +163,7 @@
       <p class="rule">Saathi highlights.<br />You do it.</p>
     </header>
 
+    <p class="sr-only" id="live" aria-live="polite"></p>
     <div class="guard" id="guard" hidden role="alert">
       <p class="headline" id="guard-headline"></p>
       <ul id="guard-reasons"></ul>
@@ -282,9 +284,9 @@
         <div class="stack" id="sec-msg">
           <h2>Got a strange message?</h2>
           <p class="muted">Paste a text, WhatsApp or email message. Saathi checks it on this computer. The message is never sent anywhere.</p>
-          <textarea id="msg-text" rows="4" maxlength="2000" placeholder="Paste the message here" aria-label="Message to check"></textarea>
+          <textarea id="msg-text" rows="4" placeholder="Paste the message here" aria-label="Message to check"></textarea>
           <button class="primary wide" id="msg-check">Check a message · सन्देश जाँच्नुहोस्</button>
-          <div class="guard inline" id="msg-result" hidden role="status">
+          <div class="guard inline" id="msg-result" hidden tabindex="-1">
             <p class="headline" id="msg-headline"></p>
             <ul id="msg-reasons"></ul>
             <button class="read wide" id="msg-read">Read it to me</button>
@@ -306,7 +308,7 @@
               <button class="primary" id="quiz-fine">Looks fine</button>
             </div>
             <div class="stack" id="quiz-reveal" hidden>
-              <p class="out" id="quiz-result" role="status"></p>
+              <p class="out" id="quiz-result"></p>
               <ul id="quiz-reasons"></ul>
               <button class="wide" id="quiz-next">Next</button>
             </div>

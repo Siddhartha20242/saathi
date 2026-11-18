@@ -91,7 +91,7 @@ try {
   check('pasted scam message gets a stop warning with reasons and a family button', /stop/.test(out.message.cls) && /Stop/.test(out.message.head) && out.message.reasons >= 3 && out.message.family, out.message);
   await c.evalIn(s, P(`d.getElementById('msg-text').value = 'Are you coming for dinner on Saturday? Bring the photos.'; d.getElementById('msg-check').click()`));
   check('an ordinary message gets no warning', await c.evalIn(s, P(`return /ok/.test(d.getElementById('msg-result').className) && d.getElementById('msg-family').hidden`)));
-  await c.evalIn(s, P(`d.getElementById('msg-text').value = ${JSON.stringify(scam)}; d.getElementById('msg-check').click(); d.getElementById('msg-family').click()`));
+  await c.evalIn(s, P(`d.getElementById('msg-text').value = ${JSON.stringify(scam)}; d.getElementById('msg-check').click(); d.getElementById('msg-family').click(); d.getElementById('msg-family').click()`)); // a double press must send one alert
   await c.waitFor(s, P(`return d.getElementById('msg-note').textContent.length > 0`), 15000);
   const alerts = await c.evalIn(s, P(`return w.__saathi.user.getIdToken()
     .then((tok) => fetch('https://firestore.googleapis.com/v1/projects/paperwork-decoder/databases/(default)/documents/groups/' + w.__saathi.group + '/alerts', { headers: { Authorization: 'Bearer ' + tok } }))
@@ -109,6 +109,13 @@ try {
     await c.evalIn(s, P(`d.getElementById('quiz-scam').click()`));
     await c.waitFor(s, P(`return !d.getElementById('quiz-reveal').hidden`), 5000);
     sawReasons ||= await c.evalIn(s, P(`return d.querySelectorAll('#quiz-reasons li').length > 0`));
+    if (i === 0) {
+      // Switching language while an answer is showing must change the words that are already on screen.
+      await c.evalIn(s, P(`d.querySelector('[data-lang=ne]').click()`));
+      out.quizNe = await c.evalIn(s, P(`return d.getElementById('quiz-result').textContent + ' | ' + d.getElementById('quiz-count').textContent + ' | ' + d.getElementById('quiz-next').textContent`));
+      check('language switch mid-quiz changes the answer text already on screen', /[\u0900-\u097F]/.test(out.quizNe) && !/Right|Not quite|Message/.test(out.quizNe), out.quizNe);
+      await c.evalIn(s, P(`d.querySelector('[data-lang=en]').click()`));
+    }
     await c.evalIn(s, P(`d.getElementById('quiz-next').click()`));
   }
   out.quiz = await c.evalIn(s, P(`return d.getElementById('quiz-score').textContent`));

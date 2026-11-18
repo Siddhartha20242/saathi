@@ -132,17 +132,37 @@ Scams also arrive as texts and WhatsApp messages, so the panel has a **Got a str
 
 | Test | Result |
 |---|---|
-| 12 made-up scam messages ([test/message.fixtures.js](test/message.fixtures.js)): fake KYC, lottery, parcel fee, "my new number", OTP request, APK, remote support, in English, Nepali and Hindi | All 12 get a warning: 5 "stop" and 7 "be careful" |
-| 12 made-up ordinary messages, including real bank OTP texts that say not to share the code, a real bill reminder, a real bank link and everyday chat | None warned |
-| The try page ([tools/e2e-try.mjs](tools/e2e-try.mjs)): paste the scam text, see the warning, press "Tell my family", read what was written | Passes. The alert holds only the kind, the link's address, the brand, the level and the reasons |
+| 12 made-up scam messages ([test/message.fixtures.js](test/message.fixtures.js)): fake KYC, lottery, parcel fee, "my new number", OTP request, APK, remote support, in English, Nepali and Hindi | All 12 get a warning: 8 "stop" and 4 "be careful" |
+| 9 scam messages written to follow what banks, the Nepal Police Cyber Bureau, CERT-In and the RBI have published ([test/message.published.js](test/message.published.js)) | **Before I tuned the rules, 4 of 9 got a warning and 5 got none** (a connectIPS "self-verify" text, a Dashain prize with a "service charge", a KYC text with a throwaway tunnel link, among them). After adding what those showed (connectIPS and the RBI as known names, KYC-by-link, throwaway addresses, more rush wording) all 9 are stopped. That second number is not independent evidence, because the rules were tuned on these 9 |
+| 28 made-up ordinary messages, 16 of them chosen to use scam words for ordinary reasons (a real "KYC updated" notice, "your NTC pack will expire", a family "my new number", a real bank OTP text that says to enter the code on the website) | None warned |
+| An independent read of the code by a second model, with each trigger run ([how it was done below](#independent-review)) | 12 findings, all fixed and each now covered by a test |
+| The try page ([tools/e2e-try.mjs](tools/e2e-try.mjs)): paste the scam text, see the warning, press "Tell my family" twice quickly, read what was written | Passes. One alert is written, holding only the kind, the link's address, the brand, the level and the reasons |
 
-The messages were written by me to look like common scams, so this shows the rules do what I intended, not how many real scams they catch. Known false alarms: "Can you send me the wifi password?" gets "be careful", because a request for a password looks the same as a scam's. A brand whose name is shorter than six letters (eSewa, SBI) is caught by the "names a bank but the link goes elsewhere" rule but not the lookalike-address rule, so those messages reach "be careful" rather than "stop". "Nothing suspicious found" is worded as *not proof of safety*. No real scam message was used.
+The messages were written by me or follow published reports, so this shows the rules do what I intended, not how many real scams they catch. The honest signal is the 4 of 9: rules written by the person who wrote the test messages looked perfect, and rules met with someone else's examples were not. Known false alarms: "Can you send me the wifi password?" gets "be careful", because a request for a password looks the same as a scam's. For messages, 2 points is "be careful" and 5 is "stop". "Nothing suspicious found" is worded as *not proof of safety*. No real scam message from a real person's phone was used.
 
 ### Practice: spot the scam
 
 Under the message checker, **Practice: spot the scam** gives the person a round of six made-up messages, half scams and half ordinary ([src/quiz.js](src/quiz.js)). They answer "Scam" or "Looks fine", then Saathi shows its own verdict and, for a scam, the reasons in plain words. The score appears at the end. It is in English, Nepali and Hindi, nothing is saved or sent, and it is spoken aloud when read-aloud is on. The unit tests check that every card agrees with the message checker, so Saathi never marks a card "scam" that it would not itself warn about. Read-aloud also reads the scam guard's and the message checker's warnings, and the message result has a **Read it to me** button.
 
 Not measured: whether practice helps anyone spot a real scam. It is a first draft of the idea and has not been tried with older people.
+
+### Independent review
+
+Before the final push, a second model read the code added in the last stretch (check-ins, message checker, practice quiz, read-aloud) with instructions to find real bugs, run each one, and say which it had run and which it had only read. It reported 12. They were fixed, and each has a test or an end-to-end check:
+
+- A link written `http://nabilbank.com@evil.top` was read as going to the real bank (the real destination is after the `@`).
+- Links ending in `.cfd`, `.sbs`, `.ru`, a number address or non-English letters were not seen at all.
+- "Do not delay: share your OTP" was treated as a warning not to share, because any "do not" in the sentence cancelled the request. A real warning ("do not share your OTP") still passes.
+- Real bank texts that say "enter this OTP on the website" were flagged as requests for the code.
+- A missing space after a full stop ("Thanks.Me too") was read as a link.
+- A family message naming a bank next to a Google Photos link was flagged.
+- Pressing "Tell my family" twice sent two alerts, and the confirmation vanished on a language switch.
+- Joining a group after a result left the "Tell my family" and "I finished" buttons disabled.
+- Switching language mid-quiz left the answer in the old language.
+- A 2,000-character box limit silently cut long messages that the checker was meant to read up to 4,000 characters of.
+- Screen-reader and focus gaps on the new controls, and a dark-mode button colour below the accessibility contrast minimum on the helper page.
+
+This is a code review by a model, not a test with people. It did not run a screen reader.
 
 ## What we measured
 
@@ -231,7 +251,7 @@ The harder redesign ran in a headless Chrome that has no on-device model, so "de
 
 **Security rules.** [tools/rules-check.js](tools/rules-check.js) runs 46 checks against the live project with two separate anonymous users: all pass. Allowed actions work (a helper can set the pick, a note and the status; a creator can delete). Refusals hold: a helper cannot change the list of controls, pick outside it, write a note over 100 characters or delete someone else's request; a path cannot be edited or created with no steps, 41 steps, an extra field or someone else's name as creator; alerts and check-ins refuse extra fields, someone else's name as creator, an unknown level, too many reasons, an empty title or 41 steps, and cannot be edited; nothing can be read without signing in, with a wrong-length group code, or outside `groups`. Not covered: the rules were checked on the real project, not the Firebase emulator, and a group code that leaks still gives full access to that group.
 
-**Tests.** 157 unit tests (`npm test`). Six end-to-end scripts drive a throwaway headless Chrome with the extension loaded and run against the live site: [tools/e2e.mjs](tools/e2e.mjs) (record, save, follow), [tools/e2e-help.mjs](tools/e2e-help.mjs) (ask for help, a phone-sized helper taps, the highlight moves, the request is deleted), [tools/e2e-try.mjs](tools/e2e-try.mjs) (the same flow on the try page, ending with the finished-guide check-in, a pasted scam message and a practice round) and [tools/e2e-real.mjs](tools/e2e-real.mjs) (real public websites, above) [tools/e2e-cloud.mjs](tools/e2e-cloud.mjs) (the cloud button's consent screen, in a browser with no on-device model) and [tools/e2e-guard.mjs](tools/e2e-guard.mjs) (the scam guard and family alert, and a pass over real legitimate pages). In the headless browser, App Check sometimes refuses the cloud translation (reCAPTCHA scores it as a bot); the path is then saved without translations, as designed, and the test reports it. In a normal Chrome the cloud call works. The on-device model is not available in that headless Chrome, so the model path was checked separately in a normal Chrome.
+**Tests.** 171 unit tests (`npm test`). Six end-to-end scripts drive a throwaway headless Chrome with the extension loaded and run against the live site: [tools/e2e.mjs](tools/e2e.mjs) (record, save, follow), [tools/e2e-help.mjs](tools/e2e-help.mjs) (ask for help, a phone-sized helper taps, the highlight moves, the request is deleted), [tools/e2e-try.mjs](tools/e2e-try.mjs) (the same flow on the try page, ending with the finished-guide check-in, a pasted scam message and a practice round) and [tools/e2e-real.mjs](tools/e2e-real.mjs) (real public websites, above) [tools/e2e-cloud.mjs](tools/e2e-cloud.mjs) (the cloud button's consent screen, in a browser with no on-device model) and [tools/e2e-guard.mjs](tools/e2e-guard.mjs) (the scam guard and family alert, and a pass over real legitimate pages). In the headless browser, App Check sometimes refuses the cloud translation (reCAPTCHA scores it as a bot); the path is then saved without translations, as designed, and the test reports it. In a normal Chrome the cloud call works. The on-device model is not available in that headless Chrome, so the model path was checked separately in a normal Chrome.
 
 ## Design
 
