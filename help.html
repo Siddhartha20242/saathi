@@ -37,7 +37,17 @@
       #alerts small { display: block; color: var(--muted); margin-top: 4px; }
       #checkins li { background: #e6f2ee; border: 2px solid var(--accent); border-radius: 10px; padding: 10px 12px; margin: 8px 0; }
       #checkins small { display: block; color: var(--muted); margin-top: 4px; }
-      @media (prefers-color-scheme: dark) { #alerts li { background: #3a1511; } #checkins li { background: #12302a; } }
+      @media (prefers-color-scheme: dark) {
+        :root { --ink: #efeadf; --muted: #b3ad9f; --line: #3a372f; --bg: #1f1d18; --accent: #2f8f77; --bad: #ff8a80; }
+        body { background: #14130f; color: var(--ink); }
+        input, button { background: #1f1d18; color: var(--ink); border-color: #4a463c; }
+        button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+        button.quiet { background: none; border: 0; color: var(--muted); }
+        .control[aria-pressed=true] { background: #4a3a12; color: #fff; }
+        .ok { color: #7fd6bd; }
+        #alerts li { background: #3a1511; border-color: #ff8a80; color: var(--ink); }
+        #checkins li { background: #12302a; border-color: #2f8f77; color: var(--ink); }
+      }
       [hidden] { display: none !important; }
     </style>
   </head>
