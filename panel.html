@@ -228,8 +228,8 @@
     </section>
 
     <nav class="tabs" role="tablist" aria-label="Saathi">
-      <button role="tab" id="tab-follow" aria-controls="panel-follow" aria-selected="true">Follow</button>
-      <button role="tab" id="tab-record" aria-controls="panel-record" aria-selected="false">Show the way</button>
+      <button role="tab" id="tab-follow" aria-controls="panel-follow" aria-selected="true">My guides</button>
+      <button role="tab" id="tab-record" aria-controls="panel-record" aria-selected="false">Make a guide</button>
       <button role="tab" id="tab-help" aria-controls="panel-help" aria-selected="false">Get help</button>
     </nav>
 
@@ -254,7 +254,7 @@
             <div class="how" id="fo-how"></div>
             <div class="privacy">
               <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="3" y="7" width="10" height="7" rx="1.5"/><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2"/></svg>
-              On this laptop only. The page you are on is never sent anywhere.
+              Stays on this device. The page you are on is never sent anywhere.
             </div>
           </div>
           <div class="banner" id="fo-warn" hidden style="margin-top: 12px"></div>
@@ -316,11 +316,11 @@
       <!-- Show the way -->
       <div class="panel-body" role="tabpanel" id="panel-record" aria-labelledby="tab-record" hidden>
         <div>
-          <h2>Show the way once</h2>
-          <p class="muted">Press Start, then use the website as you normally would. Saathi writes down which buttons and boxes you use, in order.</p>
+          <h2>Make a guide for your family</h2>
+          <p class="muted">Name the guide and press Start. Then do the task on the website as you normally would. Saathi writes down which buttons and boxes you use, in order, so your family can follow.</p>
         </div>
         <p class="banner"><b>Saved:</b> page addresses, the names of buttons and boxes, and their order.<br /><b>Never saved:</b> anything you type, passwords, or pictures of the page.</p>
-        <input id="rec-title" placeholder="Name of this path, for example Pay the electricity bill" maxlength="80" autocomplete="off" aria-label="Path name" />
+        <input id="rec-title" placeholder="Name this guide, for example: Pay the electricity bill" maxlength="80" autocomplete="off" aria-label="Guide name" />
         <div class="stack">
           <button class="primary wide" id="rec-start">Start</button>
           <button class="primary wide" id="rec-save" hidden><span class="rec-dot"></span>Finish and save</button>
@@ -384,7 +384,7 @@
         </div>
         <div class="stack">
           <h2>Not sure what this page wants?</h2>
-          <p class="muted">Uses the on-device model when this laptop has one. Otherwise the cloud answers, and only the page's labels are sent.</p>
+          <p class="muted">Uses the AI on this device when it has one. Otherwise the cloud answers, and only the names of buttons are sent.</p>
           <button class="wide" id="t-explain">Explain this page</button>
           <p class="out" id="o-explain"></p>
         </div>

@@ -7,10 +7,11 @@
     <style>
       :root { --ink: #1d1b16; --muted: #6b665c; --line: #e2ddd2; --bg: #f6f4ef; --accent: #0f5c4a; --warn: #e0a11b; --bad: #a3271f; }
       * { box-sizing: border-box; }
-      body { font: 17px/1.45 system-ui, sans-serif; margin: 0; color: var(--ink); background: #fff; }
+      body { font: 18px/1.5 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; margin: 0; color: var(--ink); background: #fff; }
       header { padding: 14px 16px; background: var(--bg); border-bottom: 1px solid var(--line); }
-      header h1 { font-size: 20px; margin: 0; }
-      header p { margin: 4px 0 0; font-size: 14px; color: var(--muted); }
+      header h1 { font-size: 22px; margin: 0; display: flex; align-items: center; gap: 10px; }
+      header h1 img { width: 34px; height: 34px; border-radius: 9px; }
+      header p { margin: 8px 0 0; font-size: 16px; color: var(--muted); }
       main { padding: 8px 16px 40px; max-width: 560px; margin: 0 auto; }
       section { padding: 12px 0; }
       h2 { font-size: 18px; margin: 0 0 6px; }
@@ -59,15 +60,15 @@
   </head>
   <body>
     <header>
-      <h1>Saathi helper</h1>
-      <p>You see only the names of the buttons and boxes on their page. Never the page, a picture of it, or anything they typed.</p>
+      <h1><img src="/icon-192.png" alt="" />Help your family</h1>
+      <p>When someone in your family gets stuck on a website, you will see it here. Tap the right button for them, and it lights up on their screen.</p>
     </header>
     <main>
       <section id="s-group">
-        <h2>Your group</h2>
-        <p class="muted">Enter the group code of the person you help.</p>
+        <h2>Join your family</h2>
+        <p class="muted">Type the family code they gave you: 8 letters and numbers. They can find it next to “Family code” in Saathi.</p>
         <div class="row">
-          <input id="group-code" placeholder="Group code" maxlength="12" autocomplete="off" autocapitalize="characters" aria-label="Group code" />
+          <input id="group-code" placeholder="For example K7M2QX4P" maxlength="12" autocomplete="off" autocapitalize="characters" aria-label="Family code" />
           <button class="primary" id="group-join">Join</button>
         </div>
         <p class="out" id="group-msg"></p>
@@ -75,13 +76,13 @@
 
       <section id="s-alerts" hidden>
         <h2>Scam alerts</h2>
-        <p class="muted">Someone in your group pressed "Tell my family" on a page that looks like a scam. Call them, and tell them not to type anything.</p>
+        <p class="muted">Someone in your family opened a page that looks like a scam and pressed "Tell my family". Call them now, and tell them not to type anything.</p>
         <ul id="alerts"></ul>
       </section>
 
       <section id="s-checkins" hidden>
         <h2>Finished on their own</h2>
-        <p class="muted">Someone in your group pressed "Let my family know I finished". Only the guide's name is shared.</p>
+        <p class="muted">Someone in your family pressed "Let my family know I finished". Only the name of the guide is shared.</p>
         <ul id="checkins"></ul>
       </section>
 
@@ -89,7 +90,7 @@
         <h2>Who needs help</h2>
         <p class="muted" id="list-note">Waiting for a request…</p>
         <ul id="requests"></ul>
-        <button class="quiet" id="group-leave">Use a different group</button>
+        <button class="quiet" id="group-leave">Use a different family</button>
       </section>
 
       <section id="s-help" hidden>

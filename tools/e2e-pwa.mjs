@@ -38,8 +38,8 @@ try {
   check('the helper page opens with no internet', /Saathi helper/.test(offline.title), offline);
   await c.evalIn(s, `location.href = '/'`).catch(() => {});
   await sleep(4000);
-  const home = await c.evalIn(s, `({ title: document.title, choices: document.querySelectorAll('a.choice').length })`);
-  check('the home page opens with no internet', home.title === 'Saathi' && home.choices === 3, home);
+  const home = await c.evalIn(s, `({ title: document.title, h1: !!document.querySelector('h1'), buttons: document.querySelectorAll('a.btn').length })`);
+  check('the home page opens with no internet', /^Saathi/.test(home.title) && home.h1 && home.buttons >= 2, home);
   await c.send('Network.emulateNetworkConditions', { offline: false, latency: 0, downloadThroughput: -1, uploadThroughput: -1 }, s);
 } catch (err) {
   out.error = String(err?.message ?? err);

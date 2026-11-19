@@ -3,7 +3,9 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Saathi</title>
+    <meta name="color-scheme" content="light dark" />
+    <title>Saathi: a guide that shows you where to press</title>
+    <meta name="description" content="Someone in your family shows the way on a website once. Saathi then guides you, one step at a time, in Nepali, Hindi or English." />
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="icon" href="/icon-192.png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
@@ -11,72 +13,190 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="Saathi" />
     <style>
-      :root { --ink: #1d1b16; --muted: #5f5a50; --line: #e2ddd2; --bg: #f6f4ef; --card: #fff; --accent: #0f5c4a; --accent-ink: #fff; }
+      :root {
+        --paper: #fbf7ef; --card: #ffffff; --ink: #231f1a; --soft: #5a5348; --line: #e6dfd0;
+        --green: #0f5c4a; --green-ink: #ffffff; --glow: #f2a900; --warn: #fff3d6;
+      }
       @media (prefers-color-scheme: dark) {
-        :root { --ink: #efeadf; --muted: #b3ad9f; --line: #3a372f; --bg: #14130f; --card: #1f1d18; --accent: #4fc3a1; --accent-ink: #0b1f19; }
+        :root { --paper: #17150f; --card: #211e17; --ink: #f4efe4; --soft: #c2bbab; --line: #3a362b; --green: #55c4a3; --green-ink: #0b1f19; --warn: #3a2f12; }
       }
       * { box-sizing: border-box; }
-      body { font: 18px/1.5 system-ui, sans-serif; margin: 0; background: var(--bg); color: var(--ink); }
-      main { max-width: 600px; margin: 0 auto; padding: 24px 16px 48px; }
-      .logo { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 1.4em; }
-      .logo img { width: 40px; height: 40px; border-radius: 10px; }
-      h1 { font-size: 1.5em; margin: 18px 0 6px; line-height: 1.25; }
-      h2 { font-size: 1.1em; margin: 0 0 6px; }
-      p { margin: 6px 0; }
-      .muted { color: var(--muted); font-size: 0.9em; }
-      .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px; margin: 14px 0; }
-      .choices { display: grid; gap: 12px; margin: 16px 0; }
-      a.choice { display: block; text-decoration: none; color: inherit; border: 2px solid var(--line); background: var(--card); border-radius: 14px; padding: 16px; min-height: 64px; }
-      a.choice b { display: block; font-size: 1.05em; }
-      a.choice span { color: var(--muted); font-size: 0.9em; }
-      a.choice.main { border-color: var(--accent); }
-      a.choice:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
-      button { font: inherit; padding: 12px 16px; border-radius: 10px; border: 0; background: var(--accent); color: var(--accent-ink); font-weight: 600; cursor: pointer; min-height: 48px; }
-      table { border-collapse: collapse; width: 100%; font-size: 0.85em; }
-      th, td { text-align: left; padding: 8px 6px; border-top: 1px solid var(--line); vertical-align: top; }
-      th { color: var(--muted); font-weight: 600; border-top: 0; }
-      .here td { background: color-mix(in srgb, var(--accent) 12%, transparent); }
-      .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #e0a11b; margin-right: 6px; }
-      .dot.ok { background: #1c8f78; }
+      html { font-size: 112.5%; } /* 18px: larger than most pages */
+      body { margin: 0; background: var(--paper); color: var(--ink); font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; line-height: 1.55; }
+      .wrap { max-width: 1040px; margin: 0 auto; padding: 0 20px; }
+      a { color: var(--green); }
+      :focus-visible { outline: 3px solid var(--glow); outline-offset: 3px; border-radius: 6px; }
       [hidden] { display: none !important; }
+
+      header.top { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 18px 0; }
+      .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 1.35rem; text-decoration: none; color: var(--ink); }
+      .brand img { width: 42px; height: 42px; border-radius: 11px; }
+      .langs { display: flex; border: 2px solid var(--line); border-radius: 12px; overflow: hidden; }
+      .langs button { font: inherit; font-size: 0.95rem; padding: 8px 14px; min-height: 44px; border: 0; background: var(--card); color: var(--ink); cursor: pointer; }
+      .langs button[aria-pressed=true] { background: var(--green); color: var(--green-ink); font-weight: 700; }
+
+      .hero { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 36px; align-items: center; padding: 28px 0 44px; }
+      h1 { font-family: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif; font-size: 2.6rem; line-height: 1.12; margin: 0 0 16px; letter-spacing: -0.01em; }
+      .lede { font-size: 1.15rem; color: var(--soft); margin: 0 0 24px; max-width: 34rem; }
+      .actions { display: flex; flex-wrap: wrap; gap: 12px; }
+      .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 56px; padding: 12px 26px; border-radius: 14px; font: inherit; font-weight: 700; font-size: 1.05rem; text-decoration: none; border: 2px solid var(--green); }
+      .btn.main { background: var(--green); color: var(--green-ink); }
+      .btn.alt { background: transparent; color: var(--green); }
+      .reassure { margin: 18px 0 0; color: var(--soft); font-size: 0.95rem; }
+
+      /* A drawing of the idea: a website, one button glowing, a spoken-style hint. */
+      .scene { background: var(--card); border: 2px solid var(--line); border-radius: 20px; padding: 16px; box-shadow: 0 10px 30px rgba(35, 31, 26, 0.08); }
+      .scene .bar { display: flex; gap: 6px; margin-bottom: 14px; }
+      .scene .bar i { width: 10px; height: 10px; border-radius: 50%; background: var(--line); display: block; }
+      .scene .page { background: #fff; color: #1d2a3a; border-radius: 12px; padding: 18px; border: 1px solid #ece6d6; }
+      .scene .page h3 { margin: 0 0 4px; font-size: 1.05rem; }
+      .scene .page p { margin: 0 0 14px; color: #5b6573; font-size: 0.9rem; }
+      .scene .menu { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; font-size: 0.95rem; color: #1d2a3a; }
+      .scene .menu span { padding: 6px 2px; }
+      .scene .target { position: relative; padding: 8px 14px; border-radius: 10px; background: #0b3a5a; color: #fff; font-weight: 700; box-shadow: 0 0 0 4px #fff, 0 0 0 8px var(--glow); animation: pulse 2s ease-in-out infinite; }
+      @keyframes pulse { 50% { box-shadow: 0 0 0 4px #fff, 0 0 0 13px rgba(242, 169, 0, 0.5); } }
+      @media (prefers-reduced-motion: reduce) { .scene .target { animation: none; } }
+      .bubble { margin-top: 18px; display: flex; gap: 12px; align-items: flex-start; background: var(--warn); border-radius: 14px; padding: 14px 16px; }
+      .bubble b { display: block; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--soft); margin-bottom: 2px; }
+      .bubble p { margin: 0; font-size: 1.12rem; font-weight: 600; color: var(--ink); }
+
+      section.block { padding: 36px 0; border-top: 1px solid var(--line); }
+      h2 { font-family: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif; font-size: 1.8rem; line-height: 1.2; margin: 0 0 22px; }
+      .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; counter-reset: s; list-style: none; margin: 0; padding: 0; }
+      .steps li { background: var(--card); border: 2px solid var(--line); border-radius: 18px; padding: 20px; counter-increment: s; }
+      .steps li::before { content: counter(s); display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: var(--green); color: var(--green-ink); font-weight: 800; font-size: 1.2rem; margin-bottom: 12px; }
+      .steps h3 { margin: 0 0 6px; font-size: 1.15rem; }
+      .steps p { margin: 0; color: var(--soft); }
+
+      .two { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+      .panel { background: var(--card); border: 2px solid var(--line); border-radius: 18px; padding: 22px; }
+      .panel h3 { margin: 0 0 8px; font-size: 1.25rem; }
+      .panel p { margin: 0 0 16px; color: var(--soft); }
+
+      .safe { background: var(--warn); border-radius: 18px; padding: 22px; }
+      .safe h2 { font-size: 1.4rem; margin-bottom: 10px; }
+      .safe ul { margin: 0; padding-left: 1.2rem; }
+      .safe li { margin: 6px 0; }
+
+      details.tech { margin: 8px 0 0; border: 2px solid var(--line); border-radius: 14px; background: var(--card); }
+      details.tech summary { cursor: pointer; padding: 16px 18px; font-weight: 600; min-height: 56px; }
+      details.tech .in { padding: 0 18px 18px; font-size: 0.95rem; color: var(--soft); }
+      details.tech table { border-collapse: collapse; width: 100%; font-size: 0.9rem; margin: 12px 0; }
+      details.tech th, details.tech td { text-align: left; padding: 8px 6px; border-top: 1px solid var(--line); vertical-align: top; }
+      details.tech th { border-top: 0; }
+      details.tech tr.here td { background: color-mix(in srgb, var(--green) 14%, transparent); }
+      .dot { display: inline-block; width: 11px; height: 11px; border-radius: 50%; background: var(--glow); margin-right: 8px; }
+      .dot.ok { background: #1c8f78; }
+      button.plain { font: inherit; font-weight: 700; min-height: 52px; padding: 10px 20px; border-radius: 12px; border: 2px solid var(--green); background: var(--green); color: var(--green-ink); cursor: pointer; }
+
+      footer { padding: 28px 0 56px; color: var(--soft); font-size: 0.9rem; border-top: 1px solid var(--line); }
+
+      @media (max-width: 820px) {
+        html { font-size: 106.25%; }
+        .hero { grid-template-columns: 1fr; gap: 24px; padding-top: 8px; }
+        h1 { font-size: 2.05rem; }
+        .steps, .two { grid-template-columns: 1fr; }
+        .btn { width: 100%; }
+      }
     </style>
   </head>
   <body>
-    <main>
-      <div class="logo"><img src="/icon-192.png" alt="" />Saathi</div>
-      <h1>Someone in your family shows the way once. Saathi shows you each step.</h1>
-      <p class="muted">Saathi highlights where to press on a website. You do it. Nepali, Hindi and English.</p>
+    <div class="wrap">
+      <header class="top">
+        <a class="brand" href="/"><img src="/icon-192.png" alt="" />Saathi</a>
+        <div class="langs" role="group" aria-label="Language">
+          <button data-lang="en" aria-pressed="true">English</button><button data-lang="ne" aria-pressed="false">नेपाली</button><button data-lang="hi" aria-pressed="false">हिन्दी</button>
+        </div>
+      </header>
 
-      <div class="choices">
-        <a class="choice main" href="/help.html"><b>I help my family</b><span>See who is stuck, point to the right button, get scam alerts. Works on a phone.</span></a>
-        <a class="choice" href="/try.html"><b>I want a guide to follow</b><span>Try it now on a practice website. No install, no login.</span></a>
-        <a class="choice" href="/panel.html"><b>Check a message, or practise spotting scams</b><span>Paste a text or email. Nothing leaves your device.</span></a>
-      </div>
+      <main>
+        <section class="hero">
+          <div>
+            <h1 data-t="h1">A guide that shows you where to press.</h1>
+            <p class="lede" data-t="lede">When a website feels confusing, someone in your family shows the way once. Saathi then walks you through it, one step at a time, in your own language.</p>
+            <div class="actions">
+              <a class="btn main" href="/try.html" data-t="try">Try it now</a>
+              <a class="btn alt" href="/help.html" data-t="help">I am helping my parents</a>
+            </div>
+            <p class="reassure" data-t="free">Free. No sign-up. Nothing to buy.</p>
+          </div>
+          <div class="scene" aria-hidden="true">
+            <div class="bar"><i></i><i></i><i></i></div>
+            <div class="page">
+              <h3>Himal Electricity Board</h3>
+              <p>Check and pay your electricity bill online.</p>
+              <div class="menu"><span>Home</span><span>About us</span><span class="target">Pay your bill</span><span>Help</span></div>
+            </div>
+            <div class="bubble">
+              <div><b data-t="stepOf">Step 1 of 5</b><p data-t="bubble">Press “Pay your bill” in the menu.</p></div>
+            </div>
+          </div>
+        </section>
 
-      <div class="card" id="install-card">
-        <h2>Keep Saathi on this device</h2>
-        <p class="muted" id="install-note">It works like an app and still opens with no internet.</p>
-        <button id="install" hidden>Install Saathi</button>
-      </div>
+        <section class="block">
+          <h2 data-t="howTitle">How it works</h2>
+          <ol class="steps">
+            <li><h3 data-t="s1h">Your family shows the way once</h3><p data-t="s1p">A son, a daughter or a neighbour does the task on the real website, one time.</p></li>
+            <li><h3 data-t="s2h">Saathi shows you each step</h3><p data-t="s2p">You see one step at a time, in big words, read aloud if you like. The right button glows.</p></li>
+            <li><h3 data-t="s3h">You press. Saathi never does.</h3><p data-t="s3p">You stay in charge. Saathi never types or presses for you, and it never sees your passwords.</p></li>
+          </ol>
+        </section>
 
-      <div class="card">
-        <h2>This device</h2>
-        <p><span class="dot" id="ai-dot"></span><span id="here"></span></p>
-        <p class="muted" id="ai-note"></p>
-      </div>
+        <section class="block">
+          <div class="two">
+            <div class="panel">
+              <h3 data-t="scamH">Got a strange message?</h3>
+              <p data-t="scamP">Paste a text or an email and Saathi tells you if it looks like a scam. It stays on your device.</p>
+              <a class="btn alt" href="/try.html#message" data-t="scamB">Check a message</a>
+            </div>
+            <div class="panel">
+              <h3 data-t="famH">Helping from far away?</h3>
+              <p data-t="famP">See who is stuck, point to the right button on your phone, and get an alert if a scam page is opened.</p>
+              <a class="btn alt" href="/help.html" data-t="famB">Open the family page</a>
+            </div>
+          </div>
+        </section>
 
-      <div class="card">
-        <h2>Where Saathi runs</h2>
-        <p class="muted">One codebase and one Firebase backend. Firebase AI Logic's hybrid inference picks the on-device model or the cloud model on each device.</p>
-        <table id="matrix">
-          <tr><th>Device</th><th>What works</th><th>AI</th></tr>
-          <tr data-kind="computer"><td>Computer, Chrome</td><td>Everything, with the extension: record, follow on any site, scam warning</td><td>On-device first, cloud if not</td></tr>
-          <tr data-kind="phone"><td>Android phone or tablet (Android app), iPhone and iPad (installed web app)</td><td>Helper, alerts, check-ins, message check, practice, practice site</td><td>Cloud only (no on-device model in phone browsers)</td></tr>
-          <tr data-kind="any"><td>Any browser, no install</td><td>The practice site and helper page</td><td>Whatever the device offers</td></tr>
-        </table>
-        <p class="muted">Following a guide on real websites needs the Chrome extension on a computer. Phone browsers cannot add a guide to other sites.</p>
-      </div>
-    </main>
+        <section class="block">
+          <div class="safe">
+            <h2 data-t="safeH">Made to be safe</h2>
+            <ul>
+              <li data-t="safe1">It points. You press. It never clicks or types for you.</li>
+              <li data-t="safe2">It does not see what you type, and it does not keep your pages.</li>
+              <li data-t="safe3">If it is not sure which button to point to, it says so and asks your family.</li>
+            </ul>
+          </div>
+        </section>
+
+        <section class="block" id="install-card">
+          <h2 data-t="instH">Keep Saathi on your phone</h2>
+          <p style="margin-top: 0; color: var(--soft)" id="install-note" data-t="instP">It works like an app, and it still opens with no internet.</p>
+          <button class="plain" id="install" hidden data-t="instB">Install Saathi</button>
+        </section>
+
+        <section class="block">
+          <details class="tech">
+            <summary data-t="techS">For developers and judges: where Saathi runs</summary>
+            <div class="in">
+              <p><span class="dot" id="ai-dot"></span><b id="here"></b></p>
+              <p id="ai-note"></p>
+              <p>One codebase and one Firebase project. Firebase AI Logic's hybrid inference picks the on-device model or the cloud model on each device, so nothing is built twice.</p>
+              <table id="matrix">
+                <tr><th>Device</th><th>What works</th><th>AI</th></tr>
+                <tr data-kind="computer"><td>Computer, Chrome</td><td>Everything, with the extension: record on any site, follow, scam warning</td><td>On-device first, cloud if not</td></tr>
+                <tr data-kind="phone"><td>Android phone or tablet (Android app); iPhone and iPad (installed web app)</td><td>Helper, alerts, check-ins, message check, practice quiz, practice site</td><td>Cloud only</td></tr>
+              </table>
+              <p>Following a guide on other websites needs the Chrome extension on a computer.</p>
+              <p><a href="https://github.com/Siddhartha20242/saathi">Source code and README</a></p>
+            </div>
+          </details>
+        </section>
+      </main>
+
+      <footer>
+        <span data-t="foot">Saathi works in Nepali, Hindi and English. The Nepali and Hindi were written with AI and have not yet been checked by a native speaker.</span>
+      </footer>
+    </div>
     <script type="module" src="/src/home.js"></script>
   </body>
 </html>

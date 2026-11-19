@@ -7,46 +7,64 @@
     <meta name="theme-color" content="#0f5c4a" />
     <title>Try Saathi</title>
     <style>
-      :root { color-scheme: light dark; --ink: #1d1b16; --muted: #5f5a50; --line: #ddd7ca; --bg: #ffffff; --surface: #f6f4ef; --accent: #0f5c4a; --accent-ink: #ffffff; --tap: 44px; }
-      @media (prefers-color-scheme: dark) { :root { --ink: #f1eee6; --muted: #b9b2a3; --line: #3b372d; --bg: #17150f; --surface: #221f18; --accent: #52bf9f; --accent-ink: #0b1f19; } }
+      :root { color-scheme: light dark; --ink: #231f1a; --muted: #5a5348; --line: #e0d9c9; --bg: #ffffff; --surface: #fbf7ef; --accent: #0f5c4a; --accent-ink: #ffffff; --glow: #f2a900; --tap: 48px; }
+      @media (prefers-color-scheme: dark) { :root { --ink: #f4efe4; --muted: #c2bbab; --line: #3a362b; --bg: #17150f; --surface: #211e17; --accent: #55c4a3; --accent-ink: #0b1f19; } }
       * { box-sizing: border-box; }
       html, body { height: 100%; margin: 0; }
-      body { height: 100dvh; font: 15px/1.5 system-ui, -apple-system, 'Segoe UI', sans-serif; color: var(--ink); background: var(--bg); display: flex; flex-direction: column; overflow: hidden; }
+      body { height: 100dvh; font: 17px/1.5 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; color: var(--ink); background: var(--bg); display: flex; flex-direction: column; overflow: hidden; }
       [hidden] { display: none !important; }
 
-      header { display: flex; align-items: center; gap: 12px; padding: 8px 16px; padding-top: max(8px, env(safe-area-inset-top)); background: var(--surface); border-bottom: 1px solid var(--line); }
-      header h1 { font-size: 1.15em; margin: 0; }
-      header .tag { flex: 1; color: var(--muted); font-size: 0.88em; }
-      button { font: inherit; font-size: 0.93em; min-height: var(--tap); padding: 6px 14px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); cursor: pointer; }
-      button[aria-pressed=true] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 600; }
-      :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+      header { display: flex; align-items: center; gap: 14px; padding: 10px 18px; padding-top: max(10px, env(safe-area-inset-top)); background: var(--surface); border-bottom: 1px solid var(--line); }
+      header a.home { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--ink); font-weight: 700; font-size: 1.15em; }
+      header a.home img { width: 34px; height: 34px; border-radius: 9px; }
+      header .tag { flex: 1; color: var(--muted); font-size: 0.92em; }
+      button { font: inherit; min-height: var(--tap); padding: 8px 18px; border-radius: 12px; border: 2px solid var(--line); background: var(--bg); color: var(--ink); cursor: pointer; }
+      button.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 700; }
+      button[aria-pressed=true] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 700; }
+      :focus-visible { outline: 3px solid var(--glow); outline-offset: 2px; }
       a { color: var(--accent); }
 
-      .guide { border-bottom: 1px solid var(--line); padding: 10px 16px; max-height: 45dvh; overflow: auto; }
-      .guide ol { margin: 0 0 6px; padding-left: 22px; }
-      .guide li { margin: 4px 0; }
-      .guide .muted { color: var(--muted); font-size: 0.9em; margin: 0; }
-      .guide .close { margin-top: 8px; }
+      /* The tour: one thing to do at a time, in plain words. */
+      .tour { background: var(--surface); border-bottom: 2px solid var(--line); padding: 14px 18px; display: grid; grid-template-columns: 1fr auto; gap: 8px 18px; align-items: center; }
+      .tour .count { font-size: 0.85em; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+      .tour h2 { margin: 2px 0 4px; font-size: 1.3em; line-height: 1.25; }
+      .tour p { margin: 0; color: var(--muted); }
+      .tour .controls { display: flex; flex-direction: column; gap: 8px; align-items: stretch; min-width: 220px; }
+      .tour .nav { display: flex; gap: 8px; }
+      .tour .nav button { flex: 1; }
+      .tour .dots { display: flex; gap: 6px; margin-top: 8px; }
+      .tour .dots i { width: 28px; height: 6px; border-radius: 3px; background: var(--line); display: block; }
+      .tour .dots i.on { background: var(--accent); }
+      .tour.min { grid-template-columns: 1fr auto; padding: 8px 18px; }
+      .tour.min h2, .tour.min p, .tour.min .dots, .tour.min .controls .do { display: none; }
 
-      .bar { display: flex; gap: 8px; align-items: center; padding: 6px 16px; border-bottom: 1px solid var(--line); }
-      .bar .short { display: none; }
-      .bar b { font-size: 0.85em; color: var(--muted); font-weight: 600; flex: none; }
-      .bar button { flex: none; }
+      .bar { display: flex; gap: 8px; align-items: center; padding: 8px 18px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+      .bar b { font-size: 0.9em; color: var(--muted); font-weight: 600; flex: none; }
+      .bar button { flex: none; min-height: 44px; padding: 6px 14px; }
       .bar .spacer { flex: 1; }
+      #expand { display: none; }
 
-      main { flex: 1; display: grid; grid-template-columns: minmax(0, 1fr) 440px; min-height: 0; }
+      main { flex: 1; display: grid; grid-template-columns: minmax(0, 1fr) 460px; min-height: 0; }
       iframe { width: 100%; height: 100%; border: 0; display: block; }
       #site { border-right: 1px solid var(--line); background: #fff; }
-      #expand { display: none; }
 
       /* Phones and narrow windows: the website on top and Saathi below, both visible at once. */
       @media (max-width: 900px) {
         header .tag { display: none; }
-        .bar { padding: 6px 12px; gap: 6px; }
-        .bar button { padding: 6px 10px; }
+        header { padding: 6px 14px; }
+        .tour { grid-template-columns: 1fr; padding: 8px 14px; gap: 6px; }
+        .tour .count { font-size: 0.75em; }
+        .tour h2 { font-size: 1.05em; margin: 0; }
+        .tour p { font-size: 0.9em; }
+        .tour .dots { display: none; }
+        .tour .controls { flex-direction: row; min-width: 0; gap: 8px; align-items: center; }
+        .tour .controls .do { flex: 1 1 auto; }
+        .tour .nav { flex: none; }
+        .tour .nav button { flex: none; padding: 6px 12px; min-height: 44px; }
+        #tour-min { flex: none; padding: 6px 12px; min-height: 44px; }
+        .bar { padding: 6px 12px; gap: 6px; flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; }
         .bar b { display: none; }
-        .bar .long { display: none; }
-        .bar .short { display: inline; }
+        .bar button { white-space: nowrap; }
         main { display: flex; flex-direction: column; }
         #site { flex: 1 1 0; min-height: 120px; border-right: 0; border-bottom: 2px solid var(--accent); }
         #panel { flex: 0 0 var(--panel-h, 46dvh); padding-bottom: env(safe-area-inset-bottom); }
@@ -64,31 +82,30 @@
   </head>
   <body>
     <header>
-      <h1>Try Saathi</h1>
-      <span class="tag">No extension needed. This page stands in for the Chrome extension, using the same code.</span>
-      <button id="guide-toggle" aria-expanded="true" aria-controls="guide">How to try</button>
+      <a class="home" href="/"><img src="/icon-192.png" alt="" />Saathi</a>
+      <span class="tag">Try it here. The website on the left is a practice website. Nothing on it is real.</span>
     </header>
 
-    <div class="guide" id="guide">
-      <ol>
-        <li>In Saathi (right of the website on a computer, below it on a phone), press <b>I am setting this up for my family</b>. Open <b>Show the way</b>, name a path and press <b>Start</b>.</li>
-        <li>On the practice website press <i>Pay your bill</i>, click the boxes, press <i>Check bill</i>, then <i>Pay now</i>. In Saathi press <b>Finish and save</b>.</li>
-        <li>Choose <b>Labels renamed</b> under the title. In Saathi, on the <b>Follow</b> tab, press <b>Start</b>. It finds the buttons even though their names changed.</li>
-        <li>Switch the language, or open <b>Get help</b>, press <b>Ask my helper</b> and open <a href="/help.html" target="_blank" rel="noopener">the helper page</a> on a phone.</li>
-        <li>Choose <b>Pretend scam page</b> under the title. A red warning appears on the page, in the language you chose, saying why. In Saathi press <b>Tell my family</b>, then open <a href="/help.html" target="_blank" rel="noopener">the helper page</a> with the same group code to see the alert.</li>
-        <li>Open <b>Get help</b> and under <b>Got a strange message?</b> paste a pretend scam text, for example: <i>Dear customer your Nabil Bank account will be blocked within 24 hours. Update your KYC now: http://nabilbank-kyc.top/login</i>. Press <b>Check a message</b>. Nothing is sent anywhere.</li>
-        <li>Under <b>Practice: spot the scam</b> press <b>Start practice</b> and answer six made-up messages. Saathi shows its own verdict after each one.</li>
-      </ol>
-      <p class="muted">No extension and no login are needed. The practice website is made up; nothing here is real and nothing is paid. The on-device model needs desktop Chrome; without it, everything except the last re-finding step still works.</p>
-      <button class="close" id="guide-close">Hide this</button>
-    </div>
+    <section class="tour" id="tour" aria-live="polite">
+      <div>
+        <div class="count" id="tour-count"></div>
+        <h2 id="tour-title"></h2>
+        <p id="tour-text"></p>
+        <div class="dots" id="tour-dots" aria-hidden="true"></div>
+      </div>
+      <div class="controls">
+        <button class="primary do" id="tour-do"></button>
+        <div class="nav"><button id="tour-back">Back</button><button id="tour-next">Next</button></div>
+        <button id="tour-min" aria-expanded="true">Hide</button>
+      </div>
+    </section>
 
-    <div class="bar" role="group" aria-label="Practice website version">
-      <b>Website:</b>
-      <button data-variant="" aria-pressed="true">Original</button>
-      <button data-variant="?v=2" aria-pressed="false" aria-label="Labels renamed"><span class="long">Labels renamed</span><span class="short">Renamed</span></button>
-      <button data-variant="?v=3" aria-pressed="false" title="Needs the on-device model" aria-label="Labels and names renamed (needs the on-device model)"><span class="long">Names renamed too</span><span class="short">Harder</span></button>
-      <button data-variant="scam" aria-pressed="false" aria-label="A pretend scam page"><span class="long">Pretend scam page</span><span class="short">Scam</span></button>
+    <div class="bar" role="group" aria-label="Which version of the practice website">
+      <b>The website:</b>
+      <button data-variant="" aria-pressed="true">As it was</button>
+      <button data-variant="?v=2" aria-pressed="false" aria-label="After a redesign: some buttons have new names">After a redesign</button>
+      <button data-variant="?v=3" aria-pressed="false" title="A bigger redesign. Needs the on-device model in Chrome." aria-label="A bigger redesign (needs the on-device model)">A bigger redesign</button>
+      <button data-variant="scam" aria-pressed="false" aria-label="A pretend fake bank page">A fake bank page</button>
       <span class="spacer"></span>
       <button id="expand" aria-pressed="false" aria-label="Make Saathi taller">Taller</button>
     </div>

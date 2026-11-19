@@ -141,18 +141,133 @@ document.querySelectorAll('[data-variant]').forEach((button) =>
   }),
 );
 
-// ---------- The guide, and the panel height on a phone ----------
+// ---------- The tour: one thing to try at a time ----------
 
-const guide = $('guide');
-const toggle = $('guide-toggle');
-const setGuide = (open) => {
-  guide.hidden = !open;
-  toggle.setAttribute('aria-expanded', String(open));
+const EXAMPLE_MESSAGE = 'Dear customer your Nabil Bank account will be blocked within 24 hours. Update your KYC now: http://nabilbank-kyc.top/login';
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const panelDoc = () => panelFrame.contentDocument;
+const demoApi = async () => {
+  for (let i = 0; i < 80; i++) {
+    const api = panelFrame.contentWindow?.__saathiDemo;
+    if (api) return api;
+    await sleep(250);
+  }
+  throw new Error('Saathi is still starting. Try again in a moment.');
 };
-// Open on a computer, where there is room. Closed on a phone, so the website and Saathi fill the screen.
-setGuide(!matchMedia('(max-width: 900px)').matches);
-toggle.addEventListener('click', () => setGuide(guide.hidden));
-$('guide-close').addEventListener('click', () => setGuide(false));
+const pressVariant = (v) => document.querySelector(`[data-variant="${v}"]`)?.click();
+
+const STEPS = [
+  {
+    title: 'Meet your family’s guide',
+    text: 'Someone in the family has already shown the way to pay an electricity bill. Press the button to get that guide.',
+    action: 'Get the guide',
+    run: async () => {
+      const api = await demoApi();
+      await api.makeSample();
+    },
+  },
+  {
+    title: 'Now follow it, one step at a time',
+    text: 'Saathi points to the right button and says what to do. You press it, and Saathi moves on. It never presses for you.',
+    action: 'Start the guide',
+    run: async () => {
+      pressVariant('');
+      await sleep(1500);
+      await demoApi();
+      panelDoc().getElementById('fo-stop')?.click();
+      panelDoc().querySelector('[data-start]')?.click();
+    },
+  },
+  {
+    title: 'What if the website changes?',
+    text: 'Websites rename their buttons all the time. Saathi finds the right one anyway, or tells you honestly when it is not sure.',
+    action: 'Change the website, then start again',
+    run: async () => {
+      await demoApi();
+      panelDoc().getElementById('fo-stop')?.click();
+      pressVariant('?v=2');
+      await sleep(2500);
+      panelDoc().querySelector('[data-start]')?.click();
+    },
+  },
+  {
+    title: 'Is this page safe?',
+    text: 'If a page looks like a fake bank, Saathi shows a warning and says why, in your language. Press the button to see a pretend fake bank page.',
+    action: 'Show a fake bank page',
+    run: async () => {
+      await demoApi();
+      panelDoc().getElementById('fo-stop')?.click();
+      pressVariant('scam');
+    },
+  },
+  {
+    title: 'Got a strange message?',
+    text: 'Paste a text or an email and Saathi tells you if it looks like a scam. Nothing is sent anywhere.',
+    action: 'Try an example message',
+    run: async () => {
+      const api = await demoApi();
+      await api.openMessage(EXAMPLE_MESSAGE);
+      await sleep(300);
+      panelDoc().getElementById('msg-check')?.click();
+    },
+  },
+  {
+    title: 'That is Saathi',
+    text: 'You can make your own guide in the “Make a guide” tab. A family member can open the family page on their phone to help when someone is stuck.',
+    action: 'Open the family page',
+    run: async () => {
+      window.open('/help.html', '_blank', 'noopener');
+    },
+  },
+];
+
+let at = 0;
+const tour = $('tour');
+function renderTour() {
+  const step = STEPS[at];
+  $('tour-count').textContent = `Step ${at + 1} of ${STEPS.length}`;
+  $('tour-title').textContent = step.title;
+  $('tour-text').textContent = step.text;
+  $('tour-do').textContent = step.action;
+  $('tour-back').disabled = at === 0;
+  $('tour-next').disabled = at === STEPS.length - 1;
+  $('tour-dots').innerHTML = STEPS.map((_, i) => `<i class="${i === at ? 'on' : ''}"></i>`).join('');
+}
+$('tour-do').addEventListener('click', async (ev) => {
+  const btn = ev.currentTarget;
+  btn.disabled = true;
+  const label = btn.textContent;
+  btn.textContent = 'One moment…';
+  try {
+    await STEPS[at].run();
+    if (at < STEPS.length - 1) {
+      at += 1;
+      renderTour();
+    }
+  } catch (err) {
+    $('tour-text').textContent = err?.message ?? 'That did not work. Try again.';
+    btn.textContent = label;
+  } finally {
+    btn.disabled = false;
+  }
+});
+$('tour-back').addEventListener('click', () => {
+  at = Math.max(0, at - 1);
+  renderTour();
+});
+$('tour-next').addEventListener('click', () => {
+  at = Math.min(STEPS.length - 1, at + 1);
+  renderTour();
+});
+$('tour-min').addEventListener('click', (ev) => {
+  const min = tour.classList.toggle('min');
+  ev.currentTarget.textContent = min ? 'Show' : 'Hide';
+  ev.currentTarget.setAttribute('aria-expanded', String(!min));
+});
+// A link from the home page can start in the middle: try.html#message
+if (location.hash === '#message') at = 4;
+else if (location.hash === '#scam') at = 3;
+renderTour();
 
 $('expand').addEventListener('click', (ev) => {
   const tall = document.body.classList.toggle('tall');

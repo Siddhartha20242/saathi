@@ -95,7 +95,7 @@ function renderList() {
 
 $('group-join').addEventListener('click', () => {
   const code = normaliseGroup($('group-code').value);
-  if (!GROUP_RE.test(code)) return say('group-msg', 'A group code has 8 letters and numbers, for example K7M2QX4P.', 'bad');
+  if (!GROUP_RE.test(code)) return say('group-msg', 'A family code has 8 letters and numbers, for example K7M2QX4P.', 'bad');
   join(code);
 });
 $('group-leave').addEventListener('click', () => {

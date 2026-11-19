@@ -340,9 +340,9 @@ async function refreshLibrary() {
   const list = $('lib-list');
   if (!state.group) {
     list.innerHTML = '';
-    return say('lib-msg', 'Join or start a group to see its paths.');
+    return say('lib-msg', 'Join or start a family to see its guides.');
   }
-  say('lib-msg', 'Loading paths…');
+  say('lib-msg', 'Loading guides…');
   try {
     state.paths = await listPaths(state.group);
     const fromCache = state.paths.some((p) => p.fromCache);
@@ -363,10 +363,10 @@ async function refreshLibrary() {
         ? fromCache
           ? 'Showing the copy saved on this laptop. It updates when you are online.'
           : ''
-        : 'No paths in this group yet. Open "Show the way" to record the first one.',
+        : 'No guides for this family yet. Open "Make a guide" to make the first one.',
     );
   } catch (err) {
-    say('lib-msg', `Could not load paths: ${err.message}`, 'bad');
+    say('lib-msg', `Could not load guides: ${err.message}`, 'bad');
   }
 }
 
@@ -435,7 +435,7 @@ async function tellFamily(data) {
   }
   const alert = data ?? (guardNow && { host: guardNow.host, brand: guardNow.brand ?? '', level: guardNow.level, reasons: guardNow.reasons.map((r) => r.code) });
   if (!alert) return;
-  if (!state.group) return say('guard-msg', 'Join a group first.', 'bad');
+  if (!state.group) return say('guard-msg', 'Join a family first.', 'bad');
   try {
     await createAlert(state.group, alert);
     say('guard-msg', warning({ level: 'stop', reasons: [] }, state.lang).sent, 'ok');
@@ -683,7 +683,7 @@ function voiceError(err) {
 
 $('voice-go').addEventListener('click', async () => {
   if (voice.busy) return voice.stop?.(); // tapping again ends the recording
-  if (!state.paths.length) return say('voice-out', 'There are no paths in this group yet. Open "Show the way" to record the first one.', 'bad');
+  if (!state.paths.length) return say('voice-out', 'There are no guides for this family yet. Open "Make a guide" to make the first one.', 'bad');
   voice.busy = true;
   voiceUi('listening');
   $('voice-perm').hidden = true;
@@ -727,7 +727,7 @@ function renderSteps() {
 function addRecorded(raw) {
   const step = sanitizeStep(raw);
   if (sameStep(state.steps[state.steps.length - 1], step)) return;
-  if (state.steps.length >= MAX_STEPS) return say('rec-msg', `That is ${MAX_STEPS} steps, the most a path can have.`, 'bad');
+  if (state.steps.length >= MAX_STEPS) return say('rec-msg', `That is ${MAX_STEPS} steps, the most one guide can have.`, 'bad');
   state.steps.push(step);
   renderSteps();
 }
@@ -748,8 +748,8 @@ function recordingUi(on) {
 }
 
 $('rec-start').addEventListener('click', async () => {
-  if (!state.group) return say('rec-msg', 'Join or start a group first (step 1).', 'bad');
-  if (!$('rec-title').value.trim()) return say('rec-msg', 'Give the path a name first.', 'bad');
+  if (!state.group) return say('rec-msg', 'Join or start a family first.', 'bad');
+  if (!$('rec-title').value.trim()) return say('rec-msg', 'Give the guide a name first.', 'bad');
   try {
     state.steps = [];
     renderSteps();
@@ -789,24 +789,12 @@ $('rec-save').addEventListener('click', async () => {
     return;
   }
   try {
-    let translations = {};
-    let note = '';
-    if (state.config.cloudEnabled && state.config.languages.length) {
-      say('rec-msg', `Translating ${steps.length} step labels in the cloud. Only the path name and the written steps are sent, nothing you typed…`);
-      try {
-        translations = await withTimeout(translatePath({ title, steps }, state.config.languages), 45000);
-      } catch (err) {
-        note = ` Saved without translations (${err.message}).`;
-      }
-    } else {
-      note = ' The cloud is switched off, so there are no translations.';
-    }
-    await savePath(state.group, { title, host: state.host, steps, translations });
+    const note = await persistGuide(title, steps, state.host);
     state.steps = [];
     renderSteps();
     recordingUi(false);
     $('rec-title').value = '';
-    say('rec-msg', `Saved "${title}" with ${steps.length} steps for group ${state.group}.${note}`, 'ok');
+    say('rec-msg', `Saved "${title}" with ${steps.length} steps for your family.${note}`, 'ok');
     await refreshLibrary();
   } catch (err) {
     recordingUi(false);
@@ -815,6 +803,58 @@ $('rec-save').addEventListener('click', async () => {
     $('rec-save').disabled = false;
   }
 });
+
+/** Translates (when the cloud is on) and saves a guide for the family. Returns a note to show when something was skipped. */
+async function persistGuide(title, steps, host) {
+  let translations = {};
+  let note = '';
+  if (state.config.cloudEnabled && state.config.languages.length) {
+    say('rec-msg', `Translating ${steps.length} step labels in the cloud. Only the guide name and the written steps are sent, nothing you typed…`);
+    try {
+      translations = await withTimeout(translatePath({ title, steps }, state.config.languages), 45000);
+    } catch (err) {
+      note = ` Saved without translations (${err.message}).`;
+    }
+  } else {
+    note = ' The cloud is switched off, so there are no translations.';
+  }
+  await savePath(state.group, { title, host, steps, translations });
+  return note;
+}
+
+// The try page can ask for a ready-made guide, so a first visit does not have to start by recording one.
+const SAMPLE_STEPS = [
+  { role: 'link', text: 'Pay your bill', section: 'Menu', page: '/demo/index.html', href: '/demo/bill.html', name: '' },
+  { role: 'field', text: 'Customer ID', section: 'Pay your bill', page: '/demo/bill.html', href: '', name: 'customer' },
+  { role: 'select', text: 'Branch office', section: 'Pay your bill', page: '/demo/bill.html', href: '', name: 'branch' },
+  { role: 'button', text: 'Check bill', section: 'Pay your bill', page: '/demo/bill.html', href: '', name: 'check' },
+  { role: 'button', text: 'Pay now', section: 'Bill details', page: '/demo/details.html', href: '', name: 'pay' },
+];
+
+async function ensureFamily() {
+  if (!state.group) await setGroup(newGroupCode());
+  $('sec-next').hidden = true;
+}
+
+if (inDemo) {
+  window.__saathiDemo = {
+    async makeSample() {
+      await ensureFamily();
+      const steps = SAMPLE_STEPS.map(sanitizeStep);
+      await persistGuide('Pay the electricity bill', steps, location.hostname);
+      showTab('follow');
+      await refreshLibrary();
+      return state.paths.length;
+    },
+    async openMessage(text) {
+      await ensureFamily();
+      showTab('help');
+      $('msg-text').value = text ?? '';
+      $('msg-text').scrollIntoView({ block: 'center' });
+      $('msg-text').focus();
+    },
+  };
+}
 
 // ---------- Following ----------
 
@@ -875,10 +915,10 @@ function setHow(text, kind = '') {
 }
 
 const HOW = {
-  code: 'Found by its label.',
-  anchor: 'The label changed, but the link or box underneath is the same.',
-  model: 'The label changed. Found by the on-device model.',
-  cloud: 'The label changed. The cloud found it, with your OK. It saw only button and link names.',
+  code: 'I found it on the page.',
+  anchor: 'The name changed, but it goes to the same place, so I found it.',
+  model: 'The name changed. Saathi found it using the AI on this device.',
+  cloud: 'The name changed. With your OK, the cloud AI found it. It saw only button and link names.',
 };
 
 const askLocal = async (prompt) => {
@@ -972,7 +1012,7 @@ async function showStep() {
     if (state.follow !== f || f.index !== index) return;
     if (!originMatches(f.path.host, page.host)) {
       $('fo-warn').hidden = false;
-      $('fo-warn').textContent = `This is not the website this path was recorded on (${f.path.host}). Stop here. Do not type anything on this page.`;
+      $('fo-warn').textContent = `This is not the website this guide was made on (${f.path.host}). Stop here. Do not type anything on this page.`;
       return setHow('');
     }
     const step = f.path.steps[index];
@@ -1168,7 +1208,7 @@ function endHelp() {
 }
 
 $('help-ask').addEventListener('click', async () => {
-  if (!state.group) return say('help-msg', 'Join or start a group first (step 1).', 'bad');
+  if (!state.group) return say('help-msg', 'Join or start a family first.', 'bad');
   say('help-msg', 'Reading the page…');
   try {
     const page = await callExtension('scan');
@@ -1281,7 +1321,7 @@ $('t-cloud').addEventListener('click', (ev) => modelTest('ONLY_IN_CLOUD', 'o-clo
 
 $('t-find').addEventListener('click', async (ev) => {
   const label = $('f-label').value.trim();
-  if (!label) return say('o-find', 'Type a label first.', 'bad');
+  if (!label) return say('o-find', 'Type a name first.', 'bad');
   const btn = ev.currentTarget; // ev.currentTarget is empty once the handler has awaited
   btn.disabled = true;
   say('o-find', 'Reading the page…');
@@ -1337,7 +1377,7 @@ async function start() {
   watchFamilyAlerts();
   if (state.group) cleanUpOwn(state.group).catch(() => {});
   if (state.group) await refreshLibrary();
-  else say('lib-msg', 'Join or start a group to see its paths.');
+  else say('lib-msg', 'Join or start a family to see its guides.');
 }
 
 start();

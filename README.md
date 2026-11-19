@@ -27,17 +27,15 @@ The older person's data stays with them by design: the page they are on is read 
 
 **https://paperwork-decoder.web.app/try.html**
 
-The practice website (a made-up electricity board) is on the left and the real Saathi panel is on the right. A short guide at the top says what to press. The page stands in for the Chrome extension and runs the extension's own page script, so you are trying the real logic.
+The practice website (a made-up electricity board) is on the left and the real Saathi panel is on the right. A tour across the top walks through six steps in plain words, and each step has one button that does it for you, so nobody has to read a manual or record anything first: **Get the guide** (a ready-made guide a family member "made"), **Start the guide** (Saathi points at each button), **Change the website** (the buttons are renamed and Saathi still finds them, or says it is not sure), **Show a fake bank page** (the scam warning), **Try an example message** (the message checker), and a last card that links to the family page. The page stands in for the Chrome extension and runs the extension's own page script, so you are trying the same code. [tools/e2e-tour.mjs](tools/e2e-tour.mjs) walks the tour on the live page (9 of 9 checks).
 
-1. On the right, press **I am setting this up for my family**, then **Invite** to send the code and a helper link to family (the link opens the helper page already joined). Under *Show the way once*, name a path and press **Start**.
-2. On the left, press *Pay your bill*, click the two boxes, press *Check bill*, then *Pay now*. Press **Finish and save**.
-3. Above the website, choose **Labels renamed**. Under *Follow a path*, press **Start**. The guide finds each button even though its name changed, and tells you how it found it.
-4. Press **Speak** and say, in Nepali, Hindi or English, what you need, for example "I need to pay the electricity bill". Saathi understands you, picks the matching path and starts guiding. It asks for the microphone; the recording goes to the cloud only when you press Speak.
-5. Switch the language to नेपाली or हिन्दी. Turn on large text or read-aloud.
-6. Press **Ask my helper**, then open [/help.html](https://paperwork-decoder.web.app/help.html) on a phone, enter the group code and tap a control.
-7. Choose **Pretend scam page** under the title. A red warning appears on the page, in the language you chose. Press **Tell my family**, then open the helper page with the same group code to see the alert. The pretend page is made inside your browser and is never a page on the hosted site.
-8. Open **Get help**, paste a pretend scam text under *Got a strange message?* (for example `Dear customer your Nabil Bank account will be blocked within 24 hours. Update your KYC now: http://nabilbank-kyc.top/login`) and press **Check a message**. A red warning appears in the language you chose, with the reasons. Nothing is sent anywhere.
-9. Under **Practice: spot the scam**, press **Start practice** and answer six made-up messages. Saathi shows its own verdict and the reasons after each one.
+Everything else is still there if you want to go further:
+
+1. Open **Make a guide**, name it, press **Start**, do the task on the website once (*Pay your bill*, the two boxes, *Check bill*, *Pay now*), and press **Finish and save**. Press **Invite** to send the family code and a helper link to someone.
+2. Press **Speak** and say, in Nepali, Hindi or English, what you need, for example "I need to pay the electricity bill". It asks for the microphone; the recording goes to the cloud only when you press Speak.
+3. Switch the language to नेपाली or हिन्दी. Turn on large text or read-aloud.
+4. Open **Get help**, press **Ask my helper**, then open [/help.html](https://paperwork-decoder.web.app/help.html) on a phone, enter the family code and tap a control. Or pick **A fake bank page**, press **Tell my family**, and see the alert on the helper page.
+5. Under **Practice: spot the scam**, press **Start practice** and answer six made-up messages. Saathi shows its own verdict and the reasons after each one.
 
 No login is needed. Nothing is paid and nothing on the practice website is real. It works on a phone too: the website sits above Saathi, so both are on screen at once (see below).
 
@@ -269,7 +267,7 @@ Caveats: the earlier improvements were designed after looking at failures on the
 
 The strong cloud model needs none of the careful checks that the small on-device model does, and one call is half the time. The cost is that for a control that has been removed, it twice picked a near-synonym ("Socialize" matched to "Community") instead of saying it is not sure. Timings varied a lot between runs. For comparison, the on-device model found 14 of the same 22 renamed controls. What was not verified end to end: pressing the button in a normal Chrome and watching the cloud's answer get highlighted. In a headless browser the button appeared with the right text and sent nothing before the click, and App Check refused the cloud call for that automated browser; the cloud's finding itself was measured through the same code above.
 
-**Speaking a request.** On the Follow tab, **Speak** records up to 8 seconds, sends the recording and the titles of the group's paths to the cloud model, and starts the path it picks. It exists because the on-device model does not understand Nepali speech, so this is a task where the cloud is genuinely needed. It shows what it heard, in the language spoken and in English, and it refuses when no path matches. Tested in a normal Chrome with a fake microphone playing speech made by the Mac's text-to-speech, against a group with one path ("Pay the electricity bill", with Nepali and Hindi titles):
+**Speaking a request.** On the My guides tab, **Speak** records up to 8 seconds, sends the recording and the titles of the group's paths to the cloud model, and starts the path it picks. It exists because the on-device model does not understand Nepali speech, so this is a task where the cloud is genuinely needed. It shows what it heard, in the language spoken and in English, and it refuses when no path matches. Tested in a normal Chrome with a fake microphone playing speech made by the Mac's text-to-speech, against a group with one path ("Pay the electricity bill", with Nepali and Hindi titles):
 
 | Spoken | Heard | Result |
 |---|---|---|
@@ -314,7 +312,7 @@ The harder redesign ran in a headless Chrome that has no on-device model, so "de
 The panel is built for someone who is not used to computers.
 
 - **The step comes first.** While following a path, the current step is the first and largest thing on screen, with a progress bar, one big button ("I did it, next") and the privacy line. The group form and the path list step out of the way.
-- **Three tabs, one job each:** Follow, Show the way, Get help. Once a group is joined, its code sits in a slim bar with a Copy button.
+- **Three tabs, one job each:** My guides, Make a guide, Get help. Once a group is joined, its code sits in a slim bar with a Copy button.
 - **Nothing appears until it has something to say.** Messages are hidden when empty, and a first visit shows one card with one clear action.
 - **Large targets and text:** controls are at least 48 px tall, with a Large text switch that enlarges the step card further, and Nepali and Hindi next to English at the top of the Follow tab.
 - **Light and dark** themes follow the system setting, motion is reduced when the system asks for it, tabs work with the arrow keys, and every control has a visible focus ring.
