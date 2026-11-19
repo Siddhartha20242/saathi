@@ -2,9 +2,9 @@
 // Firebase AI Logic, App Check, Auth, Firestore and Remote Config work here as on the web.
 // The extension around it only reads the open tab's controls and draws the highlight.
 
-import { run, deviceStatus, getUsage } from './firebase.js';
+import { run, deviceStatus, getUsage, synthesize } from './firebase.js';
 import { refind, codeFind, cloudPreview } from './refind.js';
-import { isPersonalControl, isPersonalText } from './masking.js';
+import { isPersonalControl, isPersonalText, maskText } from './masking.js';
 import { recordSpeech } from './audio.js';
 import { voicePrompt, parseVoice, VOICE_SCHEMA } from './voice.js';
 import { warning, messageWarning } from './guardText.js';
@@ -16,6 +16,7 @@ import {
   sanitizeStep, sameStep, stepInstruction, originMatches, validatePath, newGroupCode, normaliseGroup, inviteText, joinCodeFrom, GROUP_RE, LANGS, MAX_STEPS,
 } from './path.js';
 import { chooseVoice } from './speech.js';
+import { planSpeech, deviceFallback, spokenText, ttsPrompt, playable, isQuotaError, BLOCK_HOURS, TTS_VOICE, TTS_LANGUAGE } from './tts.js';
 import { whereIs } from './where.js';
 import { askMode, askPrompt, cleanQuestion, cleanAnswer } from './ask.js';
 import { controlsForHelp, helpPreview, cleanTitle } from './help.js';
@@ -55,6 +56,7 @@ const state = {
   done: false,
   lang: store.get('saathi:lang') || 'en',
   big: store.get('saathi:big') === '1',
+  cloudVoice: store.get('saathi:cloudVoice') !== '0',
   speak: false,
 };
 window.__saathi = state; // read by the end-to-end test
@@ -132,6 +134,7 @@ function renderChips() {
   $('dot-cloud').className = `dot ${state.config.cloudEnabled ? 'ok' : 'off'}`;
   document.body.classList.toggle('big', state.big);
   $('opt-big').setAttribute('aria-pressed', String(state.big));
+  $('opt-voice').setAttribute('aria-pressed', String(state.cloudVoice));
   $('opt-speak').setAttribute('aria-pressed', String(state.speak));
   // Speaking needs a microphone and the cloud, because the on-device model does not understand Nepali speech.
   $('voice').hidden = !(joined && navigator.mediaDevices?.getUserMedia && state.config.cloudEnabled);
@@ -846,6 +849,11 @@ if (inDemo) {
       await refreshLibrary();
       return state.paths.length;
     },
+    // For checking the voice: how many bytes of audio a sentence becomes, with and without the instruction in front.
+    async voiceBytes(text, lang, withInstruction = true, prompt = null) {
+      const audio = await synthesize({ prompt: prompt ?? (withInstruction ? ttsPrompt(text) : spokenText(text)), languageCode: TTS_LANGUAGE[lang], voiceName: TTS_VOICE });
+      return atob(audio.data).length;
+    },
     async openMessage(text) {
       await ensureFamily();
       showTab('help');
@@ -870,25 +878,98 @@ const WORDS = {
   hi: { step: (i, n) => `चरण ${i} / ${n}`, done: 'आपने खुद कर दिखाया। साथी ने बस रास्ता दिखाया।', tell: 'परिवार को खबर भेजिए कि मेरा काम हो गया', told: 'आपके परिवार को खबर भेज दी गई है। बहुत बढ़िया!', noGroup: 'परिवार को बताने के लिए किसी समूह से जुड़िए।' },
 };
 const VOICE_NOTE = {
-  ne: { none: 'यो उपकरणमा नेपाली आवाज छैन। कृपया लेखिएको पढ्नुहोस्।', fallback: 'यो उपकरणमा नेपाली आवाज छैन, त्यसैले हिन्दी आवाज प्रयोग भयो।' },
-  hi: { none: 'इस उपकरण में हिन्दी आवाज़ नहीं है। कृपया लिखा हुआ पढ़िए।' },
-  en: { none: '' },
+  ne: { limit: 'साथीको आवाजको आजको निःशुल्क सीमा सकियो। यो उपकरणको आवाज प्रयोग हुँदैछ, वा लेखिएको पढ्नुहोस्।', cloud: 'साथीको आवाज: वाक्य क्लाउडमा पठाइन्छ र आवाज बनाइन्छ।', none: 'यो उपकरणमा नेपाली आवाज छैन। कृपया लेखिएको पढ्नुहोस्।', fallback: 'यो उपकरणमा नेपाली आवाज छैन, त्यसैले हिन्दी आवाज प्रयोग भयो।' },
+  hi: { limit: 'साथी की आवाज़ की आज की मुफ़्त सीमा पूरी हो गई। इस उपकरण की आवाज़ इस्तेमाल हो रही है, या लिखा हुआ पढ़िए।', cloud: 'साथी की आवाज़: वाक्य क्लाउड में भेजा जाता है और आवाज़ बनती है।', none: 'इस उपकरण में हिन्दी आवाज़ नहीं है। कृपया लिखा हुआ पढ़िए।' },
+  en: { limit: 'The Saathi voice has reached its free limit for today. Using the voice on this device, or please read the text.', cloud: 'Saathi voice: only the sentence is sent to the cloud to be spoken.', none: '' },
 };
 
-function speak(text, lang) {
+// Read-aloud. Nepali and Hindi come from Firebase AI Logic's text-to-speech when the cloud is on; English uses the
+// voice on this device when it has one. Anything that fails falls back to the voice on the device, then to the text.
+let speaking = 0; // each call gets a number, so an older, slower voice never plays over a newer one
+let player = null;
+const spokenCache = new Map(); // sentence + language -> audio, so a repeated step is not fetched twice
+
+// When the cloud voice says its free daily limit is used up, stop asking for a while and use the device voice.
+const blockedUntil = () => Number(store.get('saathi:ttsBlockedUntil') || 0);
+const ttsBlocked = () => blockedUntil() > Date.now();
+const blockTts = () => store.set('saathi:ttsBlockedUntil', String(Date.now() + BLOCK_HOURS * 3600e3));
+
+function stopSpeaking() {
+  speaking += 1;
   try {
-    speechSynthesis.cancel();
-    const pick = chooseVoice(speechSynthesis.getVoices(), lang);
-    if (!pick.voice) {
-      $('read-note').textContent = VOICE_NOTE[lang]?.none ?? '';
-      return; // nothing suitable is installed: the text stays on screen
-    }
-    $('read-note').textContent = pick.fallback ? VOICE_NOTE[lang].fallback : '';
+    player?.pause();
+  } catch {
+    // nothing playing
+  }
+  player = null;
+  try {
+    stopSpeaking();
+  } catch {
+    // no speech on this device
+  }
+}
+
+function speakOnDevice(text, lang, plan) {
+  try {
     const u = new SpeechSynthesisUtterance(text);
-    u.voice = pick.voice;
-    u.lang = pick.lang;
+    u.voice = plan.voice;
+    u.lang = plan.voiceLang;
     speechSynthesis.speak(u);
-  } catch { /* no voice available */ }
+  } catch {
+    // no voice available
+  }
+}
+
+async function playCloud(text, lang, turn) {
+  const key = `${lang}|${text}`;
+  let audio = spokenCache.get(key);
+  if (!audio) {
+    audio = await withTimeout(synthesize({ prompt: ttsPrompt(text), languageCode: TTS_LANGUAGE[lang], voiceName: TTS_VOICE }), 20000);
+    spokenCache.set(key, audio);
+  }
+  if (turn !== speaking) return; // the person moved on while it was being made
+  const raw = Uint8Array.from(atob(audio.data), (c) => c.charCodeAt(0));
+  const { bytes, type } = playable(raw, audio.mimeType);
+  state.lastSpeech = { mime: audio.mimeType, bytes: raw.length, played: type };
+  const url = URL.createObjectURL(new Blob([bytes], { type }));
+  player = new Audio(url);
+  player.addEventListener('ended', () => URL.revokeObjectURL(url), { once: true });
+  await player.play();
+}
+
+async function speak(text, lang) {
+  stopSpeaking();
+  const turn = speaking;
+  // Personal details are masked before a sentence is sent anywhere, and only a short sentence is sent.
+  const sentence = spokenText(maskText(String(text ?? '')).masked);
+  if (!sentence) return;
+  const voices = typeof speechSynthesis !== 'undefined' ? speechSynthesis.getVoices() : [];
+  const plan = planSpeech(voices, lang, { cloudEnabled: state.config.cloudEnabled, cloudVoice: state.cloudVoice, blocked: ttsBlocked() });
+  const note = $('read-note');
+  if (plan.source === 'device') {
+    note.textContent = plan.fallback ? VOICE_NOTE[lang]?.fallback ?? '' : '';
+    return speakOnDevice(sentence, lang, plan);
+  }
+  if (plan.source === 'cloud') {
+    note.textContent = (VOICE_NOTE[lang] ?? VOICE_NOTE.en).cloud;
+    try {
+      await playCloud(sentence, lang, turn);
+      return;
+    } catch (err) {
+      const quota = isQuotaError(err);
+      if (quota) blockTts();
+      state.lastSpeech = { ...(state.lastSpeech ?? {}), error: `${err?.name ?? ''} ${String(err?.message ?? '').slice(0, 120)}`.trim(), quota };
+      if (turn !== speaking) return;
+      const back = deviceFallback(voices, lang);
+      if (back.source === 'device') {
+        note.textContent = quota ? (VOICE_NOTE[lang] ?? VOICE_NOTE.en).limit : back.fallback ? VOICE_NOTE[lang]?.fallback ?? '' : '';
+        return speakOnDevice(sentence, lang, back);
+      }
+      note.textContent = quota ? (VOICE_NOTE[lang] ?? VOICE_NOTE.en).limit : VOICE_NOTE[lang]?.none ?? '';
+      return;
+    }
+  }
+  note.textContent = ttsBlocked() ? (VOICE_NOTE[lang] ?? VOICE_NOTE.en).limit : VOICE_NOTE[lang]?.none ?? '';
 }
 
 const instructionIn = (path, i, lang) => path.translations?.[lang]?.steps?.[i] ?? null;
@@ -1130,7 +1211,7 @@ $('fo-stop').addEventListener('click', () => {
   $('follow').hidden = true;
   $('fo-where').hidden = true;
   $('fo-ask').hidden = true;
-  speechSynthesis?.cancel?.();
+  stopSpeaking();
 });
 
 document.querySelectorAll('[data-lang]').forEach((b) =>
@@ -1149,6 +1230,11 @@ document.querySelectorAll('[data-lang]').forEach((b) =>
     if (state.follow) renderStepCard();
   }),
 );
+$('opt-voice').addEventListener('click', () => {
+  state.cloudVoice = !state.cloudVoice;
+  store.set('saathi:cloudVoice', state.cloudVoice ? '1' : '0');
+  renderChips();
+});
 $('opt-big').addEventListener('click', () => {
   state.big = !state.big;
   store.set('saathi:big', state.big ? '1' : '0');
@@ -1157,7 +1243,7 @@ $('opt-big').addEventListener('click', () => {
 $('opt-speak').addEventListener('click', () => {
   state.speak = !state.speak;
   renderChips();
-  if (!state.speak) speechSynthesis?.cancel?.();
+  if (!state.speak) stopSpeaking();
 });
 
 // ---------- Explain this page ----------

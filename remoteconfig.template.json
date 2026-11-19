@@ -27,6 +27,13 @@
       },
       "valueType": "STRING",
       "description": "Cloud model name. Empty means the app's built-in default. Only Gemini 3 names are accepted; anything else is ignored."
+    },
+    "tts_model": {
+      "defaultValue": {
+        "value": ""
+      },
+      "valueType": "STRING",
+      "description": "Text-to-speech model name for the read-aloud voice. Empty means the built-in default. Only Gemini 3 text-to-speech names are accepted."
     }
   }
 }

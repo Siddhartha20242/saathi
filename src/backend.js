@@ -8,7 +8,7 @@ import {
   onSnapshot, serverTimestamp, Timestamp, query, where,
 } from 'firebase/firestore';
 import { getRemoteConfig, fetchAndActivate, getValue } from 'firebase/remote-config';
-import { getFirebaseApp, run, pickCloudModel, setCloudModel } from './firebase.js';
+import { getFirebaseApp, run, pickCloudModel, setCloudModel, setTtsModel } from './firebase.js';
 import { stepInstruction, cleanLoadedPath } from './path.js';
 import { cleanAlert, ALERT_HOURS, cleanCheckin, CHECKIN_HOURS, expiredOwn } from './alerts.js';
 
@@ -66,6 +66,8 @@ export async function loadConfig() {
   const langs = get('languages');
   const model = get('cloud_model');
   setCloudModel(model ? model.asString() : '');
+  const tts = get('tts_model');
+  setTtsModel(tts ? tts.asString() : '');
   return {
     cloudEnabled: cloud ? cloud.asBoolean() : DEFAULTS.cloud_enabled,
     maxLabels: Math.min(150, Math.max(10, (labels && labels.asNumber()) || DEFAULTS.max_labels)),

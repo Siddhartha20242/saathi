@@ -70,6 +70,18 @@ export function setCloudModel(value) {
 }
 export const getCloudModel = () => cloudModel;
 
+// The voice model. Remote Config (`tts_model`) can change it, but only to a Gemini 3 text-to-speech name.
+export const DEFAULT_TTS_MODEL = 'gemini-3.1-flash-tts-preview';
+export const TTS_MODEL_PATTERN = /^gemini-3(?:\.\d+)?-[a-z0-9.-]*tts[a-z0-9.-]*$/;
+let ttsModel = DEFAULT_TTS_MODEL;
+export function pickTtsModel(value) {
+  const v = String(value ?? '').trim();
+  return TTS_MODEL_PATTERN.test(v) ? v : DEFAULT_TTS_MODEL;
+}
+export function setTtsModel(value) {
+  ttsModel = pickTtsModel(value);
+}
+
 /**
  * @param {string} mode ONLY_ON_DEVICE | PREFER_ON_DEVICE | PREFER_IN_CLOUD | ONLY_IN_CLOUD
  * @param {boolean} withImage
@@ -137,6 +149,41 @@ async function toPart(image) {
 // it took and how much was sent. Never the prompt or the answer. Shown under "Technical details".
 const usage = [];
 export const getUsage = () => usage.slice();
+
+/**
+ * Speaks a sentence with Firebase AI Logic's text-to-speech. Always the cloud. Returns the audio as base64 with its type.
+ * Only the sentence is sent. Falls back to asking without a language code if the model does not take one for this language.
+ */
+export async function synthesize({ prompt, languageCode, voiceName }) {
+  const started = Date.now();
+  const ask = async (withLanguage) => {
+    const model = getGenerativeModel(init(), {
+      model: ttsModel,
+      generationConfig: {
+        responseModalities: ['AUDIO'],
+        speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName } }, ...(withLanguage && { languageCode }) },
+      },
+    });
+    const result = await model.generateContent(prompt);
+    const part = result.response.inlineDataParts?.()?.[0]?.inlineData;
+    if (!part?.data) throw new Error('No audio came back');
+    return { data: part.data, mimeType: part.mimeType || 'audio/wav' };
+  };
+  try {
+    let audio;
+    try {
+      audio = await ask(true);
+    } catch (err) {
+      if (!/language|locale|unsupported|invalid/i.test(String(err?.message))) throw err;
+      audio = await ask(false);
+    }
+    usage.push({ at: started, asked: 'TEXT_TO_SPEECH', ran: 'IN_CLOUD', ms: Date.now() - started, sentChars: String(prompt).length, media: false, ok: true });
+    return audio;
+  } catch (err) {
+    usage.push({ at: started, asked: 'TEXT_TO_SPEECH', ran: 'NONE', ms: Date.now() - started, sentChars: 0, media: false, ok: false });
+    throw err;
+  }
+}
 
 /** The runner the pipeline uses. Returns the text and where it actually ran. */
 export async function run({ mode, prompt, image, audio, schema = null }) {
