@@ -113,6 +113,8 @@ Toggle `cloud_enabled` to false in the Firebase console and the panel's cloud ch
 | **Sent to the cloud for translation** | No | The path name and the English step sentences | Never | Never |
 | **Sent to a helper's phone** | No | Names only, and the person sees exactly what will be sent before pressing Send | Never | Never |
 | **Sent to the cloud when you press Speak** | No | Only the titles of your group's paths, which the group wrote | Never | Never. A short voice recording is sent, once, and not stored. |
+| **Sent to the cloud when Saathi speaks in Nepali or Hindi (Natural voice)** | No | One short sentence: a step, a warning or an answer, with personal details replaced, and cut to 400 characters. Switch off with the Natural voice button. | Never | Never |
+| **Sent to the cloud when you ask about a step** | No | The step, the guide's name and your question, with personal details in it replaced | Never | Never |
 | **Sent to the cloud when you agree to "Ask the cloud to look"** | No | The old label and up to 60 button and link names near the step, with personal ones replaced. The panel lists examples first. | Never | Never |
 | **Sent to the family when you press "Tell my family"** | The website's address only, no path | The imitated brand's name and reason codes such as "asksSecret" | Never | Never, and none of the page's words |
 | **Sent anywhere when re-finding on this computer** | No | No. It stays on the laptop. | Never | Never |
