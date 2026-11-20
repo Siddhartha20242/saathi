@@ -2,7 +2,8 @@
 // Firebase AI Logic, App Check, Auth, Firestore and Remote Config work here as on the web.
 // The extension around it only reads the open tab's controls and draws the highlight.
 
-import { run, deviceStatus, getUsage, synthesize } from './firebase.js';
+import { deviceStatus } from './device.js';
+import { getUsage } from './usage.js';
 import { refind, codeFind, cloudPreview } from './refind.js';
 import { isPersonalControl, isPersonalText, maskText } from './masking.js';
 import { recordSpeech } from './audio.js';
@@ -24,7 +25,8 @@ import { controlsForHelp, helpPreview, cleanTitle } from './help.js';
 import {
   ensureUser, loadConfig, savePath, listPaths, deletePath, translatePath, createHelp, watchHelp, closeHelp,
   createAlert, watchAlerts, createCheckin, cleanUpOwn,
-} from './backend.js';
+  run, synthesize,
+} from './lazy.js';
 
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);

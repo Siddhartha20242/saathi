@@ -1,7 +1,7 @@
 // The helper's phone page. It shows the names of the controls on another person's page, and
 // writes back which one to point at. No extension and no on-device model are needed here.
 
-import { ensureUser, watchHelpRequests, watchHelp, answerHelp, watchAlerts, watchCheckins } from './backend.js';
+import { ensureUser, watchHelpRequests, watchHelp, answerHelp, watchAlerts, watchCheckins } from './lazy.js';
 import { alertsForMe, alertSentence, recentCheckins, checkinSentence } from './alerts.js';
 import { GROUP_RE, normaliseGroup, joinCodeFrom } from './path.js';
 import { groupBySection, kindWord, cleanNote, isLive } from './help.js';

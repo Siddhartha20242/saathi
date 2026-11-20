@@ -6,6 +6,8 @@ import { initializeApp } from 'firebase/app';
 import { getAI, getGenerativeModel, GoogleAIBackend, InferenceMode, ThinkingLevel } from 'firebase/ai';
 import { initializeAppCheck, ReCaptchaEnterpriseProvider } from 'firebase/app-check';
 import { normaliseSource } from './source.js';
+import { usage } from './usage.js';
+import { localAvailable } from './device.js';
 
 const env = import.meta.env;
 
@@ -121,19 +123,7 @@ function getModel(mode, withImage = false, schema = null) {
   return model;
 }
 
-/** Chrome's Prompt API status for the local model. */
-export async function deviceStatus() {
-  try {
-    if (typeof LanguageModel === 'undefined') return 'unsupported';
-    return await LanguageModel.availability(); // 'available' | 'downloadable' | 'downloading' | 'unavailable'
-  } catch {
-    return 'unsupported';
-  }
-}
-
-export async function localAvailable() {
-  return (await deviceStatus()) === 'available';
-}
+export { deviceStatus, localAvailable } from './device.js';
 
 /** Must be called from a user gesture (a button click). */
 export function enableDeviceModel(onProgress) {
@@ -154,8 +144,7 @@ async function toPart(image) {
 
 // A plain record of where each AI call ran in this session: the mode asked for, where it actually ran, how long
 // it took and how much was sent. Never the prompt or the answer. Shown under "Technical details".
-const usage = [];
-export const getUsage = () => usage.slice();
+export { getUsage } from './usage.js';
 
 /**
  * Speaks a sentence with Firebase AI Logic's text-to-speech. Always the cloud. Returns the audio as base64 with its type.
