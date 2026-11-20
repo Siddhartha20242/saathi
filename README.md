@@ -329,6 +329,10 @@ The harder redesign ran in a headless Chrome that has no on-device model, so "de
 
 **Tests.** 268 unit tests (`npm test`). Six end-to-end scripts drive a throwaway headless Chrome with the extension loaded and run against the live site: [tools/e2e.mjs](tools/e2e.mjs) (record, save, follow), [tools/e2e-help.mjs](tools/e2e-help.mjs) (ask for help, a phone-sized helper taps, the highlight moves, the request is deleted), [tools/e2e-try.mjs](tools/e2e-try.mjs) (the same flow on the try page, ending with the finished-guide check-in, a pasted scam message and a practice round) and [tools/e2e-real.mjs](tools/e2e-real.mjs) (real public websites, above) [tools/e2e-cloud.mjs](tools/e2e-cloud.mjs) (the cloud button's consent screen, in a browser with no on-device model) and [tools/e2e-guard.mjs](tools/e2e-guard.mjs) (the scam guard and family alert, and a pass over real legitimate pages). In the headless browser, App Check sometimes refuses the cloud translation (reCAPTCHA scores it as a bot); the path is then saved without translations, as designed, and the test reports it. In a normal Chrome the cloud call works. The on-device model is not available in that headless Chrome, so the model path was checked separately in a normal Chrome.
 
+### Accessibility check
+
+[tools/e2e-a11y.mjs](tools/e2e-a11y.mjs) runs axe-core (WCAG 2.0 and 2.1, levels A and AA) on the live home page, the tour page, the panel before and after joining, and the helper page, each in light and dark mode: **0 violations on all 10 runs** (17 to 25 rules passing per page). One item, a text box whose background colour axe could not read because of the box's resize handle, is flagged for a human look and looks fine by eye. Automated checks find only a part of real accessibility problems. This is not a claim that Saathi is fully accessible, and no one who uses a screen reader or a switch has tried it.
+
 ## Design
 
 The panel is built for someone who is not used to computers.
