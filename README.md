@@ -2,11 +2,25 @@
 
 **Someone who has done it shows the way once. Everyone with the group code gets a patient guide that highlights each button, in their own language. Saathi highlights. You do it.**
 
-Saathi is a Chrome extension for **older adults and the family who look after them**, often from far away. Bill, bank and government websites are where an older person gets stuck and where scammers go after them. A son, a daughter or an experienced friend records a task once. After that, the older person sees one step at a time, with the right button outlined on their own screen, in English, Nepali or Hindi, with large text and read-aloud. They can speak what they need instead of searching a list. If a website changes, the guide finds the button again. If they are still stuck, a family member on a phone taps the right button from afar and it lights up on their screen.
+Saathi is a Chrome extension, an Android app and an installable web app for **older adults and the family who look after them**, often from far away. Bill, bank and government websites are where an older person gets stuck and where scammers go after them. A son, a daughter or an experienced friend records a task once. After that, the older person sees one step at a time, with the right button outlined on their own screen, in English, Nepali or Hindi, with large text and read-aloud. They can speak what they need instead of searching a list. If a website changes, the guide finds the button again. If they are still stuck, a family member on a phone taps the right button from afar and it lights up on their screen.
 
 It never clicks, types or submits for anyone. It also watches for scam pages: when the page in front of an older person looks like a bank or wallet page that is not the real one, a red warning appears on the page, in their language, and they can tell their family with one tap.
 
 Built for the #BuildHybridAI hackathon with Firebase AI Logic. Licence: MIT.
+
+**Try it now, no install, no login:** https://paperwork-decoder.web.app/try.html (a six-step tour) · home page https://paperwork-decoder.web.app/ · family page for a phone https://paperwork-decoder.web.app/help.html
+
+**How it uses Firebase AI Logic (all calls go through [src/firebase.js](src/firebase.js): `getAI`, `getGenerativeModel`, hybrid `InferenceMode`):**
+
+| Job | Model and where it runs | Code |
+|---|---|---|
+| Finding a button again after a website changes | Plain matching first; then Gemini Nano on the device (Chrome's built-in AI); the cloud model only with the person's permission | [src/refind.js](src/refind.js) |
+| Translating a guide into Nepali and Hindi | `gemini-3.5-flash-lite` in the cloud, once, when a guide is saved | [src/backend.js](src/backend.js) |
+| "Ask about this step" | On-device for English when the model is installed, cloud otherwise and for Nepali and Hindi | [src/ask.js](src/ask.js) |
+| Understanding a spoken request | Cloud, when the person presses Speak | [src/voice.js](src/voice.js) |
+| Reading a sentence aloud in Nepali or Hindi | `gemini-3.1-flash-tts-preview` in the cloud, device voice first for English | [src/tts.js](src/tts.js) |
+
+Also from Firebase: App Check, anonymous Authentication, Firestore (guides, live help, alerts, with security rules), Remote Config (a cloud off-switch and the model names) and Hosting. The product shows where each AI call ran under *Technical details*, in *Where the AI ran this session*.
 
 ## For older adults and their caregivers
 

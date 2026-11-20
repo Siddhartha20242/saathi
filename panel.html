@@ -158,6 +158,14 @@
           .where { margin-top: 14px; }
       .where label { font-weight: 600; display: block; margin-bottom: 6px; }
       body[data-big=true] .where input, body.big .where input { font-size: 1.15em; }
+          /* Get help: each thing is its own card, the most urgent first (stuck), then a strange message, then practice. */
+      #panel-help:not([hidden]) { display: flex; flex-direction: column; gap: 14px; }
+      #panel-help > .stack { border: 2px solid var(--line); border-radius: 14px; padding: 16px; }
+      #panel-help > .stack > h2 { margin-top: 0; }
+      #sec-help { order: 1; }
+      #sec-msg { order: 2; }
+      #panel-help > .stack:not([id]) { order: 3; }
+      #sec-quiz { order: 4; }
     </style>
       <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
