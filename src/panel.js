@@ -57,7 +57,7 @@ const state = {
   done: false,
   lang: store.get('saathi:lang') || 'en',
   big: store.get('saathi:big') === '1',
-  cloudVoice: store.get('saathi:cloudVoice') !== '0',
+  cloudVoice: store.get('saathi:cloudVoice') === '1', // off until the person turns it on: the free daily limit is shared by everyone
   speak: false,
 };
 window.__saathi = state; // read by the end-to-end test
@@ -809,10 +809,12 @@ $('rec-save').addEventListener('click', async () => {
 });
 
 /** Translates (when the cloud is on) and saves a guide for the family. Returns a note to show when something was skipped. */
-async function persistGuide(title, steps, host) {
-  let translations = {};
+async function persistGuide(title, steps, host, ready = null) {
+  let translations = ready ?? {};
   let note = '';
-  if (state.config.cloudEnabled && state.config.languages.length) {
+  if (ready) {
+    // translations that were written ahead of time: no model call is needed
+  } else if (state.config.cloudEnabled && state.config.languages.length) {
     say('rec-msg', `Translating ${steps.length} step labels in the cloud. Only the guide name and the written steps are sent, nothing you typed…`);
     try {
       translations = await withTimeout(translatePath({ title, steps }, state.config.languages), 45000);
@@ -827,6 +829,30 @@ async function persistGuide(title, steps, host) {
 }
 
 // The try page can ask for a ready-made guide, so a first visit does not have to start by recording one.
+// Written ahead of time, so the ready-made guide needs no model call and works when the free daily limit is used up.
+const SAMPLE_TRANSLATIONS = {
+  ne: {
+    title: 'बिजुलीको बिल तिर्ने',
+    steps: [
+      '"Pay your bill" लिङ्कमा थिच्नुहोस्।',
+      '"Customer ID" बाकसमा थिचेर आफ्नो उत्तर आफैं लेख्नुहोस्।',
+      'सूचीबाट "Branch office" छान्नुहोस्।',
+      '"Check bill" बटनमा थिच्नुहोस्।',
+      '"Pay now" बटनमा थिच्नुहोस्।',
+    ],
+  },
+  hi: {
+    title: 'बिजली का बिल भरना',
+    steps: [
+      'लिंक "Pay your bill" को दबाइए।',
+      '"Customer ID" वाले बॉक्स पर क्लिक करके अपना जवाब ख़ुद लिखिए।',
+      'सूची में से "Branch office" चुनिए।',
+      '"Check bill" बटन दबाइए।',
+      '"Pay now" बटन दबाइए।',
+    ],
+  },
+};
+
 const SAMPLE_STEPS = [
   { role: 'link', text: 'Pay your bill', section: 'Menu', page: '/demo/index.html', href: '/demo/bill.html', name: '' },
   { role: 'field', text: 'Customer ID', section: 'Pay your bill', page: '/demo/bill.html', href: '', name: 'customer' },
@@ -845,7 +871,7 @@ if (inDemo) {
     async makeSample() {
       await ensureFamily();
       const steps = SAMPLE_STEPS.map(sanitizeStep);
-      await persistGuide('Pay the electricity bill', steps, location.hostname);
+      await persistGuide('Pay the electricity bill', steps, location.hostname, SAMPLE_TRANSLATIONS);
       showTab('follow');
       await refreshLibrary();
       return state.paths.length;

@@ -18,6 +18,7 @@ try {
   await c.evalIn(s, `document.getElementById('tour-do').click()`);
   await c.waitFor(s, P(`return d.getElementById('lib-list').children.length > 0`), 90000);
   check('step 1 makes a ready-made guide with 5 steps', await c.evalIn(s, P(`return /5 steps/.test(d.getElementById('lib-list').textContent)`)));
+  check('the ready-made guide has Nepali and Hindi built in, and made no model call', await c.evalIn(s, P(`const p = w.__saathi.paths[0]; d.querySelector('footer details').open = true; d.getElementById('t-usage').click(); return !!(p.translations.ne && p.translations.hi && p.translations.ne.steps.length === 5 && p.translations.hi.steps.length === 5) && /No AI call yet/.test(d.getElementById('o-usage').textContent)`)));
   check('the tour moved to step 2', await c.evalIn(s, `/Step 2 of 6/i.test(document.getElementById('tour-count').textContent)`));
 
   await c.evalIn(s, `document.getElementById('tour-do').click()`);
