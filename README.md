@@ -15,7 +15,7 @@ Built for the #BuildHybridAI hackathon with Firebase AI Logic. Licence: MIT.
 | Job | Model and where it runs | Code |
 |---|---|---|
 | Finding a button again after a website changes | Plain matching first; then Gemini Nano on the device (Chrome's built-in AI); the cloud model only with the person's permission | [src/refind.js](src/refind.js) |
-| Translating a guide into Nepali and Hindi | `gemini-3.5-flash-lite` in the cloud, once, when a guide is saved | [src/backend.js](src/backend.js) |
+| Translating a guide into Nepali and Hindi | `gemini-3.1-flash-lite` in the cloud, once, when a guide is saved | [src/backend.js](src/backend.js) |
 | "Ask about this step" | On-device for English when the model is installed, cloud otherwise and for Nepali and Hindi | [src/ask.js](src/ask.js) |
 | Understanding a spoken request | Cloud, when the person presses Speak | [src/voice.js](src/voice.js) |
 | Reading a sentence aloud in Nepali or Hindi | `gemini-3.1-flash-tts-preview` in the cloud, device voice first for English | [src/tts.js](src/tts.js) |
@@ -67,7 +67,7 @@ No login is needed. Nothing is paid and nothing on the practice website is real.
 | Checking whether the page in front of the person is a scam | On-device, plain code, no model | The page's words and its boxes are read on the laptop and never sent. A small model is poor at this kind of judgement, so none is used. |
 | Helper taps a control on a phone | No model | The helper sees only the names of the controls, written to Firestore. |
 
-Every model call goes through one file, [src/firebase.js](src/firebase.js), using Firebase AI Logic's hybrid modes. No other AI service is used. The cloud model is named explicitly (`gemini-3.5-flash-lite`).
+Every model call goes through one file, [src/firebase.js](src/firebase.js), using Firebase AI Logic's hybrid modes. No other AI service is used. The cloud model is named explicitly (`gemini-3.1-flash-lite`).
 
 **Why hybrid and not cloud only.** A cloud-only version would work, but it would have to upload the labels of the live page, which can be a bank or government page, at every step. Saathi keeps that on the laptop and uses the cloud only for what the small model cannot do (writing Nepali and Hindi) and only on the path's own written steps. This is a privacy argument. It is not a claim that the cloud is impossible.
 

@@ -3,7 +3,7 @@
 
 import './polyfills.js';
 import { initializeApp } from 'firebase/app';
-import { getAI, getGenerativeModel, GoogleAIBackend, InferenceMode } from 'firebase/ai';
+import { getAI, getGenerativeModel, GoogleAIBackend, InferenceMode, ThinkingLevel } from 'firebase/ai';
 import { initializeAppCheck, ReCaptchaEnterpriseProvider } from 'firebase/app-check';
 import { normaliseSource } from './source.js';
 
@@ -14,6 +14,12 @@ export const configured = Boolean(env.VITE_FIREBASE_API_KEY && env.VITE_FIREBASE
 let ai = null;
 let app = null;
 const models = new Map();
+
+// Our jobs (re-finding a button, translating a few lines, a short answer) do not need long reasoning, so the cloud model is
+// asked to think as little as it can. That is the biggest single cut to waiting time. If a model refuses the setting, it is
+// dropped for the rest of the session and the call is made again, so nothing breaks.
+let fastThinking = true;
+const isThinkingError = (err) => /thinking/i.test(String(err?.message));
 
 /** The shared FirebaseApp (initialises AI Logic and App Check on first use). */
 export function getFirebaseApp() {
@@ -56,7 +62,7 @@ const LANGS = ['en', 'es', 'ja'];
 
 // The cloud model is named here, so an SDK update cannot change it without us noticing. Remote Config
 // (`cloud_model`) can switch it without a new release, but only to a Gemini 3 model name.
-export const DEFAULT_CLOUD_MODEL = 'gemini-3.5-flash-lite';
+export const DEFAULT_CLOUD_MODEL = 'gemini-3.1-flash-lite';
 let cloudModel = DEFAULT_CLOUD_MODEL;
 export const CLOUD_MODEL_PATTERN = /^gemini-3(?:\.\d+)?-[a-z0-9.-]{1,40}$/;
 
@@ -89,7 +95,7 @@ export function setTtsModel(value) {
  *   model must answer in that shape (structured output), so the answer needs no guessing to read.
  */
 function getModel(mode, withImage = false, schema = null) {
-  const key = `${cloudModel}|${mode}|${withImage}|${schema ? JSON.stringify(schema) : ''}`;
+  const key = `${cloudModel}|${mode}|${withImage}|${fastThinking}|${schema ? JSON.stringify(schema) : ''}`;
   if (models.has(key)) return models.get(key);
   const expectedInputs = [{ type: 'text', languages: LANGS }];
   if (withImage) expectedInputs.push({ type: 'image' });
@@ -98,9 +104,10 @@ function getModel(mode, withImage = false, schema = null) {
     mode: InferenceMode[mode],
     inCloudParams: {
       model: cloudModel,
-      ...(schema && {
-        generationConfig: { responseMimeType: isEnum ? 'text/x.enum' : 'application/json', responseSchema: schema },
-      }),
+      generationConfig: {
+        ...(fastThinking && { thinkingConfig: { thinkingLevel: ThinkingLevel.MINIMAL } }),
+        ...(schema && { responseMimeType: isEnum ? 'text/x.enum' : 'application/json', responseSchema: schema }),
+      },
     },
     onDeviceParams: {
       createOptions: {
@@ -187,12 +194,18 @@ export async function synthesize({ prompt, languageCode, voiceName }) {
 
 /** The runner the pipeline uses. Returns the text and where it actually ran. */
 export async function run({ mode, prompt, image, audio, schema = null }) {
-  const model = getModel(mode, Boolean(image), schema);
   const media = image ?? audio; // a picture or a short spoken recording
   const started = Date.now();
   const input = media ? [prompt, await toPart(media)] : prompt;
   try {
-    const result = await model.generateContent(input);
+    let result;
+    try {
+      result = await getModel(mode, Boolean(image), schema).generateContent(input);
+    } catch (err) {
+      if (!fastThinking || !isThinkingError(err)) throw err;
+      fastThinking = false;
+      result = await getModel(mode, Boolean(image), schema).generateContent(input);
+    }
     const text = result.response.text();
     const source = normaliseSource(result.response.inferenceSource, mode);
     usage.push({ at: started, asked: mode, ran: source, ms: Date.now() - started, sentChars: source === 'ON_DEVICE' ? 0 : String(prompt).length, media: Boolean(media), ok: true });

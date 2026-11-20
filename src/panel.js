@@ -1478,12 +1478,11 @@ async function start() {
     state.device = s;
     renderChips();
   });
-  try {
-    state.user = await ensureUser();
-  } catch (err) {
-    say('group-msg', `Could not sign in. ${plainError(err)}`, 'bad');
-  }
-  state.config = await loadConfig();
+  // Signing in and reading the settings do not depend on each other, so they run together.
+  const [user, config] = await Promise.allSettled([ensureUser(), loadConfig()]);
+  if (user.status === 'fulfilled') state.user = user.value;
+  else say('group-msg', `Could not sign in. ${plainError(user.reason)}`, 'bad');
+  if (config.status === 'fulfilled') state.config = config.value;
   renderChips();
   callExtension('setLang', { lang: state.lang }).catch(() => {});
   callExtension('guardStatus').then(renderGuard).catch(() => {});

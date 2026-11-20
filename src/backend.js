@@ -272,17 +272,20 @@ export function translationPayload(title, steps) {
 export async function translatePath({ title, steps }, languages) {
   const instructions = steps.map(stepInstruction);
   const out = {};
-  for (const lang of languages) {
-    const { text } = await run({
-      mode: 'ONLY_IN_CLOUD',
-      prompt: translationPrompt(lang, title, instructions),
-      schema: TRANSLATION_SCHEMA,
-    });
-    const parsed = JSON.parse(text);
+  // Both languages are asked at the same time, so the wait is one answer long, not two.
+  const answers = await Promise.allSettled(
+    languages.map((lang) => run({ mode: 'ONLY_IN_CLOUD', prompt: translationPrompt(lang, title, instructions), schema: TRANSLATION_SCHEMA })),
+  );
+  const failed = answers.find((a) => a.status === 'rejected');
+  if (failed && answers.every((a) => a.status === 'rejected')) throw failed.reason;
+  languages.forEach((lang, i) => {
+    if (answers[i].status !== 'fulfilled') return;
+    let parsed;
+    try { parsed = JSON.parse(answers[i].value.text); } catch { return; }
     // Only keep a translation that lines up with the steps.
     if (typeof parsed.title === 'string' && Array.isArray(parsed.steps) && parsed.steps.length === steps.length) {
       out[lang] = { title: parsed.title, steps: parsed.steps.map(String) };
     }
-  }
+  });
   return out;
 }
