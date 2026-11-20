@@ -18,6 +18,7 @@ import {
 import { chooseVoice } from './speech.js';
 import { planSpeech, deviceFallback, spokenText, ttsPrompt, playable, isQuotaError, BLOCK_HOURS, TTS_VOICE, TTS_LANGUAGE } from './tts.js';
 import { whereIs } from './where.js';
+import { plainError } from './plainError.js';
 import { askMode, askPrompt, cleanQuestion, cleanAnswer } from './ask.js';
 import { controlsForHelp, helpPreview, cleanTitle } from './help.js';
 import {
@@ -369,7 +370,7 @@ async function refreshLibrary() {
         : 'No guides for this family yet. Open "Make a guide" to make the first one.',
     );
   } catch (err) {
-    say('lib-msg', `Could not load guides: ${err.message}`, 'bad');
+    say('lib-msg', `Could not load guides. ${plainError(err)}`, 'bad');
   }
 }
 
@@ -383,7 +384,7 @@ $('lib-list').addEventListener('click', async (ev) => {
       await deletePath(state.group, del);
       await refreshLibrary();
     } catch (err) {
-      say('lib-msg', `Could not delete: ${err.message}`, 'bad');
+      say('lib-msg', `Could not delete. ${plainError(err)}`, 'bad');
     }
   }
 });
@@ -444,7 +445,7 @@ async function tellFamily(data) {
     say('guard-msg', warning({ level: 'stop', reasons: [] }, state.lang).sent, 'ok');
     await callExtension('alertSent').catch(() => {});
   } catch (err) {
-    say('guard-msg', `Could not tell your family: ${err.message}`, 'bad');
+    say('guard-msg', `Could not tell your family. ${plainError(err)}`, 'bad');
   }
 }
 $('guard-family').addEventListener('click', () => tellFamily());
@@ -563,7 +564,7 @@ $('msg-family').addEventListener('click', async () => {
   } catch (err) {
     msgSending = false;
     renderMessage();
-    $('msg-note').textContent = `Could not tell your family: ${err.message}`;
+    $('msg-note').textContent = `Could not tell your family. ${plainError(err)}`;
     $('msg-note').className = 'out bad';
   }
 });
@@ -681,7 +682,7 @@ function voiceError(err) {
     return 'The microphone is blocked. Allow it for this page, then tap Speak again.';
   }
   if (err?.name === 'NotFoundError') return 'No microphone was found on this computer.';
-  return `I could not understand that: ${err?.message ?? err}`;
+  return `I could not understand that. ${plainError(err)}`;
 }
 
 $('voice-go').addEventListener('click', async () => {
@@ -801,7 +802,7 @@ $('rec-save').addEventListener('click', async () => {
     await refreshLibrary();
   } catch (err) {
     recordingUi(false);
-    say('rec-msg', `Could not save: ${err.message}`, 'bad');
+    say('rec-msg', `Could not save. ${plainError(err)}`, 'bad');
   } finally {
     $('rec-save').disabled = false;
   }
@@ -816,7 +817,7 @@ async function persistGuide(title, steps, host) {
     try {
       translations = await withTimeout(translatePath({ title, steps }, state.config.languages), 45000);
     } catch (err) {
-      note = ` Saved without translations (${err.message}).`;
+      note = ` Saved without translations. ${plainError(err)}`;
     }
   } else {
     note = ' The cloud is switched off, so there are no translations.';
@@ -1057,7 +1058,7 @@ $('fo-cloud-go').addEventListener('click', async (ev) => {
     }
     setHow(HOW.cloud);
   } catch (err) {
-    setHow(`The cloud could not help: ${err.message}`, 'bad');
+    setHow(`The cloud could not help. ${plainError(err)}`, 'bad');
   } finally {
     btn.disabled = false;
   }
@@ -1171,7 +1172,7 @@ $('fo-tell-btn').addEventListener('click', async () => {
     $('fo-tell-msg').focus();
     announce(w.told);
   } catch (err) {
-    $('fo-tell-msg').textContent = `Could not tell your family: ${err.message}`;
+    $('fo-tell-msg').textContent = `Could not tell your family. ${plainError(err)}`;
     $('fo-tell-btn').disabled = false;
   }
 });
@@ -1327,10 +1328,10 @@ $('help-send').addEventListener('click', async () => {
       state.group,
       id,
       (data) => onHelpAnswer(data),
-      (err) => say('help-msg', `Lost the connection to your helper: ${err.message}`, 'bad'),
+      (err) => say('help-msg', `Lost the connection to your helper. ${plainError(err)}`, 'bad'),
     );
   } catch (err) {
-    say('help-msg', `Could not ask: ${err.message}`, 'bad');
+    say('help-msg', `Could not ask. ${plainError(err)}`, 'bad');
   } finally {
     $('help-send').disabled = false;
   }
@@ -1454,7 +1455,7 @@ async function start() {
   try {
     state.user = await ensureUser();
   } catch (err) {
-    say('group-msg', `Could not sign in: ${err.message}`, 'bad');
+    say('group-msg', `Could not sign in. ${plainError(err)}`, 'bad');
   }
   state.config = await loadConfig();
   renderChips();
